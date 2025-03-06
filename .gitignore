@@ -6,11 +6,6 @@ storage/framework/cache/*
 storage/framework/sessions/*
 storage/framework/views/*
 storage/logs/*
-storage/app/public/uploads/*
-storage/app/public/images/*
-storage/app/public/temp/*
-storage/app/public/temp/*
-storage/app/public/temp/*
 
 store.txt
 notes.txt

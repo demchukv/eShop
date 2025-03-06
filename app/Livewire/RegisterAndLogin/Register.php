@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Log;
 use App\Traits\ReferralCodeTrait;
 use Illuminate\Support\Facades\Cookie;
 
-//define('BOT_TOKEN', '7987880585:AAE4gcMyqMB9YGYcEq4qPXp3BnpPCQc-hJI');
 
 class Register extends Component
 {
