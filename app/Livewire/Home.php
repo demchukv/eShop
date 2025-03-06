@@ -18,6 +18,7 @@ class Home extends Component
         $this->user_id = Auth::user() != '' ? Auth::user()->id : NUll;
     }
     public $store_id = "";
+
     public function render(Request $request)
     {
         $store_id = session('store_id');
@@ -27,12 +28,13 @@ class Home extends Component
         $categoryController = app(CategoryController::class);
         $categories = $categoryController->getCategories(sort: 'row_order', order: "ASC", store_id: $store_id);
         $categories = $categories->original;
-// dd($categories);
+        // dd($categories);
         $BrandController = app(BrandController::class);
         $brands = $BrandController->getBrands("", "", "", "", "ASC", $store_id);
 
         $categories_section = $this->getCategoriesSection();
         $sections = $this->sections();
+
         return view('livewire.' . config('constants.theme') . '.home.home', [
             'sliders' => $sliders,
             'categories' => $categories,

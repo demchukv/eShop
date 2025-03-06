@@ -53,7 +53,7 @@ use App\Livewire\MyAccount\LiveChat;
 use App\Livewire\Products\ComboProductDetails;
 use App\Livewire\Products\ComboProductListing;
 use App\Livewire\MyAccount\UserStatus;
-
+use Illuminate\Support\Facades\Log;
 
 /*
 |--------------------------------------------------------------------------
@@ -179,6 +179,7 @@ Route::any('admin/webhook/razorpay-webhook', [AdminWebhook::class, 'razorpay_web
 Route::post('/pre-payment-setup', [CartController::class, 'pre_payment_setup'])->name('pre_payment_setup');
 
 Route::get('/', Home::class)->name('home');
+
 
 Route::post('set_store', function (Request $request) {
     session(['store_id' => $request->store_id]);
