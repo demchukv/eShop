@@ -17,12 +17,10 @@ class SetDefaultStore
      */
     public function handle(Request $request, Closure $next): Response
     {
-
         $sqlDumpPath = base_path('eshop_plus.sql');
         $installViewPath = resource_path('views/install.blade.php');
         // Check if the installation has been completed
         if (!file_exists($sqlDumpPath) && !file_exists($installViewPath)) {
-
             $defaultStore = Store::where('is_default_store', 1)
                 ->where('status', 1)
                 ->first();
@@ -32,27 +30,23 @@ class SetDefaultStore
             $default_store_image = $defaultStore ? $defaultStore->image : '';
             $default_store_slug = $defaultStore ? $defaultStore->slug : '';
 
-            // Встановлюємо дефолтний магазин тільки якщо він ще не встановлений
-            if (!session()->has('store_id')) {
-                session([
-                    'store_id' => $default_store_id,
-                    'store_name' => $default_store_name,
-                    'store_image' => $default_store_image,
-                    'store_slug' => $default_store_slug,
-                    'default_store_slug' => $default_store_slug,
-                ]);
-            }
-
+            session([
+                'store_id' => session('store_id', $default_store_id),
+                'store_name' => session('store_name', $default_store_name),
+                'store_image' => session('store_image', $default_store_image),
+                'store_slug' => session('store_slug', $default_store_slug),
+                'default_store_slug' => session('default_store_slug', $default_store_slug),
+            ]);
             if (!$request->session()->has('show_store_popup')) {
                 $request->session()->put('show_store_popup', true);
             }
-
-            // Обробляємо параметр store тільки якщо він явно вказаний
             if (isset($request->query()['store']) && ($request->query()['store'] != null)) {
                 $store_slug = $request->query()['store'];
                 $store = fetchDetails('stores', ['slug' => $store_slug], "*");
-
-                if (count($store) > 0 && isset($store[0]) && $store[0]->id != session('store_id')) {
+                if (count($store) <= 0) {
+                    return redirect(customUrl(url()->current()));
+                }
+                if (isset($store[0]) && $store[0]->id != session('store_id')) {
                     session()->forget(['store_id', 'store_name', 'store_image', 'store_slug']);
                     session()->put('store_id', $store[0]->id);
                     session()->put('store_name', $store[0]->name);

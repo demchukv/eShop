@@ -53,7 +53,7 @@ use App\Livewire\MyAccount\LiveChat;
 use App\Livewire\Products\ComboProductDetails;
 use App\Livewire\Products\ComboProductListing;
 use App\Livewire\MyAccount\UserStatus;
-use Illuminate\Support\Facades\Log;
+
 
 /*
 |--------------------------------------------------------------------------

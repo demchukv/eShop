@@ -66,7 +66,7 @@ use LaravelDaily\Invoices\Invoice;
 use LaravelDaily\Invoices\Classes\Buyer;
 use LaravelDaily\Invoices\Classes\InvoiceItem;
 use LaravelDaily\Invoices\Classes\Party;
-use Illuminate\Support\Facades\Log;
+
 
 // generate unique slug
 function generateSlug($newName, $tableName = 'categories', $slugField = 'slug', $currentSlug = '', $currentName = '')
@@ -9766,7 +9766,7 @@ function getFrontMediaImageUrl($image, $const = 'MEDIA_PATH')
     return $imageUrl;
 }
 
-function setUrlParameter($url, $paramName = '', $paramValue = '')
+function setUrlParameter($url, $paramName, $paramValue)
 {
     $paramName = str_replace(' ', '-', $paramName);
     if ($paramValue == null || $paramValue == '') {
@@ -9783,14 +9783,13 @@ function setUrlParameter($url, $paramName = '', $paramValue = '')
 
 function customUrl($name)
 {
-    // $store = session()->get('store_slug');
+    $store = session()->get('store_slug');
     if (Route::has($name)) {
-        //return route($name, ['store' => $store]);
-        return route($name);
+        return route($name, ['store' => $store]);
     }
-    //$url = setUrlParameter($name, 'store', $store);
-    //$url = setUrlParameter($name);
-    return url($name);
+    $url = setUrlParameter($name, 'store', $store);
+
+    return url($url);
 }
 
 function dynamic_image($image, $width, $quantity = 90)

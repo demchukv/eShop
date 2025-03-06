@@ -37,7 +37,7 @@ Route::get('seller/zones/zones_data', [AreaController::class, 'zone_data']);
 Route::get("seller/area/get_cities", [AreaController::class, 'getCities']);
 Route::get("seller/area/get_zipcodes", [AreaController::class, 'get_zipcodes']);
 Route::group(
-    ['middleware' => ['auth', 'role:seller','CheckPurchaseCode']],
+    ['middleware' => ['auth', 'role:seller', 'CheckPurchaseCode']],
     function () {
 
         // account
@@ -52,6 +52,7 @@ Route::group(
             '/seller/home',
             [HomeController::class, 'index']
         )->name('seller.home');
+
         Route::get('/seller/get_statistics', [HomeController::class, 'get_statistics']);
 
         Route::get('/seller/get_most_selling_category', [HomeController::class, 'get_most_selling_category']);
@@ -60,12 +61,12 @@ Route::group(
 
         Route::get('/seller/mostPopularProduct', [HomeController::class, 'mostPopularProduct']);
 
-        Route::get('seller/categories', [CategoryController::class, 'index'])->name('seller_categories.index');
+        Route::get('/seller/categories', [CategoryController::class, 'index'])->name('seller_categories.index');
 
-        Route::get('seller/categories/list', [CategoryController::class, 'list'])->name('seller_categories.list');
+        Route::get('/seller/categories/list', [CategoryController::class, 'list'])->name('seller_categories.list');
 
-        Route::get('seller/categories/get_seller_categories', [CategoryController::class, 'getSellerCategories']);
-        Route::get('seller/categories/get_seller_categories_filter', [CategoryController::class, 'get_seller_categories_filter']);
+        Route::get('/seller/categories/get_seller_categories', [CategoryController::class, 'getSellerCategories']);
+        Route::get('/seller/categories/get_seller_categories_filter', [CategoryController::class, 'get_seller_categories_filter']);
 
         // pickup locations
 
@@ -373,4 +374,3 @@ Route::group(
 
 
 );
-
