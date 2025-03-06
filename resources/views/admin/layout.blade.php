@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<meta name="csrf-token" content="{{ csrf_token() }}">
+<head>
 
 @include('admin.include_css')
-
+</head>
 <body>
     <div id="db-wrapper">
 

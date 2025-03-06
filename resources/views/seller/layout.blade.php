@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 
-
+<head>
 @include('seller.include_css')
-
+</head>
 <body>
     <div id="db-wrapper">
         <!-- navbar vertical -->
