@@ -9783,13 +9783,15 @@ function setUrlParameter($url, $paramName, $paramValue)
 
 function customUrl($name)
 {
-    $store = session()->get('store_slug');
+    // $store = session()->get('store_slug');
     if (Route::has($name)) {
-        return route($name, ['store' => $store]);
+        // return route($name, ['store' => $store]);
+        return route($name);
     }
-    $url = setUrlParameter($name, 'store', $store);
+    // $url = setUrlParameter($name, 'store', $store);
 
-    return url($url);
+    // return url($url);
+    return url($name);
 }
 
 function dynamic_image($image, $width, $quantity = 90)

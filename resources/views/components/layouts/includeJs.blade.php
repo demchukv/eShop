@@ -1,4 +1,5 @@
 @livewireScripts
+@stack('scripts')
 
 <script src="{{ asset('frontend/elegant/js/plugins.js') }}" defer></script>
 <script src="{{ asset('frontend/elegant/js/main.js') }}" defer></script>

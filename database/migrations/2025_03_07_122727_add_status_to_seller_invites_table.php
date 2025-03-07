@@ -11,7 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::rename('user_status', 'user_statuses');
+        Schema::table('seller_invites', function (Blueprint $table) {
+            $table->enum('status', ['active', 'used', 'expired'])->default('active')->after('user_id');
+        });
     }
 
     /**
@@ -19,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::rename('user_statuses', 'user_status');
+        Schema::table('seller_invites', function (Blueprint $table) {
+            $table->dropColumn('status');
+        });
     }
 };

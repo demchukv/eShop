@@ -8,26 +8,18 @@ class CopyButton extends Component
 {
     public string $textToCopy;
     public string $buttonState = 'copy';
+    public string $uniqueId;
 
     public function mount($text)
     {
         $this->textToCopy = $text;
+        $this->uniqueId = uniqid('copy_button_');
     }
 
     public function copyToClipboard()
     {
         // Ця функція буде викликатися при кліку
-        $this->dispatch('copy-to-clipboard', text: $this->textToCopy, success: 'Copied to clipboard!');
-        $this->buttonState = 'copied';
-
-        // Опціонально: повернути текст кнопки до початкового стану через 2 секунди
-        $this->resetButtonText();
-    }
-
-    private function resetButtonText()
-    {
-        sleep(1);
-        $this->buttonState = 'copy';
+        $this->dispatch('copy-to-clipboard-' . $this->uniqueId, text: $this->textToCopy, success: 'Copied to clipboard!');
     }
 
     public function render()

@@ -1,29 +1,25 @@
-
 <div>
-    <button
-        type="button"
-        wire:click="copyToClipboard"
-        class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center p-1"
-        title="{{ $buttonState === 'copy' ? 'Copy to clipboard' : 'Copied' }}"
-    >
-       <ion-icon name="copy"></ion-icon>
+    <button wire:click="copyToClipboard"
+        class="btn-sm p-1 {{ $buttonState === 'copied' ? 'btn-success' : 'btn-secondary' }}" wire:loading.attr="disabled"
+        wire:key="copy-button-{{ $uniqueId }}">
+        {{ $buttonState === 'copied' ? 'Copied!' : 'Copy' }}
     </button>
 
     {{-- @push('scripts') --}}
     <script>
-        document.addEventListener('livewire:init', function () {
-                window.addEventListener('copy-to-clipboard', function (event) {
-                    console.log(event);
-                    navigator.clipboard.writeText(event.detail.text)
-                        .then(() => {
-                            console.log('Текст скопійовано в буфер обміну: ' + event.detail.text);
-                            alert(event.detail.success);
-                        })
-                        .catch(err => {
-                            console.error('Помилка копіювання: ', err);
-                        });
+        document.addEventListener('livewire:init', function() {
+            window.addEventListener('copy-to-clipboard-{{ $uniqueId }}', function(event) {
+                const text = event.detail.text;
+                navigator.clipboard.writeText(text).then(() => {
+                    @this.set('buttonState', 'copied');
+                    setTimeout(() => {
+                        @this.set('buttonState', 'copy');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
                 });
             });
+        });
     </script>
     {{-- @endpush --}}
 

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_status', function (Blueprint $table) {
+        Schema::create('user_statuses', function (Blueprint $table) {
             $table->id();
             $table->integer("user_id");
             $table->enum('type', ['dealer', 'manager']);
@@ -23,7 +23,7 @@ return new class extends Migration
 
             $table->engine = "InnoDB";
         });
-        Schema::table('user_status', function ($table) {
+        Schema::table('user_statuses', function ($table) {
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
@@ -33,7 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_status');
+        Schema::dropIfExists('user_statuses');
         Schema::enableForeignKeyConstraints();
     }
 };

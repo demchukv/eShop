@@ -13,6 +13,8 @@ use App\Http\Controllers\InstallerController;
 use App\Http\Controllers\Seller\MediaController as SellerMediaController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\StoreController;
+use App\Http\Controllers\SellerInviteController;
+use App\Livewire\Sellers\SellerRegister;
 
 // ---------------------------------------------------------------------------------------------------------------------------
 Route::get('/clear-cache', function () {
@@ -23,10 +25,9 @@ Route::get('/clear-cache', function () {
     Artisan::call('view:clear');
     return redirect()->back()->with('message', 'Cache cleared successfully.');
 });
-Route::get('/version', function() {
+Route::get('/version', function () {
 
     return app()->version();
-
 });
 
 Route::get('storage-link', function () {
@@ -147,7 +148,6 @@ Route::middleware(['CheckInstallation'])->group(function () {
     Route::get('admin/webhook/paystack_webhook', [Webhook::class, 'paystack_webhook'])->name('admin.paystack_webhook');
     Route::get('admin/webhook/stripe_webhook', [Webhook::class, 'stripe_webhook'])->name('admin.stripe_webhook');
     Route::get('admin/webhook/phonepe_webhook', [Webhook::class, 'phonepe_webhook'])->name('admin.phonepe_webhook');
-
 });
 Route::get('admin/orders/generat_invoice_PDF/{id}', [OrderController::class, 'generatInvoicePDF'])->name('admin.orders.generatInvoicePDF');
 Route::get('/admin/stores', [StoreController::class, 'index'])->name('admin.stores.index');
@@ -155,3 +155,10 @@ Route::post('admin/store', [StoreController::class, 'store'])->middleware(['demo
 Route::get("settings/registration", [SettingController::class, 'registration'])->name('admin.system_registration');
 Route::post("settings/system_registration", [SettingController::class, 'systemRegister'])->name('admin.system_register');
 Route::post("settings/web_system_registration", [SettingController::class, 'WebsystemRegister'])->name('admin.web_system_register');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/seller-invites', [SellerInviteController::class, 'index'])->name('seller_invites.index');
+    Route::post('/seller-invites', [SellerInviteController::class, 'store'])->name('seller_invites.store');
+    Route::delete('/seller-invites/{sellerInvite}', [SellerInviteController::class, 'destroy'])->name('seller_invites.destroy');
+});
+Route::get('/seller-register/{link}', SellerRegister::class)->name('seller.register');

@@ -19,13 +19,13 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
                                 <h2 class="mb-0">{{ labels('front_messages.user_status', 'User Status') }}</h2>
                                 <p>{{ labels('front_messages.user_status_info', 'Your current status: ') }}{{ $user_info->role->description }}
                                 </p>
-                                @if(!$user_status)
+                                @if(!$user_status && ($user_info->role_id == 2 || $user_info->role_id == 7))
                                 <p>{{ labels('front_messages.user_status_change', 'You can submit a request to change your status.') }}
                                 </p>
                                 @endif
                             </div>
 
-                            @if (!$user_status)
+                            @if (!$user_status && ($user_info->role_id == 2 || $user_info->role_id == 7))
                             <div class="row">
                                     @if ($user_info->role_id == 2)
                                 <div class="col-xs-12 col-md-6">
@@ -34,11 +34,13 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
                                         {{ labels('front_messages.become_dealer', 'Become a dealer') }}</button>
                                 </div>
                                     @endif
+                                    @if ($user_info->role_id == 2 || $user_info->role_id == 7)
                                 <div class="col-xs-12 col-md-6">
                                     <button wire:ignore type="button" class="btn btn-primary btn-sm"
                                         data-bs-toggle="modal" data-bs-target="#managerModal">
                                         {{ labels('front_messages.become_manager', 'Become a manager') }}</button>
                                 </div>
+                                    @endif
                             </div>
 
                             @if (session('success'))

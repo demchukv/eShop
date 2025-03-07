@@ -27,6 +27,7 @@ use App\Http\Controllers\Seller\LanguageController;
 use App\Http\Controllers\Seller\ReportController;
 use App\Http\Controllers\Seller\UserController;
 use App\Http\Controllers\vendor\Chatify\MessagesController;
+use App\Http\Controllers\SellerInviteController;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Artisan;
 
