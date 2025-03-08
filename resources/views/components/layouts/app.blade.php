@@ -43,6 +43,8 @@
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/lightbox.css') }}">
+    @livewireStyles
+    @stack('styles')
 
     <!-- JavaScript files -->
     <script src="{{ asset('frontend/elegant/js/plugins.js') }}" defer></script>
@@ -105,6 +107,8 @@
     @endif
     <x-include-modal.modals />
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/lightbox.css') }}">
+    @livewireScripts
+    @stack('scripts')
 </body>
 
 

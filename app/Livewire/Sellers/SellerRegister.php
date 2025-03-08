@@ -4,6 +4,7 @@ namespace App\Livewire\Sellers;
 
 use App\Models\SellerInvite;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
@@ -67,8 +68,10 @@ class SellerRegister extends Component
         $this->friend_code = $this->user_info->referral_code;
     }
 
-    public function register()
+    public function register(Request $request)
     {
+        $this->dispatch('start-verification', message: 'Start verification!' . $request->phone_full);
+
         $this->validate();
 
         if (!$this->invite || $this->invite->status !== SellerInvite::STATUS_ACTIVE) {
@@ -90,6 +93,7 @@ class SellerRegister extends Component
         // ]);
 
         // $this->invite->update(['status' => SellerInvite::STATUS_USED]);
+        // $this->dispatch('show-error', message: 'Registration failed!');
         $this->dispatch('show-success', message: 'Registration successful!');
 
         // Auth::login($user);

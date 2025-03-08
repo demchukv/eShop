@@ -14,7 +14,8 @@
             <nav aria-label="breadcrumb" class="float-end">
                 <ol class="breadcrumb">
                     <i class='bx bx-home-smile'></i>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.home') }}">{{ labels('admin_labels.home', 'Home') }}</a></li>
+                    <li class="breadcrumb-item"><a
+                            href="{{ route('admin.home') }}">{{ labels('admin_labels.home', 'Home') }}</a></li>
                     <li class="breadcrumb-item active">{{ labels('admin_labels.sellers', 'Sellers') }}</li>
 
                 </ol>
@@ -51,10 +52,14 @@
                                     <i class='bx bx-download'></i>
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="exportOptionsDropdown">
-                                    <li><button class="dropdown-item" type="button" onclick="exportTableData('admin_manage_sellers','csv')">CSV</button></li>
-                                    <li><button class="dropdown-item" type="button" onclick="exportTableData('admin_manage_sellers','json')">JSON</button></li>
-                                    <li><button class="dropdown-item" type="button" onclick="exportTableData('admin_manage_sellers','sql')">SQL</button></li>
-                                    <li><button class="dropdown-item" type="button" onclick="exportTableData('admin_manage_sellers','excel')">Excel</button></li>
+                                    <li><button class="dropdown-item" type="button"
+                                            onclick="exportTableData('admin_manage_sellers','csv')">CSV</button></li>
+                                    <li><button class="dropdown-item" type="button"
+                                            onclick="exportTableData('admin_manage_sellers','json')">JSON</button></li>
+                                    <li><button class="dropdown-item" type="button"
+                                            onclick="exportTableData('admin_manage_sellers','sql')">SQL</button></li>
+                                    <li><button class="dropdown-item" type="button"
+                                            onclick="exportTableData('admin_manage_sellers','excel')">Excel</button></li>
                                 </ul>
                             </div>
                         </div>
