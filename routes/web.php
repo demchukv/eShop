@@ -14,7 +14,6 @@ use App\Http\Controllers\Seller\MediaController as SellerMediaController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\StoreController;
 use App\Http\Controllers\SellerInviteController;
-use App\Livewire\Sellers\SellerRegister;
 
 // ---------------------------------------------------------------------------------------------------------------------------
 Route::get('/clear-cache', function () {
@@ -161,4 +160,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/seller-invites', [SellerInviteController::class, 'store'])->name('seller_invites.store');
     Route::delete('/seller-invites/{sellerInvite}', [SellerInviteController::class, 'destroy'])->name('seller_invites.destroy');
 });
-Route::get('/seller-register/{link}', SellerRegister::class)->name('seller.register');
+// Route::get('/seller-register/{link}', SellerRegister::class)->name('seller.register');
+Route::get('/seller-register/{link}', \App\Livewire\Sellers\SellerTelegramVerify::class)->name('seller.telegram.verify');
+Route::get('/seller-register/{link}/complete', \App\Livewire\Sellers\SellerRegister::class)->name('seller.register.complete');
