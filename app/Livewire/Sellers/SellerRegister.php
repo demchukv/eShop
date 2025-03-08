@@ -5,32 +5,34 @@ namespace App\Livewire\Sellers;
 use App\Models\SellerInvite;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Component;
+use Illuminate\Support\Facades\Log;
 
 class SellerRegister extends Component
 {
 
 
-    public string $link;
-    public ?SellerInvite $invite = null;
-    public string $message = '';
+
+    public $link;
+    public $invite;
+    public $message = '';
     public $user_info;
 
+    public $telegram_id = '';
+    public $telegram_username = '';
+    public $username = '';
+    public $mobile = '';
+    public $email = '';
+    public $first_name = '';
+    public $last_name = '';
+    public $password = '';
+    public $password_confirmation = '';
+    public $agree = false;
 
-    // Публічні властивості для полів форми
-    public string $telegram_id = '';
-    public string $telegram_username = '';
-    public string $username = '';
-    public string $mobile = '';
-    public string $email = '';
-    public string $first_name = '';
-    public string $last_name = '';
-    public string $password = '';
-    public string $password_confirmation = '';
-    public bool $agree = false;
+    public $telegramVerified = false; // Додаємо для відстеження стану Telegram
 
-    // Правила валідації
+
     protected $rules = [
         'telegram_id' => 'required|string',
         'telegram_username' => 'required|string',
@@ -40,10 +42,9 @@ class SellerRegister extends Component
         'first_name' => 'required|string|max:255',
         'last_name' => 'required|string|max:255',
         'password' => 'required|string|min:8|confirmed',
-        'agree' => 'accepted', // Повинен бути true (чекбокс відмічений)
+        'agree' => 'accepted',
     ];
 
-    // Кастомні повідомлення (опціонально)
     protected $messages = [
         'agree.accepted' => 'You must agree to the terms and policy.',
         'password.confirmed' => 'The password confirmation does not match.',
@@ -51,7 +52,11 @@ class SellerRegister extends Component
 
     public function mount($link)
     {
+
         $this->link = $link;
+        // $this->system_settings = cache()->remember('system_settings', 3600, function () {
+        //     return \App\Models\SystemSetting::pluck('value', 'key')->toArray();
+        // });
 
         // Перевіряємо, чи існує запрошення з таким посиланням
         $this->invite = SellerInvite::where('link', $this->link)->first();
@@ -81,45 +86,61 @@ class SellerRegister extends Component
         }
     }
 
+    public function verifyTelegram($telegramData)
+    {
+        // Імітуємо відповідь від вашого AJAX-запиту
+        $user = $telegramData;
+        if (!isset($user['username'])) {
+            $user['username'] = $user['id'];
+        }
+
+        $this->telegram_id = $user['id'];
+        $this->telegram_username = $user['username'];
+        $this->username = $user['username'];
+        $this->first_name = $user['first_name'] ?? '';
+        $this->last_name = $user['last_name'] ?? '';
+        $this->telegramVerified = true;
+
+        $this->dispatch('telegram-verified');
+    }
+
     public function register()
     {
-        // Валідація даних
-        $this->validate();
 
-        if (!$this->invite) {
-            $this->message = 'Invalid invitation link.';
+        if (!$this->telegramVerified) {
+            $this->addError('telegram_id', 'Please verify your Telegram account.');
+            $this->dispatch('show-error', message: 'Telegram verification required.');
             return;
         }
 
-        if ($this->invite->status !== SellerInvite::STATUS_ACTIVE) {
-            $this->message = 'This link is no longer valid.';
+        try {
+            $this->validate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e; // Повторно кидаємо виняток, щоб Livewire повернув помилки
+        }
+
+        if (!$this->invite || $this->invite->status !== SellerInvite::STATUS_ACTIVE) {
+            $this->message = 'Invalid or used invitation link.';
+            $this->dispatch('show-error', message: $this->message);
             return;
         }
 
-        // Створення нового користувача
-        // $user = User::create([
-        //     'username' => $this->username,
-        //     'mobile' => $this->mobile,
-        //     'email' => $this->email,
-        //     'first_name' => $this->first_name,
-        //     'last_name' => $this->last_name,
-        //     'password' => Hash::make($this->password),
-        //     'telegram_id' => $this->telegram_id,
-        //     'telegram_username' => $this->telegram_username,
-        //     // Додайте інші поля, якщо потрібно (наприклад, роль продавця)
-        // ]);
+        $user = User::create([
+            'username' => $this->username,
+            'mobile' => $this->mobile,
+            'email' => $this->email,
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
+            'password' => Hash::make($this->password),
+            'telegram_id' => $this->telegram_id,
+            'telegram_username' => $this->telegram_username,
+        ]);
 
-        // Оновлення статусу запрошення
-        // $this->invite->update(['status' => SellerInvite::STATUS_USED]);
-
-        // Повідомлення про успіх
+        $this->invite->update(['status' => SellerInvite::STATUS_USED]);
         $this->dispatch('show-success', message: 'Registration successful! Welcome, ' . $this->username . '!');
 
-        // Авторизація користувача (опціонально)
-        // Auth::login($user);
-
-        // Редирект на дашборд продавця
-        // return redirect()->route('seller.dashboard');
+        Auth::login($user);
+        return redirect()->route('seller.dashboard');
     }
 
 
@@ -130,6 +151,9 @@ class SellerRegister extends Component
 
     public function render()
     {
+        if (!$this->telegramVerified) {
+            $this->dispatch('reinit-telegram');
+        }
         return view('livewire.elegant.sellers.seller-register');
     }
 }

@@ -105,7 +105,6 @@
     @endif
     <x-include-modal.modals />
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/lightbox.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 

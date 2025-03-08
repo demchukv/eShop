@@ -23,24 +23,30 @@
                     <div class="inner h-100">
 
 
-                        <div class="form-row verify-telegram">
-                            <div class="form-group col-12 d-flex-justify-center mt-2">
-                                <script async src="https://telegram.org/js/telegram-widget.js?22"
-                                    data-telegram-login="{{ $system_settings['tg_bot_user_name'] }}" data-size="large" data-userpic="true"
-                                    data-radius="6" data-onauth="onTelegramSellerRegister(user)" data-request-access="write"></script>
 
-                            </div>
-                        </div>
-                        <div class="form-row verify-telegram-success d-none">
-                            <div class="form-group col-12">
-                                <p class="telegram-username">Telegram verification successful</p>
-                            </div>
-                        </div>
+                        <form class="seller-register-form" wire:submit.prevent="register">
 
-                        <form class="seller-register-form d-none" wire:submit="register">
-                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                            <input type="hidden" wire:model="telegram_id" id="telegram_id">
-                            <input type="hidden" wire:model="telegram_username" id="telegram_username">
+                            <div class="form-row">
+                                <div class="form-group col-12">
+                                    <div class="form-row verify-telegram {{ $telegramVerified ? 'd-none' : '' }}">
+                                        <label class="d-none" for="telegram_id">
+                                            {{ labels('front_messages.validate_telegram_account', 'Validate your Telegram account') }}
+                                            <span class="required">*</span>
+                                        </label>
+                                        <div class="telegram-login-button"></div>
+                                    </div>
+                                    <div
+                                        class="form-group col-12 verify-telegram-success {{ $telegramVerified ? '' : 'd-none' }}">
+                                        <p class="telegram-username">Telegram: @{{ $telegram_username }}</p>
+                                    </div>
+                                    @error('telegram_id')
+                                        <span class="error text-danger">{{ $message }}</span>
+                                    @enderror
+                                    <input type="hidden" wire:model="telegram_id" id="telegram_id">
+                                    <input type="hidden" wire:model="telegram_username" id="telegram_username">
+                                </div>
+                            </div>
+
                             <div class="form-row">
                                 <div class="form-group col-12">
                                     <label for="username" class="d-none">
@@ -56,7 +62,8 @@
 
 
                                 <div class="form-group col-12 d-flex flex-column">
-                                    <label for="mobile" class="d-none">{{ labels('front_messages.mobile', 'mobile') }}
+                                    <label for="mobile"
+                                        class="d-none">{{ labels('front_messages.mobile', 'mobile') }}
                                         <span class="required">*</span></label>
                                     <input type="number" wire:model="mobile" name="mobile" placeholder="mobile"
                                         id="number" value="" />
@@ -65,17 +72,6 @@
                                     @enderror
                                 </div>
 
-
-                                {{-- <div class="form-group col-12 d-flex flex-column">
-                                    <label for="mobile" class="d-none">
-                                        {{ labels('front_messages.mobile', 'Mobile') }} <span class="required">*</span>
-                                    </label>
-                                    <input type="number" wire:model="mobile" placeholder="Mobile" id="mobile"
-                                        class="form-control" />
-                                    @error('mobile')
-                                        <span class="error text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div> --}}
 
                                 <div class="form-group col-12">
                                     <label for="email" class="d-none">
@@ -169,53 +165,74 @@
 </div>
 
 
-{{-- <button wire:click="register" class="btn btn-primary">
-            Register Now
-        </button> --}}
-
 <script>
     function onTelegramSellerRegister(user) {
-        $.ajax({
-            type: "post",
-            url: appUrl + "register/check-telegram",
-            data: {
-                user,
-                check_type: "register",
-            },
-            success: function(response) {
-                if (response.error == true) {
-                    iziToast.error({
-                        message: response.message,
-                        position: "topRight",
-                    });
-                } else {
-                    iziToast.success({
-                        message: response.message,
-                        position: "topRight",
-                    });
-                    if (!response.user.username) {
-                        // if not set username change to id
-                        response.user.username = response.user.id;
-                    }
-                    $("#telegram_id").val(response.user.id);
-                    $("#telegram_username").val(response.user.username);
-                    $("#username").val(response.user.username);
-                    $("#first_name").val(response.user.first_name);
-                    $("#last_name").val(response.user.last_name);
-                    $(".verify-telegram").addClass("d-none");
-                    $(".verify-telegram-success").removeClass("d-none");
-                    $(".telegram-username").text(
-                        "Telegram: @" + response.user.username
-                    );
-                    $(".seller-register-form").removeClass("d-none");
-                }
-            },
-            error: function(response) {
-                iziToast.error({
-                    message: "Error checking Telegram auth",
-                    position: "topRight",
-                });
-            },
-        });
+        @this.call('verifyTelegram', user);
     }
+
+    function initializeTelegramWidget() {
+        const container = document.querySelector('.telegram-login-button');
+        container.innerHTML = ''; // Очищаємо перед додаванням нового віджета
+        const script = document.createElement('script');
+        script.src = "https://telegram.org/js/telegram-widget.js?22";
+        script.async = true;
+        script.setAttribute('data-telegram-login', "{{ $system_settings['tg_bot_user_name'] }}");
+        script.setAttribute('data-size', 'large');
+        script.setAttribute('data-userpic', 'true');
+        script.setAttribute('data-radius', '6');
+        script.setAttribute('data-onauth', 'onTelegramSellerRegister(user)');
+        script.setAttribute('data-request-access', 'write');
+        container.appendChild(script);
+    }
+
+    // Чекаємо повного завантаження Livewire
+    window.addEventListener('load', function() {
+        console.log('Window loaded, initializing Livewire hooks');
+
+        Livewire.hook('message.sent', (message, component) => {
+            console.log('Livewire message sent:', message);
+        });
+
+        Livewire.hook('message.processed', (message, component) => {
+            console.log('Livewire message processed:', message);
+            if (!component.state.telegramVerified) {
+                initializeTelegramWidget();
+            }
+        });
+
+        Livewire.hook('element.updated', (el, component) => {
+            console.log('Livewire element updated:', el);
+        });
+
+        // Ініціалізація віджета після завантаження
+        initializeTelegramWidget();
+    });
+
+    document.addEventListener('livewire:init', function() {
+        console.log('Livewire initialized');
+    });
+
+    document.addEventListener('livewire:navigated', function() {
+        console.log('Livewire navigated');
+    });
+
+    window.addEventListener('telegram-verified', function() {
+        console.log('Telegram verified event received');
+        document.querySelector('.verify-telegram').classList.add('d-none');
+        document.querySelector('.verify-telegram-success').classList.remove('d-none');
+    });
+
+    window.addEventListener('show-success', function(event) {
+        iziToast.success({
+            message: event.detail.message,
+            position: 'topRight'
+        });
+    });
+
+    window.addEventListener('show-error', function(event) {
+        iziToast.error({
+            message: event.detail.message,
+            position: 'topRight'
+        });
+    });
 </script>
