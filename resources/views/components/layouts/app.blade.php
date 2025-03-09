@@ -107,6 +107,7 @@
     @endif
     <x-include-modal.modals />
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/lightbox.css') }}">
+     @filepondScripts
     @livewireScripts
     @stack('scripts')
 </body>

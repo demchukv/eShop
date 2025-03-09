@@ -4,14 +4,17 @@ namespace App\Livewire\Sellers;
 
 use App\Models\SellerInvite;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
-use Illuminate\Support\Facades\Log;
+// use Livewire\WithFileUploads;
+use Spatie\LivewireFilepond\WithFilePond;
 
 class SellerRegister extends Component
 {
+    // use WithFileUploads;
+    use WithFilePond;
+
+    public $file;
+
     public $link;
     public $invite;
     public $message = '';
@@ -20,22 +23,59 @@ class SellerRegister extends Component
     public $telegram_username = '';
     public $username = '';
     public $mobile = '';
+    public $phone_full = '';
+    public $country_code = '';
     public $email = '';
     public $first_name = '';
     public $last_name = '';
     public $password = '';
-    public $password_confirmation = '';
+    public $confirm_password = '';
+    public $address = '';
     public $agree = false;
     public $friend_code = '';
 
+    public $account_number = '';
+    public $account_name = '';
+    public $bank_name = '';
+    public $bank_code = '';
+
+    public $store_name = '';
+    public $store_url = '';
+    public $description = '';
+
+    public $city = '';
+    public $zipcode = '';
+
+    public $tax_name = '';
+    public $tax_number = '';
+    public $pan_number = '';
+    public $latitude = '';
+    public $longitude = '';
+
+    public $profile_image = null;
+    public $address_proof = null;
+    public $authorized_signature = null;
+
     protected $rules = [
         'username' => 'required|string|max:255|unique:users,username',
-        'mobile' => 'required|numeric|digits_between:9,15|unique:users,mobile',
+        'mobile' => 'required|numeric|digits_between:8,15|unique:users,mobile',
         'email' => 'required|email|max:255|unique:users,email',
         'first_name' => 'required|string|max:255',
         'last_name' => 'required|string|max:255',
         'password' => 'required|string|min:8|confirmed',
+        'address' => 'required|string|min:10',
         'agree' => 'accepted',
+        'account_number' => 'required|string|min:10',
+        'account_name' => 'required|string|min:10',
+        'bank_name' => 'required|string|min:10',
+        'bank_code' => 'required|string|min:5',
+        'store_name' => 'required|string|min:10',
+        'store_url' => 'required|string|min:5',
+        'description' => 'required|string|min:10',
+
+        'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'address_proof' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'authorized_signature' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
     ];
 
     protected $messages = [
@@ -68,9 +108,28 @@ class SellerRegister extends Component
         $this->friend_code = $this->user_info->referral_code;
     }
 
-    public function register(Request $request)
+    public function updated($propertyName)
     {
-        $this->dispatch('start-verification', message: 'Start verification!' . $request->phone_full);
+        if ($propertyName === 'profile_image') {
+            // Обробка файлу profile_image
+            $this->profile_image = $this->profile_image->store('example', 'public');
+        }
+        if ($propertyName === 'address_proof') {
+            // Обробка файлу address_proof
+            $this->address_proof = $this->address_proof->store('example', 'public');
+        }
+        if ($propertyName === 'authorized_signature') {
+            // Обробка файлу authorized_signature
+            $this->authorized_signature = $this->authorized_signature->store('example', 'public');
+        }
+        if ($propertyName === 'file') {
+            // Обробка файлу authorized_signature
+            $this->file = $this->file->store('example', 'public');
+        }
+    }
+
+    public function register()
+    {
 
         $this->validate();
 
@@ -79,6 +138,10 @@ class SellerRegister extends Component
             $this->dispatch('show-error', message: $this->message);
             return;
         }
+
+        $this->profile_image->store('example', 'public');
+        $this->address_proof->store('example', 'public');
+        $this->authorized_signature->store('example', 'public');
 
         // $user = User::create([
         //     'username' => $this->username,
@@ -101,10 +164,6 @@ class SellerRegister extends Component
         return;
     }
 
-    public function updated($propertyName)
-    {
-        $this->validateOnly($propertyName);
-    }
 
     public function render()
     {
