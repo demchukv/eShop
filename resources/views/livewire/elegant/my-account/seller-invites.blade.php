@@ -24,7 +24,7 @@
                         <tr wire:key="invite-{{ $invite->id }}-{{ $loop->index }}">
                             <td>{{ $invite->id }}</td>
                             <td>{{ config('app.url') . 'seller-register/' . $invite->link }}</td>
-                            <td>
+                            <td wire:ignore>
                                 @if ($invite->status === \App\Models\SellerInvite::STATUS_ACTIVE)
                                     <livewire:components.copy-button
                                         text="{{ config('app.url') . 'seller-register/' . $invite->link }}"
@@ -45,10 +45,10 @@
                                 @endif
                             </td>
                             <td>{{ $invite->created_at->format('d.m.Y H:i') }}</td>
-                            <td>
-                                <button wire:click="deleteInvite({{ $invite->id }})" class="btn-danger btn-sm p-1"
-                                    onclick="return confirm('Видалити?')">
-                                    Delete
+                            <td wire:ignore>
+                                <button wire:click="deleteInvite({{ $invite->id }})" class="btn-link btn-lg p-0"
+                                    onclick="return confirm('Delete?')" title="Delete link">
+                                    <ion-icon name="trash-outline"></ion-icon>
                                 </button>
                             </td>
                         </tr>
@@ -63,29 +63,31 @@
         @endif
     </div>
 
-    <script>
-        document.addEventListener('livewire:init', function() {
-            // Обробка успішних повідомлень
-            window.addEventListener('show-success', function(event) {
-                iziToast.success({
-                    message: event.detail.message,
-                    position: 'topRight'
+    @script
+        <script>
+            document.addEventListener('livewire:init', function() {
+                // Обробка успішних повідомлень
+                window.addEventListener('show-success', function(event) {
+                    iziToast.success({
+                        message: event.detail.message,
+                        position: 'topRight'
+                    });
                 });
-            });
 
-            // Обробка помилок
-            window.addEventListener('show-error', function(event) {
-                iziToast.error({
-                    message: event.detail.message,
-                    position: 'topRight'
+                // Обробка помилок
+                window.addEventListener('show-error', function(event) {
+                    iziToast.error({
+                        message: event.detail.message,
+                        position: 'topRight'
+                    });
                 });
-            });
 
-            // Дебаг для перевірки помилок
-            window.addEventListener('livewire:exception', function(event) {
-                console.error('Livewire error:', event.detail);
-            });
+                // Дебаг для перевірки помилок
+                window.addEventListener('livewire:exception', function(event) {
+                    console.error('Livewire error:', event.detail);
+                });
 
-        });
-    </script>
+            });
+        </script>
+    @endscript
 </div>

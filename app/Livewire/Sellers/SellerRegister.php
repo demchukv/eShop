@@ -17,7 +17,6 @@ use Exception;
 use App\Traits\ReferralCodeTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Log;
 
 class SellerRegister extends Component
 {
@@ -91,8 +90,8 @@ class SellerRegister extends Component
         'store_url' => 'required|string|min:4',
         'description' => 'required|string|min:10',
 
-        'city' => 'string',
-        'zipcode' => 'string',
+        'city' => 'required|string',
+        'zipcode' => 'required|string',
 
         'tax_name' => 'nullable|string',
         'tax_number' => 'nullable|string',
@@ -117,8 +116,6 @@ class SellerRegister extends Component
 
     public function mount($link)
     {
-        Log::info('Current Route Name: ' . Route::currentRouteName());
-        Log::info('Current Route URI: ' . Route::current()->uri());
 
         if (Route::current()->uri() != 'seller-register/success') {
 
@@ -365,6 +362,19 @@ class SellerRegister extends Component
         //create seller
         $seller = Seller::create($seller_data);
 
+        $city = new City();
+        $city->name = $this->city;
+        $city->minimum_free_delivery_order_amount = 0;
+        $city->delivery_charges = 0;
+        $city->save();
+
+        $zipcode = new Zipcode();
+        $zipcode->city_id = $city->id;
+        $zipcode->zipcode = $this->zipcode;
+        $zipcode->minimum_free_delivery_order_amount = 0;
+        $zipcode->delivery_charges = 0;
+        $zipcode->save();
+
         $seller_store_data = array_merge($seller_store_data, [
             'user_id' => $user->id,
             'seller_id' => $seller->id,
@@ -385,8 +395,8 @@ class SellerRegister extends Component
             'store_id' => $store_id,
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
-            'city' => $this->city,
-            'zipcode' => $this->zipcode,
+            'city' => $city->id,
+            'zipcode' => $zipcode->id,
             'disk' => isset($address_proof->disk) && !empty($address_proof->disk) ? $address_proof->disk : 'public',
         ]);
         // create store
@@ -405,8 +415,8 @@ class SellerRegister extends Component
 
     public function render()
     {
-        $zipcodes = Zipcode::orderBy('id', 'desc')->get();
-        $cities = City::orderBy('id', 'desc')->get();
-        return view('livewire.elegant.sellers.seller-register', compact('zipcodes', 'cities'));
+        // $zipcodes = Zipcode::orderBy('id', 'desc')->get();
+        // $cities = City::orderBy('id', 'desc')->get();
+        return view('livewire.elegant.sellers.seller-register');
     }
 }

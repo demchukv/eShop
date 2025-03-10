@@ -13,6 +13,7 @@ class SellerTelegramVerify extends Component
     public $invite;
     public $user_info;
     public $message = '';
+    public $error_message = "";
     public $telegram_id = '';
     public $telegram_username = '';
     public $telegramVerified = false;
@@ -56,6 +57,12 @@ class SellerTelegramVerify extends Component
         $this->telegramVerified = true;
 
         $this->validate();
+
+        // $exists_user = USER::where('telegram_id', $this->telegram_id)->first();
+        // if ($exists_user) {
+        //     $this->error_message = 'User with this Telegram ID already exists.';
+        //     return;
+        // }
 
         // Зберігаємо дані в сесію
         session()->put('seller_telegram_data', [

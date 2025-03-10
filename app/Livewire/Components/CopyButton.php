@@ -13,13 +13,13 @@ class CopyButton extends Component
     public function mount($text)
     {
         $this->textToCopy = $text;
-        $this->uniqueId = uniqid('copy_button_');
+        $this->uniqueId = uniqid('copy-button-');
     }
 
     public function copyToClipboard()
     {
         // Ця функція буде викликатися при кліку
-        $this->dispatch('copy-to-clipboard-' . $this->uniqueId, text: $this->textToCopy, success: 'Copied to clipboard!');
+        $this->dispatch($this->uniqueId . '_btn', text: $this->textToCopy, success: 'Copied to clipboard!');
     }
 
     public function render()

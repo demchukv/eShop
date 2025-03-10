@@ -368,54 +368,36 @@
                                         <div class="row">
                                             <div class="form-group col-md-12">
                                                 <div class="mb-3">
-                                                    <label class="form-label"
-                                                        for="basic-default-company">{{ labels('admin_labels.description', 'Description') }}
-                                                        <span class="text-asterisks text-sm">*</span></label>
-                                                    <textarea wire:model="description" id="basic-default-message" value="" name="description"
-                                                        class="form-control" placeholder="Write some description here">{{ $description }}</textarea>
-
+                                                    <div class="mb-3">
+                                                        <label class="form-label"
+                                                            for="basic-default-company">{{ labels('admin_labels.description', 'Description') }}
+                                                            <span class="text-asterisks text-sm">*</span></label>
+                                                        <textarea wire:model="description" id="basic-default-message" value="" name="description"
+                                                            class="form-control" placeholder="Write some description here">{{ $description }}</textarea>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6">
-                                                {{-- <div class="form-group city_list_parent">
+                                                <div class="form-group">
                                                     <label for="city"
-                                                        class="control-label mb-2 mt-2">{{ labels('admin_labels.city', 'City') }}
+                                                        class="control-label mb-2 mt-2">{{ labels('front_messages.city', 'City') }}
                                                         <span class='text-asterisks text-xs'>*</span></label>
-                                                    <select wire:model="city" class="form-select city_list"
-                                                        name="city" id="city">
-                                                        <option value=" ">
-                                                            {{ labels('admin_labels.select_city', 'Select City') }}
-                                                        </option>
-                                                    </select>
-                                                </div> --}}
-                                                <div class="form-group city_list_div">
-                                                    <div wire:ignore>
-                                                        <label for="city"
-                                                            class="control-label mb-2 mt-2">{{ labels('front_messages.city', 'City') }}
-                                                            <span class='text-asterisks text-xs'>*</span></label>
-                                                        <select class="col-md-12 form-control city_list"
-                                                            id="city_list" name="city">
-                                                        </select>
-                                                    </div>
+                                                    <input type="text" wire:model="city" class="form-control"
+                                                        id="city" name="city">
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="form-group">
-                                                    <label for="city"
+                                                    <label for="zipcode"
                                                         class="control-label mb-2 mt-2">{{ labels('admin_labels.zipcode', 'Zipcode') }}
                                                         <span class='text-asterisks text-xs'>*</span></label>
-                                                    <select wire:model="zipcode" class="form-select zipcode_list"
-                                                        name="zipcode" id="zipcode">
-                                                        <option value=" ">
-                                                            {{ labels('admin_labels.select_zipcode', 'Select Zipcode') }}
-                                                        </option>
-                                                    </select>
+                                                    <input type="text" wire:model="zipcode" class="form-control"
+                                                        id="zipcode" name="zipcode">
                                                 </div>
                                             </div>
                                         </div>
-
 
                                     </div>
                                 </div>
@@ -535,9 +517,6 @@
 @endpush
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.0/build/js/intlTelInput.min.js"></script>
-@endpush
-
-@script
     <script>
         window.addEventListener('show-error', function(event) {
             iziToast.error({
@@ -547,39 +526,54 @@
         });
 
         window.addEventListener('load', function() {
-            const mobile = document.querySelector("#mobile");
-            const phone_full = document.querySelector("#phone_full");
-            const country_code = document.querySelector("#country_code");
-            const iti = window.intlTelInput(mobile, {
-                allowExtensions: true,
-                formatOnDisplay: true,
-                autoFormat: true,
-                autoHideDialCode: false,
-                autoPlaceholder: "polite",
-                defaultCountry: "in",
-                ipinfoToken: "yolo",
-                nationalMode: true,
-                numberType: "MOBILE",
-                preventInvalidNumbers: true,
-                separateDialCode: true,
-                initialCountry: "auto",
-                geoIpLookup: callback => {
-                    fetch("https://ipapi.co/json")
-                        .then(res => res.json())
-                        .then(data => callback(data.country_code))
-                        .catch(() => callback("us"));
-                },
-                loadUtils: () => import(
-                    "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.0/build/js/utils.js"
-                )
-            });
+            let ipData;
+            fetch("https://ipapi.co/json")
+                .then(response => response.json())
+                .then(data => {
+                    ipData = data; // Зберігаємо дані в змінну
+                    if (ipData && ipData.city && ipData.postal) {
+                        @this.set('city', ipData.city);
+                        @this.set('zipcode', ipData.postal);
+                        @this.set('country_code', ipData.country_code); // Зберігаємо код країни
+                    } else {
+                        iziToast.error({
+                            message: "Не вдалося отримати дані про місто та поштовий індекс.",
+                            position: 'topRight'
+                        });
+                    }
+                    const mobile = document.querySelector("#mobile");
+                    const iti = window.intlTelInput(mobile, {
+                        allowExtensions: true,
+                        formatOnDisplay: true,
+                        autoFormat: true,
+                        autoHideDialCode: false,
+                        autoPlaceholder: "polite",
+                        defaultCountry: "in",
+                        ipinfoToken: "yolo",
+                        nationalMode: true,
+                        numberType: "MOBILE",
+                        preventInvalidNumbers: true,
+                        separateDialCode: true,
+                        initialCountry: "auto",
+                        geoIpLookup: callback => {
+                            if (ipData && ipData.country_code) {
+                                callback(ipData.country_code);
+                            } else {
+                                callback("us"); // Якщо дані не доступні, повертаємо "us"
+                            }
+                        },
+                        loadUtils: () => import(
+                            "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.0/build/js/utils.js"
+                        )
+                    });
+                });
+
             const handleChange = () => {
-                let text;
                 if (mobile.value) {
                     if (iti.isValidNumber()) {
-                        @this.phone_full = iti.getNumber().replace('+' + iti.getSelectedCountryData().dialCode,
-                            '');
-                        @this.country_code = iti.getSelectedCountryData().dialCode;
+                        @this.set('phone_full', iti.getNumber().replace('+' + iti.getSelectedCountryData()
+                            .dialCode, ''));
+                        @this.set('country_code', iti.getSelectedCountryData().dialCode);
                     }
                 }
             };
@@ -605,4 +599,4 @@
 
         });
     </script>
-@endscript
+@endpush

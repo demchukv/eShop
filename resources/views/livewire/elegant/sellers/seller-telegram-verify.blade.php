@@ -10,44 +10,50 @@
     <div class="container-fluid">
         <h1>Seller Registration - Step 1: Telegram Verification</h1>
 
-        @if ($message)
-            <div class="alert {{ $invite && $invite->status === 'active' ? 'alert-info' : 'alert-danger' }}">
-                {{ $message }}
+        @if ($error_message)
+            <div class="alert alert-danger">
+                {{ $error_message }}
             </div>
-        @endif
+        @else
+            @if ($message)
+                <div class="alert {{ $invite && $invite->status === 'active' ? 'alert-info' : 'alert-danger' }}">
+                    {{ $message }}
+                </div>
+            @endif
 
-        @if ($invite && $invite->status === 'active')
-            <p>Please verify your Telegram account to proceed.</p>
+            @if ($invite && $invite->status === 'active')
+                <p>Please verify your Telegram account to proceed.</p>
 
-            <div class="login-register pt-2">
-                <div class="row">
-                    <div class="col-12 col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
-                        <div class="inner h-100">
-                            <div class="form-row">
-                                <div class="form-group col-12">
-                                    <div class="form-row verify-telegram {{ $telegramVerified ? 'd-none' : '' }}">
-                                        <label class="d-none" for="telegram_id">
-                                            {{ labels('front_messages.validate_telegram_account', 'Validate your Telegram account') }}
-                                            <span class="required">*</span>
-                                        </label>
-                                        <div class="telegram-login-button"></div>
-                                    </div>
-                                    @if ($telegramVerified)
-                                        <div class="form-group col-12 verify-telegram-success">
-                                            <p class="telegram-username">Telegram: @{{ $telegram_username }}</p>
+                <div class="login-register pt-2">
+                    <div class="row">
+                        <div class="col-12 col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+                            <div class="inner h-100">
+                                <div class="form-row">
+                                    <div class="form-group col-12">
+                                        <div class="form-row verify-telegram {{ $telegramVerified ? 'd-none' : '' }}">
+                                            <label class="d-none" for="telegram_id">
+                                                {{ labels('front_messages.validate_telegram_account', 'Validate your Telegram account') }}
+                                                <span class="required">*</span>
+                                            </label>
+                                            <div class="telegram-login-button"></div>
                                         </div>
-                                    @endif
-                                    @error('telegram_id')
-                                        <span class="error text-danger">{{ $message }}</span>
-                                    @enderror
-                                    <input type="hidden" wire:model="telegram_id" id="telegram_id">
-                                    <input type="hidden" wire:model="telegram_username" id="telegram_username">
+                                        @if ($telegramVerified)
+                                            <div class="form-group col-12 verify-telegram-success">
+                                                <p class="telegram-username">Telegram: @{{ $telegram_username }}</p>
+                                            </div>
+                                        @endif
+                                        @error('telegram_id')
+                                            <span class="error text-danger">{{ $message }}</span>
+                                        @enderror
+                                        <input type="hidden" wire:model="telegram_id" id="telegram_id">
+                                        <input type="hidden" wire:model="telegram_username" id="telegram_username">
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            @endif
         @endif
     </div>
 </div>
