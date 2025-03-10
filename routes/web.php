@@ -160,6 +160,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/seller-invites', [SellerInviteController::class, 'store'])->name('seller_invites.store');
     Route::delete('/seller-invites/{sellerInvite}', [SellerInviteController::class, 'destroy'])->name('seller_invites.destroy');
 });
-// Route::get('/seller-register/{link}', SellerRegister::class)->name('seller.register');
+// Seller registration by invitation link
+Route::get('/seller-register/success', \App\Livewire\Sellers\SellerRegisterSuccess::class)->name('seller.register.success');
 Route::get('/seller-register/{link}', \App\Livewire\Sellers\SellerTelegramVerify::class)->name('seller.telegram.verify');
 Route::get('/seller-register/{link}/complete', \App\Livewire\Sellers\SellerRegister::class)->name('seller.register.complete');

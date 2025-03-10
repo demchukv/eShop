@@ -450,7 +450,6 @@ class SellerController extends Controller
         $all_categories = Category::where('status', 1)->where('store_id', $store_id)->orderBy('id', 'desc')->get();
 
         $zipcodes = Zipcode::orderBy('id', 'desc')->get();
-
         $cities = City::orderBy('id', 'desc')->get();
 
         $note_for_necessary_documents = fetchDetails('stores', ['id' => $store_id], 'note_for_necessary_documents');

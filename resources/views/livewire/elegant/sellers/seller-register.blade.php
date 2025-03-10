@@ -76,19 +76,29 @@
                                                     <span class="error text-danger">{{ $message }}</span>
                                                 @enderror
                                             </div>
+
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label"
                                                     for="mobile">{{ labels('admin_labels.mobile', 'Mobile') }}
                                                     <span class="text-asterisks text-sm">*</span></label>
                                                 <div wire:ignore class="input-group input-group-merge">
                                                     <input wire:model="mobile" type="text" id="mobile"
-                                                        name="mobile" maxlength="16" {{-- oninput="validateNumberInput(this)"  --}}
-                                                        class="form-control w-full" placeholder="8787878787"
+                                                        name="mobile" maxlength="16" class="form-control w-full"
                                                         value="{{ $mobile }}" />
                                                 </div>
                                                 @error('mobile')
                                                     <span class="error text-danger">{{ $message }}</span>
                                                 @enderror
+                                                @error('phone_full')
+                                                    <span class="error text-danger">{{ $message }}</span>
+                                                @enderror
+                                                @error('country_code')
+                                                    <span class="error text-danger">{{ $message }}</span>
+                                                @enderror
+                                                <input type="hidden" wire:model="country_code" name="country_code"
+                                                    id="country_code" />
+                                                <input type="hidden" wire:model="phone_full" name="phone_full"
+                                                    id="phone_full" />
                                             </div>
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label"
@@ -109,13 +119,13 @@
                                                 <label class="form-label"
                                                     for="password">{{ labels('admin_labels.password', 'Password') }}
                                                     <span class="text-asterisks text-sm">*</span></label>
-                                                <div class="input-group input-group-merge">
-
-                                                    <input wire:model="password" type="password"
-                                                        class="form-control show_seller_password" name="password"
+                                                <div wire:ignore class="input-group">
+                                                    <input wire:model="password" type="password" class="form-control"
+                                                        name="password" id="password"
                                                         placeholder="Enter Your Password" autocomplete="off">
-                                                    <span class="input-group-text cursor-pointer toggle_password"><i
-                                                            class="bx bx-hide"></i></span>
+                                                    <span
+                                                        class="input-group-text cursor-pointer toggle_password"><ion-icon
+                                                            name="eye-outline"></ion-icon></span>
                                                 </div>
                                                 @error('password')
                                                     <span class="error text-danger">{{ $message }}</span>
@@ -125,16 +135,16 @@
                                                 <label class="form-label"
                                                     for="password">{{ labels('admin_labels.confirm_password', 'Confirm Password') }}
                                                     <span class="text-asterisks text-sm">*</span></label>
-                                                <div class="input-group input-group-merge">
-                                                    <input wire:model="confirm_password" type="password"
-                                                        class="form-control" name="confirm_password"
-                                                        placeholder="Enter your password" aria-describedby="password"
-                                                        autocomplete="off" />
+                                                <div wire:ignore class="input-group">
+                                                    <input wire:model="password_confirmation" type="password"
+                                                        class="form-control" name="password_confirmation"
+                                                        id="password_confirmation" placeholder="Enter your password"
+                                                        aria-describedby="password" autocomplete="off" />
                                                     <span
-                                                        class="input-group-text cursor-pointer toggle_confirm_password"><i
-                                                            class="bx bx-hide"></i></span>
+                                                        class="input-group-text cursor-pointer toggle_confirm_password"><ion-icon
+                                                            name="eye-outline"></ion-icon></span>
                                                 </div>
-                                                @error('confirm_password')
+                                                @error('password_confirmation')
                                                     <span class="error text-danger">{{ $message }}</span>
                                                 @enderror
                                             </div>
@@ -154,14 +164,14 @@
                                                     <label class="form-label"
                                                         for="profile_image">{{ labels('admin_labels.profile_image', 'Profile image') }}
                                                         <span class="text-asterisks text-sm">*</span></label>
-                                                    <x-filepond::upload wire:model="profile_image" max-files="5" />
+                                                    <x-filepond::upload wire:model="profile_image" />
                                                     {{-- <input wire:model="profile_image" type="file" class="filepond"
                                                         name="profile_image" id="profile_image"
                                                         data-max-file-size="300MB" data-max-files="200"
-                                                        data-allow-drop="true" accept="image/*,.webp" />
+                                                        data-allow-drop="true" accept="image/*,.webp" /> --}}
                                                     @error('profile_image')
                                                         <span class="error text-danger">{{ $message }}</span>
-                                                    @enderror --}}
+                                                    @enderror
                                                 </div>
                                             </div>
                                             <div class="form-group col-md-12">
@@ -169,14 +179,14 @@
                                                     <label class="form-label"
                                                         for="address_proof">{{ labels('admin_labels.address_proof', 'Address Proof') }}
                                                         <span class="text-asterisks text-sm">*</span></label>
-                                                    <x-filepond::upload wire:model="address_proof" max-files="5" />
+                                                    <x-filepond::upload wire:model="address_proof" />
                                                     {{-- <input wire:model="address_proof" type="file" class="filepond"
                                                         name="address_proof" id="address_proof"
                                                         data-max-file-size="300MB" data-max-files="200"
-                                                        data-allow-drop="true" accept="image/*,.webp" />
+                                                        data-allow-drop="true" accept="image/*,.webp" /> --}}
                                                     @error('address_proof')
                                                         <span class="error text-danger">{{ $message }}</span>
-                                                    @enderror --}}
+                                                    @enderror
 
                                                 </div>
                                             </div>
@@ -185,16 +195,15 @@
                                                     <label class="form-label"
                                                         for="authorized_signature">{{ labels('admin_labels.authorized_signature', 'Authorized Signature') }}
                                                         <span class="text-asterisks text-sm">*</span></label>
-                                                    <x-filepond::upload wire:model="authorized_signature"
-                                                        max-files="5" />
+                                                    <x-filepond::upload wire:model="authorized_signature" />
                                                     {{-- <input wire:model="authorized_signature" type="file"
                                                         class="filepond" name="authorized_signature"
                                                         id="authorized_signature" data-max-file-size="300MB"
                                                         data-allow-drop="true" data-max-files="200"
-                                                        accept="image/*,.webp" />
+                                                        accept="image/*,.webp" /> --}}
                                                     @error('authorized_signature')
                                                         <span class="error text-danger">{{ $message }}</span>
-                                                    @enderror --}}
+                                                    @enderror
                                                 </div>
                                             </div>
                                         </div>
@@ -319,10 +328,13 @@
                                                     <label class="form-label"
                                                         for="basic-default-phone">{{ labels('admin_labels.logo', 'Logo') }}
                                                         <span class="text-asterisks text-sm">*</span></label>
-                                                    <input type="file" class="filepond" name="store_logo"
+                                                    <x-filepond::upload wire:model="store_logo" />
+                                                    {{-- <input type="file" class="filepond" name="store_logo"
                                                         data-max-file-size="300MB" data-max-files="200"
-                                                        accept="image/*,.webp" />
-
+                                                        accept="image/*,.webp" /> --}}
+                                                    @error('store_logo')
+                                                        <span class="error text-danger">{{ $message }}</span>
+                                                    @enderror
 
                                                 </div>
                                             </div>
@@ -331,10 +343,13 @@
                                                     <label class="form-label"
                                                         for="basic-default-phone">{{ labels('admin_labels.store_thumbnail', 'Store Thumbnail') }}
                                                         <span class="text-asterisks text-sm">*</span></label>
-                                                    <input type="file" class="filepond" name="store_thumbnail"
+                                                    <x-filepond::upload wire:model="store_thumbnail" />
+                                                    {{-- <input type="file" class="filepond" name="store_thumbnail"
                                                         data-max-file-size="300MB" data-max-files="200"
-                                                        accept="image/*,.webp" />
-
+                                                        accept="image/*,.webp" /> --}}
+                                                    @error('store_thumbnail')
+                                                        <span class="error text-danger">{{ $message }}</span>
+                                                    @enderror
                                                 </div>
                                             </div>
                                         </div>
@@ -344,8 +359,9 @@
                                                     <label class="form-label"
                                                         for="basic-default-company">{{ labels('admin_labels.other_documents', 'Other Documents') }}</label>
                                                     {{-- <small>({{ $note_for_necessary_documents }})</small> --}}
-                                                    <input type="file" class="filepond" name="other_documents[]"
-                                                        multiple data-max-file-size="300MB" data-max-files="200" />
+                                                    <x-filepond::upload wire:model="other_document" multiple />
+                                                    {{-- <input type="file" class="filepond" name="other_documents[]"
+                                                        multiple data-max-file-size="300MB" data-max-files="200" /> --}}
                                                 </div>
                                             </div>
                                         </div>
@@ -363,7 +379,7 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <div class="form-group city_list_parent">
+                                                {{-- <div class="form-group city_list_parent">
                                                     <label for="city"
                                                         class="control-label mb-2 mt-2">{{ labels('admin_labels.city', 'City') }}
                                                         <span class='text-asterisks text-xs'>*</span></label>
@@ -373,6 +389,16 @@
                                                             {{ labels('admin_labels.select_city', 'Select City') }}
                                                         </option>
                                                     </select>
+                                                </div> --}}
+                                                <div class="form-group city_list_div">
+                                                    <div wire:ignore>
+                                                        <label for="city"
+                                                            class="control-label mb-2 mt-2">{{ labels('front_messages.city', 'City') }}
+                                                            <span class='text-asterisks text-xs'>*</span></label>
+                                                        <select class="col-md-12 form-control city_list"
+                                                            id="city_list" name="city">
+                                                        </select>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
@@ -469,9 +495,14 @@
                                                         class="form-label">{{ labels('admin_labels.national_identity_card', 'National Identity Card') }}
                                                         <span class='text-asterisks text-sm'>*</span></label>
                                                     <div>
-                                                        <input type="file" class="filepond"
+                                                        <x-filepond::upload wire:model="national_identity_card"
+                                                            accept="image/*,.webp" />
+                                                        {{-- <input type="file" class="filepond"
                                                             name="national_identity_card" data-max-file-size="300MB"
-                                                            data-max-files="200" accept="image/*,.webp" />
+                                                            data-max-files="200" accept="image/*,.webp" /> --}}
+                                                        @error('national_identity_card')
+                                                            <span class="error text-danger">{{ $message }}</span>
+                                                        @enderror
                                                     </div>
                                                 </div>
                                             </div>
@@ -485,7 +516,7 @@
                     </div>
 
                     <div class="d-flex justify-content-end mt-4">
-                        <button type="submit"
+                        <button type="submit" wire:loading.attr="disabled"
                             class="btn btn-primary submit_button">{{ labels('admin_labels.add_seller', 'Send request') }}</button>
                     </div>
                 </form>
@@ -508,54 +539,29 @@
 
 @script
     <script>
-        window.addEventListener("livewire:init", function() {
-            console.log('Livewire initialized');
-            Livewire.hook('message.sent', (message, component) => {
-                console.log('Livewire message sent:', message);
+        window.addEventListener('show-error', function(event) {
+            iziToast.error({
+                message: event.detail.message,
+                position: 'topRight'
             });
-
-            Livewire.hook('message.processed', (message, component) => {
-                console.log('Livewire message processed:', message);
-
-            });
-
-            Livewire.hook('element.updated', (el, component) => {
-                console.log('Livewire element updated:', el);
-            });
-
-
-        });
-        window.addEventListener('livewire:navigated', function() {
-            console.log('Livewire navigated');
-        });
-
-        window.addEventListener('messages', (event) => {
-            console.log('Livewire message sent:', event);
-        });
-
-        window.addEventListener('start-verification', (event) => {
-            console.log('Start verification:', event);
         });
 
         window.addEventListener('load', function() {
-            console.log('Window loaded');
             const mobile = document.querySelector("#mobile");
-            window.intlTelInput(mobile, {
-                hiddenInput: (telInputName) => ({
-                    phone: "phone_full",
-                    country: "country_code"
-                }),
-                allowExtensions: !0,
-                formatOnDisplay: !0,
-                autoFormat: !0,
-                autoHideDialCode: !0,
-                autoPlaceholder: !0,
+            const phone_full = document.querySelector("#phone_full");
+            const country_code = document.querySelector("#country_code");
+            const iti = window.intlTelInput(mobile, {
+                allowExtensions: true,
+                formatOnDisplay: true,
+                autoFormat: true,
+                autoHideDialCode: false,
+                autoPlaceholder: "polite",
                 defaultCountry: "in",
                 ipinfoToken: "yolo",
-                nationalMode: !1,
+                nationalMode: true,
                 numberType: "MOBILE",
-                preventInvalidNumbers: !0,
-                separateDialCode: !0,
+                preventInvalidNumbers: true,
+                separateDialCode: true,
                 initialCountry: "auto",
                 geoIpLookup: callback => {
                     fetch("https://ipapi.co/json")
@@ -567,17 +573,35 @@
                     "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.0/build/js/utils.js"
                 )
             });
+            const handleChange = () => {
+                let text;
+                if (mobile.value) {
+                    if (iti.isValidNumber()) {
+                        @this.phone_full = iti.getNumber().replace('+' + iti.getSelectedCountryData().dialCode,
+                            '');
+                        @this.country_code = iti.getSelectedCountryData().dialCode;
+                    }
+                }
+            };
+            mobile.addEventListener('change', handleChange);
+            mobile.addEventListener('keyup', handleChange);
 
-            const phoneFullInput = document.querySelector('input[name="phone_full"]');
-            const countryCodeInput = document.querySelector('input[name="country_code"]');
-
-            phoneFullInput.addEventListener('input', function() {
-                @this.phone_full = phoneFullInput.value;
+            const passwordBtn = document.querySelector(".toggle_password");
+            const confirmPasswordBtn = document.querySelector(".toggle_confirm_password");
+            passwordBtn.addEventListener('click', () => {
+                togglePasswordVisibility('password');
             });
-
-            countryCodeInput.addEventListener('input', function() {
-                @this.country_code = countryCodeInput.value;
+            confirmPasswordBtn.addEventListener('click', () => {
+                togglePasswordVisibility('password_confirmation');
             });
+            const togglePasswordVisibility = (id) => {
+                const passwordInput = document.getElementById(id);
+                const toggleButton = document.querySelector(`.toggle_${id}`);
+                const isPasswordVisible = passwordInput.type === 'password';
+                passwordInput.type = isPasswordVisible ? 'text' : 'password';
+                toggleButton.innerHTML = isPasswordVisible ? '<ion-icon name="eye-off-outline"></ion-icon>' :
+                    '<ion-icon name="eye-outline"></ion-icon>';
+            };
 
         });
     </script>
