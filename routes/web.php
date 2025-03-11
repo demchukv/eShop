@@ -159,6 +159,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/seller-invites', [SellerInviteController::class, 'index'])->name('seller_invites.index');
     Route::post('/seller-invites', [SellerInviteController::class, 'store'])->name('seller_invites.store');
     Route::delete('/seller-invites/{sellerInvite}', [SellerInviteController::class, 'destroy'])->name('seller_invites.destroy');
+    Route::get('/manager/product-approvals', \App\Livewire\Elegant\Manager\ProductApprovalManager::class)
+        ->name('manager.product.approvals');
 });
 // Seller registration by invitation link
 Route::get('/seller-register/success', \App\Livewire\Sellers\SellerRegisterSuccess::class)->name('seller.register.success');

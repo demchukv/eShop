@@ -93,4 +93,14 @@ class Product extends Model
     {
         return $this->hasMany(ProductRating::class);
     }
+
+    public function seller()
+    {
+        return $this->belongsTo(User::class, 'seller_id');
+    }
+
+    public function approvals()
+    {
+        return $this->hasMany(ProductApproval::class);
+    }
 }
