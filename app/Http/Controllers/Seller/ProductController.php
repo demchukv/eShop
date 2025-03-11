@@ -366,7 +366,6 @@ class ProductController extends Controller
 
                         if (isset($variant_images[$i]) && !empty($variant_images[$i])) {
                             $product_variant_data['images'] = json_encode($variant_images[$i]);
-
                         } else {
                             $product_variant_data['images'] = '[]';
                         }

@@ -123,6 +123,7 @@
                                                 </div>
                                             </div>
                                         </div>
+
                                         <div class="col col-xxl-6">
                                             <div class="card p-5">
                                                 <h6>{{ labels('admin_labels.select_category', 'Select Product Category') }}

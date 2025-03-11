@@ -362,18 +362,30 @@ class SellerRegister extends Component
         //create seller
         $seller = Seller::create($seller_data);
 
-        $city = new City();
-        $city->name = $this->city;
-        $city->minimum_free_delivery_order_amount = 0;
-        $city->delivery_charges = 0;
-        $city->save();
+        // $city = new City();
+        // $city->name = $this->city;
+        // $city->minimum_free_delivery_order_amount = 0;
+        // $city->delivery_charges = 0;
+        // $city->save();
 
-        $zipcode = new Zipcode();
-        $zipcode->city_id = $city->id;
-        $zipcode->zipcode = $this->zipcode;
-        $zipcode->minimum_free_delivery_order_amount = 0;
-        $zipcode->delivery_charges = 0;
-        $zipcode->save();
+        // $zipcode = new Zipcode();
+        // $zipcode->city_id = $city->id;
+        // $zipcode->zipcode = $this->zipcode;
+        // $zipcode->minimum_free_delivery_order_amount = 0;
+        // $zipcode->delivery_charges = 0;
+        // $zipcode->save();
+
+        // Перевірка наявності міста в базі даних
+        $city = City::firstOrCreate(
+            ['name' => $this->city], // Умова для перевірки
+            ['minimum_free_delivery_order_amount' => 0, 'delivery_charges' => 0] // Значення для створення
+        );
+
+        // Перевірка наявності поштового індексу в базі даних
+        $zipcode = Zipcode::firstOrCreate(
+            ['zipcode' => $this->zipcode, 'city_id' => $city->id], // Умова для перевірки
+            ['minimum_free_delivery_order_amount' => 0, 'delivery_charges' => 0] // Значення для створення
+        );
 
         $seller_store_data = array_merge($seller_store_data, [
             'user_id' => $user->id,

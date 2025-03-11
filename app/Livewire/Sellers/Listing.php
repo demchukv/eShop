@@ -11,7 +11,7 @@ class Listing extends Component
     public function render(Store $store)
     {
         $store_id = session('store_id');
-        $seller_listing = fetchDetails('seller_store',['store_id'=> $store_id]);
+        $seller_listing = fetchDetails('seller_store', ['store_id' => $store_id, 'status' => 1]);
         if (count($seller_listing) >= 1) {
             $total_products = count($seller_listing);
             $products = collect($seller_listing);

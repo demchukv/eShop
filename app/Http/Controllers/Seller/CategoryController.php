@@ -46,7 +46,8 @@ class CategoryController extends Controller
 
         $category_ids = explode(",", $seller_data[0]->category_ids);
 
-        $category_data = Category::whereIn('id', $category_ids)->where('store_id', $store_id);
+        // $category_data = Category::whereIn('id', $category_ids)->where('store_id', $store_id);
+        $category_data = Category::where('store_id', $store_id);
         if ($search) {
             $category_data->where(function ($query) use ($search) {
                 $query->where('name', 'like', '%' . $search . '%')
@@ -141,8 +142,13 @@ class CategoryController extends Controller
 
         $category_ids = explode(",", $seller_data->category_ids);
 
-        $categories = Category::whereIn('id', $category_ids)
-            ->where('status', 1)
+        // $categories = Category::whereIn('id', $category_ids)
+        //     ->where('status', 1)
+        //     ->where('store_id', $store_id)
+        //     ->get()
+        //     ->toArray();
+        // Enable ALL categories
+        $categories = Category::where('status', 1)
             ->where('store_id', $store_id)
             ->get()
             ->toArray();
@@ -191,8 +197,11 @@ class CategoryController extends Controller
         $category_ids = explode(",", $seller_data->category_ids);
 
         // Apply search filter
-        $categoriesQuery = Category::whereIn('id', $category_ids)
-            ->where('status', 1)
+        // $categoriesQuery = Category::whereIn('id', $category_ids)
+        //     ->where('status', 1)
+        //     ->where('store_id', $store_id);
+        // enable ALL categories
+        $categoriesQuery = Category::where('status', 1)
             ->where('store_id', $store_id);
 
         if ($search) {
@@ -250,8 +259,12 @@ class CategoryController extends Controller
 
         $category_ids = explode(",", $seller_data->category_ids);
 
-        $categories = Category::whereIn('id', $category_ids)
-            ->where('status', 1)
+        // $categories = Category::whereIn('id', $category_ids)
+        //     ->where('status', 1)
+        //     ->where('store_id', $store_id)
+        //     ->get()
+        //     ->toArray();
+        $categories = Category::where('status', 1)
             ->where('store_id', $store_id)
             ->get()
             ->toArray();
