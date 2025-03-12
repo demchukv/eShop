@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Models\OrderItems;
+use App\Models\ProductApprovalComment;
 
 use function PHPUnit\Framework\isEmpty;
 
@@ -535,7 +536,9 @@ class ProductController extends Controller
             ->join('seller_data', 'seller_data.id', '=', 'products.seller_id')
             ->join('seller_store', 'seller_store.seller_id', '=', 'products.seller_id')
             ->join('product_variants', 'product_variants.product_id', '=', 'products.id')
-            ->where('products.store_id', $store_id);
+            ->where('products.store_id', $store_id)
+            ->withCount('approvals') // Додаємо кількість підтверджень
+            ->withCount('approvalComments as has_comments'); // Додаємо перевірку наявності коментарів;
 
 
         $query->where(function ($q) use ($multipleWhere) {
@@ -634,6 +637,12 @@ class ProductController extends Controller
                 'width' => 60,
                 'quality' => 90
             ]);
+
+            // Додаємо іконку для коментарів, якщо вони є
+            $comments_icon = $p->has_comments > 0
+                ? '<i class="bx bx-comment-dots text-primary" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#commentsModal" data-product-id="' . $p->id . '" onclick="loadComments(' . $p->id . ')"></i>'
+                : '';
+
             return [
                 'id' => $p->id,
                 'name' => $p->name . '<br><small>' . ucwords(str_replace('_', ' ', $p->type)) . '</small><br><small> By </small><b>' . $p->store_name . '</b>',
@@ -652,6 +661,7 @@ class ProductController extends Controller
                     '</select>',
 
                 'image' => '<div><a href="' . getMediaImageUrl($p->image) . '" data-lightbox="image-' . $p->pid . '"><img src="' . $image . '" alt="Avatar" class="rounded"/></a></div>',
+                'approvals' => $p->approvals_count . '/10 ' . $comments_icon, // Новий стовпчик із кількістю підтверджень та іконкою
                 'operate' => $action,
 
             ];
@@ -1870,5 +1880,24 @@ class ProductController extends Controller
         ];
 
         return response()->json($response);
+    }
+
+    public function getComments($productId)
+    {
+        $comments = ProductApprovalComment::where('product_id', $productId)
+            ->with('manager') // Завантажуємо дані менеджера
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($comment) {
+                return [
+                    'comment' => $comment->comment,
+                    'manager_name' => $comment->manager->username ?? 'Unknown Manager', // Припускаємо, що в моделі User є поле name
+                    'created_at' => $comment->created_at,
+                ];
+            });
+
+        return response()->json([
+            'comments' => $comments,
+        ]);
     }
 }

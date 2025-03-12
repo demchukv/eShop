@@ -109,4 +109,9 @@ class Product extends Model
     {
         return $this->hasMany(ProductApproval::class);
     }
+
+    public function approvalComments()
+    {
+        return $this->hasMany(ProductApprovalComment::class, 'product_id', 'id');
+    }
 }

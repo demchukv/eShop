@@ -21,14 +21,13 @@
                 </thead>
                 <tbody>
                     @foreach ($invites as $invite)
-                        <tr wire:key="invite-{{ $invite->id }}-{{ $loop->index }}">
+                        <tr wire:key="invite-{{ $invite->id }}">
                             <td>{{ $invite->id }}</td>
                             <td>{{ config('app.url') . 'seller-register/' . $invite->link }}</td>
-                            <td wire:ignore>
+                            <td>
                                 @if ($invite->status === \App\Models\SellerInvite::STATUS_ACTIVE)
-                                    <livewire:components.copy-button
-                                        text="{{ config('app.url') . 'seller-register/' . $invite->link }}"
-                                        wire:key="copy-{{ $invite->id }}" />
+                                    <livewire:components.copy-button :text="config('app.url') . 'seller-register/' . $invite->link"
+                                        :wire:key="'copy-' . $invite->id" />
                                 @else
                                     <span class="text-muted">N/A</span>
                                 @endif
@@ -45,10 +44,10 @@
                                 @endif
                             </td>
                             <td>{{ $invite->created_at->format('d.m.Y H:i') }}</td>
-                            <td wire:ignore>
+                            <td>
                                 <button wire:click="deleteInvite({{ $invite->id }})" class="btn-link btn-lg p-0"
                                     onclick="return confirm('Delete?')" title="Delete link">
-                                    <ion-icon name="trash-outline"></ion-icon>
+                                    <ion-icon name="trash-outline" role="img" class="md hydrated"></ion-icon>
                                 </button>
                             </td>
                         </tr>
@@ -81,12 +80,6 @@
                         position: 'topRight'
                     });
                 });
-
-                // Дебаг для перевірки помилок
-                window.addEventListener('livewire:exception', function(event) {
-                    console.error('Livewire error:', event.detail);
-                });
-
             });
         </script>
     @endscript

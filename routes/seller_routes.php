@@ -372,6 +372,8 @@ Route::group(
         )->name('seller.parcels.list');
 
         Route::post('seller/orders/delete_parcel', [OrderController::class, 'delete_parcel']);
+
+        Route::get('/seller/products/comments/{productId}', [App\Http\Controllers\Seller\ProductController::class, 'getComments'])->name('seller.products.comments');
     }
 
 

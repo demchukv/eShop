@@ -48,6 +48,10 @@
                                                 class="btn btn-sm btn-primary" wire:loading.attr="disabled">
                                                 Approve
                                             </button>
+                                            <button wire:click="openCommentModal({{ $product->id }})"
+                                                class="btn btn-sm btn-secondary" wire:loading.attr="disabled">
+                                                Add Comment
+                                            </button>
                                         </td>
                                     </tr>
                                 @empty
@@ -62,6 +66,53 @@
                         <div class="mt-3">
                             {{ $products->links() }}
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <!-- Modal -->
+        <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg"> <!-- Збільшено розмір модального вікна -->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="commentModalLabel">Add Comment</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Попередні коментарі -->
+                        @if (!empty($comments))
+                            <div class="mb-3">
+                                <h6>Previous Comments</h6>
+                                <div class="border p-3" style="max-height: 200px; overflow-y: auto;">
+                                    @foreach ($comments as $comment)
+                                        <div class="mb-2">
+                                            <strong>{{ $comment['manager']['username'] ?? 'Unknown Manager' }}</strong>
+                                            <small
+                                                class="text-muted">({{ \Carbon\Carbon::parse($comment['created_at'])->format('Y-m-d H:i') }})</small>
+                                            <p>{{ $comment['comment'] }}</p>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <p class="text-muted">No comments yet.</p>
+                        @endif
+
+                        <!-- Форма для нового коментаря -->
+                        <form wire:submit.prevent="saveComment">
+                            <div class="mb-3">
+                                <label for="comment" class="form-label">New Comment</label>
+                                <textarea wire:model="comment" class="form-control" id="comment" rows="3" placeholder="Enter your comment here"></textarea>
+                                @error('comment')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
+                                Save Comment
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -82,6 +133,16 @@
                     message: event.detail.message,
                     position: 'topRight'
                 });
+            });
+
+            window.addEventListener('open-comment-modal', function() {
+                var modal = new bootstrap.Modal(document.getElementById('commentModal'));
+                modal.show();
+            });
+
+            window.addEventListener('close-comment-modal', function() {
+                var modal = bootstrap.Modal.getInstance(document.getElementById('commentModal'));
+                modal.hide();
             });
         </script>
     @endpush

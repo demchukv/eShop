@@ -57,10 +57,10 @@
 
  <script src="{{ asset('/assets/js/plugins/jquery.rateyo.min.js') }}"></script>
 
-  {{-- data sortable and dragable js --}}
+ {{-- data sortable and dragable js --}}
 
-  <script src="{{ asset('assets/admin/js/TweenMax.min.js') }}"></script>
-  <script src="{{ asset('assets/admin/js/draggable.min.js') }}"></script>
+ <script src="{{ asset('assets/admin/js/TweenMax.min.js') }}"></script>
+ <script src="{{ asset('assets/admin/js/draggable.min.js') }}"></script>
 
  <script src="{{ asset('assets/admin/custom/pos.js') }}"></script>
  <script src="{{ asset('assets/admin/custom/custom.js') }}"></script>
@@ -95,3 +95,5 @@
          toastr.warning("{{ session('warning') }}");
      @endif
  </script>
+
+ @yield('scripts')
