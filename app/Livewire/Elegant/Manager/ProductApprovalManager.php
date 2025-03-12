@@ -82,7 +82,12 @@ class ProductApprovalManager extends Component
     public function render()
     {
         $user = Auth::user();
+        $managerId = Auth::id();
+
         $products = Product::where('status', 2)
+            ->whereDoesntHave('approvals', function ($query) use ($managerId) {
+                $query->where('manager_id', $managerId); // Виключаємо товари, підтверджені поточним менеджером
+            })
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%')
                     ->orWhere('product_identity', 'like', '%' . $this->search . '%');
