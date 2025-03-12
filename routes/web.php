@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Auth;
+use App\Models\Role;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Admin\HomeController;
@@ -155,13 +156,14 @@ Route::get("settings/registration", [SettingController::class, 'registration'])-
 Route::post("settings/system_registration", [SettingController::class, 'systemRegister'])->name('admin.system_register');
 Route::post("settings/web_system_registration", [SettingController::class, 'WebsystemRegister'])->name('admin.web_system_register');
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'role:manager,super_admin')->group(function () {
     Route::get('/seller-invites', [SellerInviteController::class, 'index'])->name('seller_invites.index');
     Route::post('/seller-invites', [SellerInviteController::class, 'store'])->name('seller_invites.store');
     Route::delete('/seller-invites/{sellerInvite}', [SellerInviteController::class, 'destroy'])->name('seller_invites.destroy');
     Route::get('/manager/product-approvals', \App\Livewire\Elegant\Manager\ProductApprovalManager::class)
         ->name('manager.product.approvals');
 });
+
 // Seller registration by invitation link
 Route::get('/seller-register/success', \App\Livewire\Sellers\SellerRegisterSuccess::class)->name('seller.register.success');
 Route::get('/seller-register/{link}', \App\Livewire\Sellers\SellerTelegramVerify::class)->name('seller.telegram.verify');

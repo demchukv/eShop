@@ -70,11 +70,14 @@ class Product extends Model
         return $this->belongsTo(Seller::class, 'seller_id');
     }
 
+    // public function user()
+    // {
+    //     return $this->belongsTo(User::class, 'seller_id');
+    // }
     public function user()
     {
-        return $this->belongsTo(User::class, 'seller_id');
+        return $this->hasOneThrough(User::class, Seller::class, 'id', 'id', 'seller_id', 'user_id');
     }
-
     public function productVariants()
     {
         return $this->hasMany(Product_variants::class, 'product_id');
@@ -94,11 +97,14 @@ class Product extends Model
         return $this->hasMany(ProductRating::class);
     }
 
+    // public function seller()
+    // {
+    //     return $this->belongsTo(User::class, 'seller_id');
+    // }
     public function seller()
     {
-        return $this->belongsTo(User::class, 'seller_id');
+        return $this->belongsTo(Seller::class, 'seller_id', 'id');
     }
-
     public function approvals()
     {
         return $this->hasMany(ProductApproval::class);

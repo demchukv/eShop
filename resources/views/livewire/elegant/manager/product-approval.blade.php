@@ -37,8 +37,10 @@
                                 @forelse ($products as $product)
                                     <tr>
                                         <td>{{ $product->id }}</td>
-                                        <td>{{ $product->name }}</td>
-                                        <td>{{ $product->seller ? $product->seller->username : 'N/A' }}</td>
+                                        <td><a target="_blank"
+                                                href="{{ route('products.details', $product->slug) }}">{{ $product->name }}</a>
+                                        </td>
+                                        <td>{{ $product->user ? $product->user->username : 'N/A' }}</td>
                                         <td>{{ $product->approvals_count }}/10</td>
                                         <td>{{ $product->created_at->format('Y-m-d H:i') }}</td>
                                         <td>

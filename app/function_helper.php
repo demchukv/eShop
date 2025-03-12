@@ -647,7 +647,7 @@ function deleteDetails($where, $table)
     }
 }
 
-function fetchProduct($user_id = NULL, $filter = NULL, $id = NULL, $category_id = NULL, $limit = 20, $offset = NULL, $sort = 'p.id', $order = 'DESC', $return_count = NULL, $is_deliverable = NULL, $seller_id = NULL, $brand_id = NULL, $store_id = NULL, $is_detailed_data = 0, $type = '', $from_seller = 0)
+function fetchProduct($user_id = NULL, $filter = NULL, $id = NULL, $category_id = NULL, $limit = 20, $offset = NULL, $sort = 'p.id', $order = 'DESC', $return_count = NULL, $is_deliverable = NULL, $seller_id = NULL, $brand_id = NULL, $store_id = NULL, $is_detailed_data = 0, $type = '', $from_seller = 0, $show_unapproved = false)
 {
     $sort = empty($sort) || $sort == "" ? 'p.id' : $sort;
     $order = empty($order) || $order == "" ? 'desc' : $order;
@@ -726,12 +726,21 @@ function fetchProduct($user_id = NULL, $filter = NULL, $id = NULL, $category_id 
         $total_query->orderByRaw($expression);
     }
 
-    if (isset($filter['show_only_active_products']) && $filter['show_only_active_products'] == 0) {
+    // if (isset($filter['show_only_active_products']) && $filter['show_only_active_products'] == 0) {
+    //     $where = [];
+    // } else {
+    //     $where = ['p.status' => '1', 'pv.status' => 1, 'sd.status' => 1];
+    // }
 
+    if (isset($filter['show_only_active_products']) && $filter['show_only_active_products'] == 0) {
+        $where = [];
+    } elseif ($show_unapproved) {
         $where = [];
     } else {
         $where = ['p.status' => '1', 'pv.status' => 1, 'sd.status' => 1];
     }
+    $total_query->where($where);
+
 
 
     if (isset($type) && $type == 'simple_product') {
@@ -1091,12 +1100,21 @@ function fetchProduct($user_id = NULL, $filter = NULL, $id = NULL, $category_id 
             $product_query->whereRaw('FIND_IN_SET(?, pa.attribute_value_ids) > 0', [$attributeValueId]);
         }
     }
-    if (isset($filter['show_only_active_products']) && $filter['show_only_active_products'] == 0) {
+    // if (isset($filter['show_only_active_products']) && $filter['show_only_active_products'] == 0) {
+    //     $where = [];
+    // } else {
+    //     $where = ['p.status' => '1', 'pv.status' => 1, 'sd.status' => 1];
+    // }
 
+    if (isset($filter['show_only_active_products']) && $filter['show_only_active_products'] == 0) {
         $where = [];
+    } elseif ($show_unapproved) {
+        $where = []; // Знімаємо обмеження на статуси, якщо show_unapproved = true
     } else {
         $where = ['p.status' => '1', 'pv.status' => 1, 'sd.status' => 1];
     }
+    $product_query->where($where)->orderBy($sort, $order);
+
     if (isset($type) && $type == 'simple_product') {
         $product_query->where('p.type', 'simple_product');
     }
@@ -1275,9 +1293,10 @@ function fetchProduct($user_id = NULL, $filter = NULL, $id = NULL, $category_id 
         $product_query->orderBy('p.row_order', 'asc');
     }
     $product_query->groupBy('p.id');
-    // dd($product_query->toSql(),$product_query->getBindings());
-    $product = $product_query->get()->toArray();
 
+    // dd($product_query->toSql(), $product_query->getBindings());
+    $product = $product_query->get()->toArray();
+    // dd($product);
     $attribute_values_ids = array();
     $temp = [];
     $min_price = getPrice('min', $store_id);

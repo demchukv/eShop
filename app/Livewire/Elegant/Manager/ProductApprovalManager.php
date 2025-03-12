@@ -52,9 +52,10 @@ class ProductApprovalManager extends Component
             })
             ->withCount('approvals')
             ->with('seller')
+            ->with('user')
             ->orderBy('created_at', 'desc')
             ->paginate($this->perPage);
-
+        // dd($products);
         return view('livewire.elegant.manager.product-approval', [
             'user_info' => $user,
             'products' => $products,

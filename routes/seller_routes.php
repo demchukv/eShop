@@ -31,6 +31,7 @@ use App\Http\Controllers\SellerInviteController;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Artisan;
 
+
 Route::get('seller/orders/generatParcelInvoicePDF/{id}', [OrderController::class, 'generatParcelInvoicePDF'])->name('seller.orders.generatParcelInvoicePDF');
 Route::get('seller/orders/generatInvoicePDF/{id}/{seller_id?}', [OrderController::class, 'generatInvoicePDF'])
     ->name('seller.orders.generatInvoicePDF');

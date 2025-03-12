@@ -45,7 +45,12 @@ class Details extends Component
         $this->store_id = session('store_id');
         $store_id = $this->store_id;
         // dd($store_id);
-        $details = fetchProduct(user_id: $user_id, filter: $filter, is_detailed_data: 1, store_id: $store_id);
+        // Перевіряємо, чи користувач є менеджером через role->name
+        $user = Auth::user();
+        $isManager = Auth::check() && ($user->role->name === 'manager' || $user->role->name === 'super_admin');
+
+        $details = fetchProduct(user_id: $user_id, filter: $filter, is_detailed_data: 1, store_id: $store_id, show_unapproved: $isManager);
+
         if ($details['total'] == 0) {
             $this->redirect('products', true);
             return;
