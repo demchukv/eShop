@@ -29,51 +29,51 @@ class CategoryController extends Controller
     }
 
     public function store(Request $request)
-{
-    $store_id = getStoreId();
+    {
+        $store_id = getStoreId();
 
-    $validator = Validator::make($request->all(), [
-        'name' => 'required',
-        'category_image' => 'required', 
-        'banner' => 'required',
-    ]);
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'category_image' => 'required',
+            'banner' => 'required',
+        ]);
 
-    // Check if the category name already exists in the same store
-    $validator->after(function ($validator) use ($request, $store_id) {
-        $existingCategory = Category::where('store_id', $store_id)
-            ->where('name', $request->name)
-            ->first();
+        // Check if the category name already exists in the same store
+        $validator->after(function ($validator) use ($request, $store_id) {
+            $existingCategory = Category::where('store_id', $store_id)
+                ->where('name', $request->name)
+                ->first();
 
-        if ($existingCategory) {
-            $validator->errors()->add('name', 'The category name already exists in this store.');
+            if ($existingCategory) {
+                $validator->errors()->add('name', 'The category name already exists in this store.');
+            }
+        });
+
+        if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json(['errors' => $validator->errors()->all()], 422);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
         }
-    });
 
-    if ($validator->fails()) {
-        if ($request->ajax()) {
-            return response()->json(['errors' => $validator->errors()->all()], 422);
-        }
-        return redirect()->back()->withErrors($validator)->withInput();
+        $validatedData = $validator->validated();
+
+        $validatedData['image'] = $validatedData['category_image'];
+        unset($validatedData['category_image']);
+
+        $validatedData['banner'] = $request->banner;
+        $validatedData['parent_id'] = ($request->input('parent_id') != null) ? $request->input('parent_id') : 0;
+        $validatedData['slug'] = generateSlug($validatedData['name']);
+        $validatedData['status'] = 1;
+        $validatedData['store_id'] = $store_id;
+        $validatedData['style'] = $request->filled('category_style') ? $request->category_style : '';
+
+        Category::create($validatedData);
+
+        return $request->ajax()
+            ? response()->json(['message' => labels('admin_labels.category_created_successfully', 'Category created successfully')])
+            : redirect()->back()->with('success', labels('admin_labels.category_created_successfully', 'Category created successfully'));
     }
-
-    $validatedData = $validator->validated();
-
-    $validatedData['image'] = $validatedData['category_image'];
-    unset($validatedData['category_image']);
-
-    $validatedData['banner'] = $request->banner;
-    $validatedData['parent_id'] = ($request->input('parent_id') != null) ? $request->input('parent_id') : 0;
-    $validatedData['slug'] = generateSlug($validatedData['name']);
-    $validatedData['status'] = 1;
-    $validatedData['store_id'] = $store_id;
-    $validatedData['style'] = $request->filled('category_style') ? $request->category_style : '';
-
-    Category::create($validatedData);
-
-    return $request->ajax()
-        ? response()->json(['message' => labels('admin_labels.category_created_successfully', 'Category created successfully')])
-        : redirect()->back()->with('success', labels('admin_labels.category_created_successfully', 'Category created successfully'));
-}
 
 
 
@@ -375,7 +375,6 @@ class CategoryController extends Controller
         $query = DB::table('categories as c1');
 
         $storeId = getStoreId();
-
         if (isset($storeId) && !empty($storeId)) {
             $query->where('c1.store_id', $storeId);
         }
@@ -433,7 +432,6 @@ class CategoryController extends Controller
         if (isset($categories[0])) {
             $categories[0]->total = $countRes;
         }
-
         return Response::json(compact('categories', 'countRes'));
     }
 
@@ -562,7 +560,6 @@ class CategoryController extends Controller
             $categories[$i]->banner = dynamic_image(getImageUrl($pCat->banner, 'thumb', 'md'), 400);
             $i++;
         }
-
         return Response::json(['categories' => $categories, 'total' => $total]);
     }
 
@@ -750,8 +747,7 @@ class CategoryController extends Controller
 
         $validatedData = $validator->validated();
 
-        $validatedData['title'] = $request->title ?? '';
-        ;
+        $validatedData['title'] = $request->title ?? '';;
         $validatedData['category_ids'] = isset($request->category_ids) ? implode(',', $request->category_ids) : '';
 
         // Rename the "category_slider_style" key to "style"

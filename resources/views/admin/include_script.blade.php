@@ -72,3 +72,6 @@
  <script src="{{ asset('assets/admin/js/draggable.min.js') }}"></script>
 
  <script src="{{ asset('assets/admin/custom/custom.js') }}"></script>
+
+
+ @yield('scripts')

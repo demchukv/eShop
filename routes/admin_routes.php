@@ -1091,6 +1091,8 @@ Route::group(
         Route::get('admin/zones/zones_data', [ZoneController::class, 'zone_data']);
 
         Route::get('admin/zones/edit/{id}', [ZoneController::class, 'edit'])->name('admin.zones.edit');
+
+        Route::get('/admin/products/comments/{productId}', [App\Http\Controllers\Admin\ProductController::class, 'getComments'])->name('admin.products.comments');
     }
 
 );

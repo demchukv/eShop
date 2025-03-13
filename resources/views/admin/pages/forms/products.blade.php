@@ -126,6 +126,7 @@
                                         <h6>{{ labels('admin_labels.select_category', 'Select Product Category') }}</h6>
                                         <hr>
                                         <div id="product_category_tree_view_html" class='category-tree-container'>
+
                                         </div>
                                     </div>
                                 </div>
@@ -248,7 +249,8 @@
                                                             class="form-label">{{ labels('admin_labels.tax_includes_in_price', 'Tax Includes In Price') }}</label>
                                                     </div>
                                                     <div class="d-flex">
-                                                        <label for="" class="me-6 text-muted">[Enable/Disable]</label>
+                                                        <label for=""
+                                                            class="me-6 text-muted">[Enable/Disable]</label>
                                                         <div class="form-check form-switch">
                                                             <input class="form-check-input" type="checkbox"
                                                                 id="" name="is_prices_inclusive_tax">
@@ -408,7 +410,8 @@
                                                                 class="form-label">{{ labels('admin_labels.is_cod_allowed', 'IS COD Allowed') }}?</label>
                                                         </div>
                                                         <div class="d-flex">
-                                                            <label for="" class="me-6 text-muted">[Enable/Disable]</label>
+                                                            <label for=""
+                                                                class="me-6 text-muted">[Enable/Disable]</label>
                                                             <div class="form-check form-switch">
                                                                 <input class="form-check-input" type="checkbox"
                                                                     id="" name="cod_allowed">

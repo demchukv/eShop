@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\OrderItems;
 use App\Models\UserFcm;
 use PhpParser\Node\Expr\FuncCall;
+use App\Models\ProductApprovalComment;
 
 class ProductController extends Controller
 {
@@ -626,6 +627,10 @@ class ProductController extends Controller
         $settings = json_decode($settings, true);
         $low_stock_limit = isset($settings['low_stock_limit']) ? $settings['low_stock_limit'] : 5;
 
+        // Нові параметри фільтрування
+        $notApprovedFilter = request('not_approved', false); // Фільтр "Not approved"
+        $disapprovedFilter = request('disapproved', false); // Фільтр "Disapproved"
+
         $query = Product::query();
         $query->select('products.id AS id', 'categories.name as category_name', 'brands.name as brand_name', 'seller_store.store_name', 'products.id as pid', 'products.rating', 'products.no_of_ratings', 'products.name', 'products.type', 'products.image', 'products.status', 'products.brand', 'product_variants.price', 'product_variants.special_price', 'product_variants.stock')
             ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
@@ -633,7 +638,9 @@ class ProductController extends Controller
             ->leftJoin('seller_data', 'seller_data.id', '=', 'products.seller_id')
             ->join('seller_store', 'seller_store.seller_id', '=', 'products.seller_id')
             ->join('product_variants', 'product_variants.product_id', '=', 'products.id')
-            ->where('products.store_id', $store_id);
+            ->where('products.store_id', $store_id)
+            ->withCount('approvals') // Додаємо кількість підтверджень
+            ->withCount('approvalComments as has_comments'); // Додаємо перевірку наявності коментарів;;
 
         if (request()->filled('search')) {
             $search = trim(request('search'));
@@ -689,6 +696,18 @@ class ProductController extends Controller
             });
         }
 
+        // Додаємо фільтр "Not approved"
+        if ($notApprovedFilter) {
+            $query->where('products.status', 2); // Товари зі статусом "Not Approved"
+        }
+
+        // Додаємо фільтр "Disapproved"
+        if ($disapprovedFilter) {
+            $query->whereHas('approvals', function ($q) {
+                $q->where('status', 'disapproved'); // Товари з хоча б одним "disapproved" у ProductApproval
+            });
+        }
+
 
         $total = $query->groupBy('products.id')->get()->count();
 
@@ -740,6 +759,21 @@ class ProductController extends Controller
                 'quality' => 90
             ]);
 
+            // Обчислюємо кількість підтверджень і відхилень
+            $approvedCount = \App\Models\ProductApproval::where('product_id', $p->id)
+                ->where('status', 'approved')
+                ->count();
+            $disapprovedCount = \App\Models\ProductApproval::where('product_id', $p->id)
+                ->where('status', 'disapproved')
+                ->count();
+
+            // Форматуємо стовпець Approvals
+            $approvalsHtml = '<span class="text-success">' . $approvedCount . '</span>' .
+                '<span class="text-danger">/' . $disapprovedCount . '</span>/10';
+            $comments_icon = $p->has_comments > 0
+                ? ' <i class="bx bx-comment-dots text-primary" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#commentsModal" data-product-id="' . $p->id . '" onclick="loadComments(' . $p->id . ')"></i>'
+                : '';
+
             return [
                 'id' => $p->id,
                 'name' => $p->name . '<br><small>' . ucwords(str_replace('_', ' ', $p->type)) . '</small><br><small> By </small><b>' . $p->store_name . '</b>',
@@ -755,6 +789,7 @@ class ProductController extends Controller
                 <option value="0" ' . ($p->status == 0 ? 'selected' : '') . '>Deactive</option>' .
                     ($p->status == 2 ? '<option value="2" ' . ($p->status == 2 ? 'selected' : '') . '>Not Approved</option>' : '') .
                     '</select>',
+                'approvals' => $approvalsHtml . $comments_icon, // Новий стовпчик із кількістю підтверджень та іконкою
                 'operate' => $action,
 
             ];
@@ -1975,6 +2010,26 @@ class ProductController extends Controller
         return response()->json([
             'error' => false,
             'message' => labels('admin_labels.products_deleted_successfully', 'Selected products deleted successfully!'),
+        ]);
+    }
+
+    public function getComments($productId)
+    {
+        $comments = ProductApprovalComment::where('product_id', $productId)
+            ->with('manager')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($comment) {
+                return [
+                    'comment' => $comment->comment,
+                    'manager_name' => $comment->manager->username ?? 'Unknown Manager',
+                    'created_at' => $comment->created_at,
+                    'reason' => $comment->reason ? json_decode($comment->reason, true) : [], // Додаємо причини відхилення
+                ];
+            });
+
+        return response()->json([
+            'comments' => $comments,
         ]);
     }
 }
