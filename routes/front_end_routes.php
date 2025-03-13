@@ -196,6 +196,7 @@ Route::get('/products', Listing::class)->name('products');
 Route::get('/section/{section}/{slug}/products', Listing::class)->name('section.products');
 Route::get('/products/{slug}', Details::class)->name('products.details');
 Route::get('/products/{slug}/reviews', Reviews::class)->name('products.reviews');
+Route::get('/product-view/{dealer_referral_code}/', Details::class)->name('products.referral');
 
 // combo product
 Route::get('/combo-products', ComboProductListing::class)->name('combo-products');

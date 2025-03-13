@@ -8,6 +8,9 @@ use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Models\ReferralCode;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class Details extends Component
 {
@@ -17,6 +20,9 @@ class Details extends Component
 
     public $store_id;
     public $user_id;
+    public $referral_link = ''; // Додаємо властивість для реферального посилання
+
+
     public function __construct()
     {
         $this->user_id = Auth::user() != '' ? Auth::user()->id : NUll;
@@ -36,10 +42,8 @@ class Details extends Component
 
     public $relative_products = [];
 
-    public function mount($slug)
+    public function mount($slug = null, $dealer_referral_code = null)
     {
-        $filter['slug'] = $slug;
-
 
         $user_id =  $this->user_id;
         $this->store_id = session('store_id');
@@ -48,6 +52,20 @@ class Details extends Component
         // Перевіряємо, чи користувач є менеджером через role->name
         $user = Auth::user();
         $isManager = Auth::check() && ($user->role->name === 'manager' || $user->role->name === 'super_admin');
+
+        // Якщо є referral_code у шляху, отримуємо дані з таблиці
+        if ($dealer_referral_code) {
+            $referral = ReferralCode::where('code', $dealer_referral_code)->first();
+            if ($referral) {
+                $this->product_id = $referral->product_id;
+                $filter['id'] = $this->product_id; // Фільтр за ID
+            } else {
+                $this->redirect('products', true); // Некоректний referral_code
+                return;
+            }
+        } else {
+            $filter['slug'] = $slug; // Звичайний режим зі slug
+        }
 
         $details = fetchProduct(user_id: $user_id, filter: $filter, is_detailed_data: 1, store_id: $store_id, show_unapproved: $isManager);
 
@@ -89,6 +107,33 @@ class Details extends Component
         $this->pname = $details['product'][0]->name;
         $this->pdescription = $details['product'][0]->short_description;
         $this->image = $details['product'][0]->image;
+
+        // Генерація реферального посилання для дилерів
+        if (Auth::check() && Auth::user()->role->name === 'dealer') {
+            // Перевіряємо, чи вже є код для цього дилера та продукту
+            $existingReferral = ReferralCode::where('product_id', $this->product_id)
+                ->where('dealer_id', $this->user_id)
+                ->first();
+
+            if ($existingReferral) {
+                $dealer_referral_code = $existingReferral->code;
+            } else {
+                // Генеруємо унікальний короткий код
+                $dealer_referral_code = Str::random(8); // 8 символів, можна змінити
+                while (ReferralCode::where('code', $dealer_referral_code)->exists()) {
+                    $dealer_referral_code = Str::random(8); // Перегенеруємо, якщо код уже існує
+                }
+
+                // Зберігаємо в таблиці
+                ReferralCode::create([
+                    'code' => $dealer_referral_code,
+                    'product_id' => $this->product_id,
+                    'dealer_id' => $this->user_id,
+                ]);
+            }
+
+            $this->referral_link = route('products.referral', ['dealer_referral_code' => $dealer_referral_code]);
+        }
     }
     public function render()
     {
@@ -114,6 +159,7 @@ class Details extends Component
             'product_id' => $product_id,
             'bread_crumb' => $bread_crumb,
             'deliverabilitySettings' => $deliverabilitySettings,
+            'referral_link' => $this->referral_link, // Передаємо посилання в шаблон
         ])->layoutData([
             'title' => $this->pname . " |",
             'metaKeys' =>  $this->pname,
@@ -121,6 +167,7 @@ class Details extends Component
             'metaImage' => $this->image
         ]);
     }
+
 
     public function city($city)
     {
