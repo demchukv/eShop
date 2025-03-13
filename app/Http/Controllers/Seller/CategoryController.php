@@ -131,7 +131,7 @@ class CategoryController extends Controller
         $user_id = Auth::user()->id;
         $seller_id = Seller::where('user_id', $user_id)->value('id');
         $seller_data = DB::table('seller_store')
-            ->select('category_ids')
+            // ->select('category_ids')
             ->where('store_id', $store_id)
             ->where('seller_id', $seller_id)->get()[0];
 
@@ -140,7 +140,7 @@ class CategoryController extends Controller
             return [];
         }
 
-        $category_ids = explode(",", $seller_data->category_ids);
+        // $category_ids = explode(",", $seller_data->category_ids);
 
         // $categories = Category::whereIn('id', $category_ids)
         //     ->where('status', 1)
@@ -150,6 +150,7 @@ class CategoryController extends Controller
         // Enable ALL categories
         $categories = Category::where('status', 1)
             ->where('store_id', $store_id)
+            ->where('parent_id', 0)
             ->get()
             ->toArray();
 
@@ -165,9 +166,10 @@ class CategoryController extends Controller
         }
 
         if (!empty($categories)) {
-            $categories[0]['total'] = count($category_ids);
+            //$categories[0]['total'] = count($category_ids);
+            $categories[0]['total'] = count($categories);
         }
-
+        // dd($categories);
         return $categories;
     }
 
