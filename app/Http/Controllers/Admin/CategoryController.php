@@ -441,6 +441,7 @@ class CategoryController extends Controller
         $level = 0;
         $storeId = getStoreId();
 
+
         // Convert the comma-separated ids string to an array
         $idsArray = !empty($ids) ? explode(',', $ids) : [];
         // Initial count query to calculate the total number of categories
@@ -596,16 +597,22 @@ class CategoryController extends Controller
             ->where('store_id', $store_id)
             ->where('seller_id', $sellerId)
             ->first();
+        // ===============================================
+        // Для продавця відкриваємо всі категорії магазину
+        // ===============================================
+        // if (!$sellerData || empty($sellerData->category_ids)) {
+        //     return []; // Return empty if no data is found
+        // }
 
-        if (!$sellerData || empty($sellerData->category_ids)) {
-            return []; // Return empty if no data is found
-        }
-
-        $categoryIds = explode(',', $sellerData->category_ids);
+        // $categoryIds = explode(',', $sellerData->category_ids);
 
         // Fetch categories with the given IDs and status
-        $categories = Category::whereIn('id', $categoryIds)
-            ->where('status', 1)
+        // $categories = Category::whereIn('id', $categoryIds)
+        //     ->where('status', 1)
+        //     ->where('store_id', $store_id)
+        //     ->get();
+
+        $categories = Category::where('status', 1)
             ->where('store_id', $store_id)
             ->get();
 

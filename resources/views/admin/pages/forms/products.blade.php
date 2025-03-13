@@ -126,7 +126,7 @@
                                         <h6>{{ labels('admin_labels.select_category', 'Select Product Category') }}</h6>
                                         <hr>
                                         <div id="product_category_tree_view_html" class='category-tree-container'>
-
+                                            <input type="hidden" name="category_id" id="category_id" value="">
                                         </div>
                                     </div>
                                 </div>
