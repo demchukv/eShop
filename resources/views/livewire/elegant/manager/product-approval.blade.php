@@ -50,7 +50,7 @@
                                             </button>
                                             <button wire:click="openCommentModal({{ $product->id }})"
                                                 class="btn btn-sm btn-secondary" wire:loading.attr="disabled">
-                                                Add Comment
+                                                Disapprove
                                             </button>
                                         </td>
                                     </tr>
@@ -92,6 +92,10 @@
                                             <small
                                                 class="text-muted">({{ \Carbon\Carbon::parse($comment['created_at'])->format('Y-m-d H:i') }})</small>
                                             <p>{{ $comment['comment'] }}</p>
+                                            @if (!empty($comment['reason']))
+                                                <p><strong>Reasons:</strong>
+                                                    {{ implode(', ', json_decode($comment['reason'], true)) }}</p>
+                                            @endif
                                         </div>
                                     @endforeach
                                 </div>
@@ -103,14 +107,27 @@
                         <!-- Форма для нового коментаря -->
                         <form wire:submit.prevent="saveComment">
                             <div class="mb-3">
-                                <label for="comment" class="form-label">New Comment</label>
+                                <label for="comment" class="form-label">Comment</label>
                                 <textarea wire:model="comment" class="form-control" id="comment" rows="3" placeholder="Enter your comment here"></textarea>
                                 @error('comment')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
-                            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
-                                Save Comment
+                            <div class="mb-3">
+                                <label class="form-label">Reasons for Disapproval</label>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" wire:model="reasons"
+                                        value="missing image" id="reason1">
+                                    <label class="form-check-label" for="reason1">Missing Image</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" wire:model="reasons"
+                                        value="missing description" id="reason2">
+                                    <label class="form-check-label" for="reason2">Missing Description</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-danger" wire:loading.attr="disabled">
+                                Disapprove
                             </button>
                         </form>
                     </div>

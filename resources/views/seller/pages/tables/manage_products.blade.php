@@ -48,6 +48,19 @@
                                             class="form-control searchInput" placeholder="Search...">
                                         <span class="input-group-text">{{ labels('admin_labels.search', 'Search') }}</span>
                                     </div>
+
+                                    <!-- Додаємо чекбокси -->
+                                    <div class="form-check me-2">
+                                        <input class="form-check-input" type="checkbox" id="notApprovedFilter"
+                                            data-table="seller_product_table">
+                                        <label class="form-check-label" for="notApprovedFilter">Not Approved</label>
+                                    </div>
+                                    <div class="form-check me-2">
+                                        <input class="form-check-input" type="checkbox" id="disapprovedFilter"
+                                            data-table="seller_product_table">
+                                        <label class="form-check-label" for="disapprovedFilter">Disapproved</label>
+                                    </div>
+
                                     <a class="btn me-2" id="tableFilter" data-bs-toggle="offcanvas"
                                         data-bs-target="#columnFilterOffcanvas" data-table="seller_product_table"
                                         productTypeFilter='true' brandFilter='true' StatusFilter='true'
@@ -160,6 +173,20 @@
 
 @section('scripts')
     <script>
+        // Функція для передачі параметрів у запит до сервера
+        function queryParams(params) {
+            params.not_approved = $('#notApprovedFilter').is(':checked') ? 1 : 0;
+            params.disapproved = $('#disapprovedFilter').is(':checked') ? 1 : 0;
+            return params;
+        }
+
+        // Обробка зміни стану чекбоксів
+        $(document).ready(function() {
+            $('#notApprovedFilter, #disapprovedFilter').on('change', function() {
+                $('#seller_product_table').bootstrapTable('refresh');
+            });
+        });
+
         function loadComments(productId) {
             $.ajax({
                 url: '/seller/products/comments/' + productId,
@@ -168,11 +195,17 @@
                     let commentsHtml = '';
                     if (response.comments.length > 0) {
                         response.comments.forEach(function(comment) {
+                            let reasonsHtml = '';
+                            if (comment.reason && comment.reason.length > 0) {
+                                reasonsHtml = '<p><strong>Reasons for Disapproval:</strong> ' + comment
+                                    .reason.join(', ') + '</p>';
+                            }
                             commentsHtml += `
-                                <div class="mb-2">
+                                <div class="mb-3 border-bottom pb-2">
                                     <strong>${comment.manager_name || 'Unknown Manager'}</strong>
                                     <small class="text-muted">(${new Date(comment.created_at).toLocaleString()})</small>
                                     <p>${comment.comment}</p>
+                                    ${reasonsHtml}
                                 </div>
                             `;
                         });

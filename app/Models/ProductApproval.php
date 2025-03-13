@@ -10,11 +10,17 @@ class ProductApproval extends Model
         'product_id',
         'manager_id',
         'approved_at',
+        'status', // Додано нове поле
     ];
 
     protected $casts = [
         'approved_at' => 'datetime',
+        'status' => 'string', // Для enum
     ];
+
+    // Дозволені значення для status
+    const STATUS_APPROVED = 'approved';
+    const STATUS_DISAPPROVED = 'disapproved';
 
     public function product()
     {

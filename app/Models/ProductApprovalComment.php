@@ -13,6 +13,11 @@ class ProductApprovalComment extends Model
         'product_id',
         'manager_id',
         'comment',
+        'reason', // Додано нове поле
+    ];
+
+    protected $casts = [
+        'reason' => 'array', // Зберігатимемо як JSON-масив
     ];
 
     public function product()

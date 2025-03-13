@@ -514,6 +514,10 @@ class ProductController extends Controller
         $user_id = Auth::id();
         $seller_id = Seller::where('user_id', $user_id)->value('id');
 
+        // Нові параметри фільтрування
+        $notApprovedFilter = request('not_approved', false); // Фільтр "Not approved"
+        $disapprovedFilter = request('disapproved', false); // Фільтр "Disapproved"
+
 
         $multipleWhere = [];
 
@@ -588,6 +592,18 @@ class ProductController extends Controller
             });
         }
 
+        // Додаємо фільтр "Not approved"
+        if ($notApprovedFilter) {
+            $query->where('products.status', 2); // Товари зі статусом "Not Approved"
+        }
+
+        // Додаємо фільтр "Disapproved"
+        if ($disapprovedFilter) {
+            $query->whereHas('approvals', function ($q) {
+                $q->where('status', 'disapproved'); // Товари з хоча б одним "disapproved" у ProductApproval
+            });
+        }
+
 
         $total = $query->groupBy('products.id')->get()->count();
 
@@ -638,9 +654,19 @@ class ProductController extends Controller
                 'quality' => 90
             ]);
 
-            // Додаємо іконку для коментарів, якщо вони є
+            // Обчислюємо кількість підтверджень і відхилень
+            $approvedCount = \App\Models\ProductApproval::where('product_id', $p->id)
+                ->where('status', 'approved')
+                ->count();
+            $disapprovedCount = \App\Models\ProductApproval::where('product_id', $p->id)
+                ->where('status', 'disapproved')
+                ->count();
+
+            // Форматуємо стовпець Approvals
+            $approvalsHtml = '<span class="text-success">' . $approvedCount . '</span>' .
+                '<span class="text-danger">/' . $disapprovedCount . '</span>/10';
             $comments_icon = $p->has_comments > 0
-                ? '<i class="bx bx-comment-dots text-primary" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#commentsModal" data-product-id="' . $p->id . '" onclick="loadComments(' . $p->id . ')"></i>'
+                ? ' <i class="bx bx-comment-dots text-primary" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#commentsModal" data-product-id="' . $p->id . '" onclick="loadComments(' . $p->id . ')"></i>'
                 : '';
 
             return [
@@ -661,7 +687,7 @@ class ProductController extends Controller
                     '</select>',
 
                 'image' => '<div><a href="' . getMediaImageUrl($p->image) . '" data-lightbox="image-' . $p->pid . '"><img src="' . $image . '" alt="Avatar" class="rounded"/></a></div>',
-                'approvals' => $p->approvals_count . '/10 ' . $comments_icon, // Новий стовпчик із кількістю підтверджень та іконкою
+                'approvals' => $approvalsHtml . $comments_icon, // Новий стовпчик із кількістю підтверджень та іконкою
                 'operate' => $action,
 
             ];
@@ -1885,14 +1911,15 @@ class ProductController extends Controller
     public function getComments($productId)
     {
         $comments = ProductApprovalComment::where('product_id', $productId)
-            ->with('manager') // Завантажуємо дані менеджера
+            ->with('manager')
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($comment) {
                 return [
                     'comment' => $comment->comment,
-                    'manager_name' => $comment->manager->username ?? 'Unknown Manager', // Припускаємо, що в моделі User є поле name
+                    'manager_name' => $comment->manager->username ?? 'Unknown Manager',
                     'created_at' => $comment->created_at,
+                    'reason' => $comment->reason ? json_decode($comment->reason, true) : [], // Додаємо причини відхилення
                 ];
             });
 

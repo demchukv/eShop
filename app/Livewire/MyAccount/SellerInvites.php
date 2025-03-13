@@ -28,7 +28,7 @@ class SellerInvites extends Component
     public function createInvite()
     {
         if (!Auth::check()) {
-            $this->dispatch('show-error', message: 'Login please');
+            $this->dispatch('show-error-invite', message: 'Login please');
             return;
         }
 
@@ -42,31 +42,31 @@ class SellerInvites extends Component
             'status' => SellerInvite::STATUS_ACTIVE,
         ]);
 
-        $this->dispatch('show-success', message: "Invitation created!");
+        $this->dispatch('show-success-invite', message: "Invitation created!");
         $this->resetPage(); // Скидаємо сторінку до першої після створення
     }
 
     public function deleteInvite($inviteId)
     {
         if (!Auth::check()) {
-            $this->dispatch('show-error', message: 'Login please');
+            $this->dispatch('show-error-invite', message: 'Login please');
             return;
         }
 
         $invite = SellerInvite::find($inviteId);
 
         if (!$invite) {
-            $this->dispatch('show-error', message: 'Invitation not found');
+            $this->dispatch('show-error-invite', message: 'Invitation not found');
             return;
         }
 
         if ($invite->user_id !== Auth::id()) {
-            $this->dispatch('show-error', message: 'You cannot delete this link.');
+            $this->dispatch('show-error-invite', message: 'You cannot delete this link.');
             return;
         }
 
         $invite->delete();
-        $this->dispatch('show-success', message: 'Link removed');
+        $this->dispatch('show-success-invite', message: 'Link removed');
         $remainingInvites = SellerInvite::where('user_id', Auth::id())->count();
         if ($remainingInvites === 0) {
             $this->resetPage(); // Скидаємо до першої сторінки, якщо записів немає

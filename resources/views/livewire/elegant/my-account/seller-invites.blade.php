@@ -66,7 +66,7 @@
         <script>
             document.addEventListener('livewire:init', function() {
                 // Обробка успішних повідомлень
-                window.addEventListener('show-success', function(event) {
+                window.addEventListener('show-success-invite', function(event) {
                     iziToast.success({
                         message: event.detail.message,
                         position: 'topRight'
@@ -74,7 +74,7 @@
                 });
 
                 // Обробка помилок
-                window.addEventListener('show-error', function(event) {
+                window.addEventListener('show-error-invite', function(event) {
                     iziToast.error({
                         message: event.detail.message,
                         position: 'topRight'
