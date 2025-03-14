@@ -30,7 +30,7 @@ class HandleReferralCode
             Cookie::queue('referral_code', $referralCode, 43200); // 43200 хвилин = 30 днів
         }
 
-        // Обробка нового referral_code із шляху
+        // Обробка нового dealer_referral_code із шляху
         if ($referral_code_from_path && !auth()->check()) {
             $referral = ReferralCode::where('code', $referral_code_from_path)->with('dealer')->first();
             if ($referral) {
