@@ -734,279 +734,305 @@
                                                                 <div id="product-general-settings">
 
                                                                     @if ($data->type == 'simple_product' || $data->type == 'digital_product')
+                                                                        <div id="general_price_section">
+                                                                            <div class="row">
+                                                                                <div class="col-md-6">
 
-                                                                    <div id="general_price_section">
-                                                                        <div class="row">
-                                                                            <div class="col-md-6">
+                                                                                    <ul>
+                                                                                        <li>
+                                                                                            <h6>{{ labels('admin_labels.price_info', 'Price Info') }}
+                                                                                            </h6>
+                                                                                        </li>
+                                                                                    </ul>
 
-                                                                                <ul>
-                                                                                    <li>
-                                                                                        <h6>{{ labels('admin_labels.price_info', 'Price Info') }}
-                                                                                        </h6>
-                                                                                    </li>
-                                                                                </ul>
-
-                                                                                <div class="col-md-12">
-                                                                                    <div class="form-group">
-                                                                                        <label for="simple_price"
-                                                                                            class="col-md-6 form-label">{{ labels('admin_labels.price', 'Price') }}:
-                                                                                            <span
-                                                                                                class="text-asterisks text-sm">*</span></label>
-                                                                                        <input type="number"
-                                                                                            name="simple_price"
-                                                                                            class="form-control stock-simple-mustfill-field price"
-                                                                                            value="{{ $product_variants[0]->price }}"
-                                                                                            min="0.01" step="0.01">
+                                                                                    <div class="col-md-12">
+                                                                                        <div class="form-group">
+                                                                                            <label for="simple_price"
+                                                                                                class="col-md-6 form-label">{{ labels('admin_labels.price', 'Price') }}:
+                                                                                                <span
+                                                                                                    class="text-asterisks text-sm">*</span></label>
+                                                                                            <input type="number"
+                                                                                                name="simple_price"
+                                                                                                class="form-control stock-simple-mustfill-field price"
+                                                                                                value="{{ $product_variants[0]->price }}"
+                                                                                                min="0.01"
+                                                                                                step="0.01">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-12">
+                                                                                        <div class="form-group">
+                                                                                            <label for="type"
+                                                                                                class="col-md-6 form-label">{{ labels('admin_labels.special_price', 'Special Price') }}
+                                                                                                : <span
+                                                                                                    class="text-asterisks text-sm">*</span></label>
+                                                                                            <input type="number"
+                                                                                                name="simple_special_price"
+                                                                                                class="form-control discounted_price"
+                                                                                                value="{{ $product_variants[0]->special_price }}"
+                                                                                                min="0"
+                                                                                                step="0.01">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-12">
+                                                                                        <div class="form-group">
+                                                                                            <label for="dealer_price"
+                                                                                                class="col-md-6 form-label">{{ labels('admin_labels.dealer_price', 'Dealer Price') }}:<span
+                                                                                                    class="text-asterisks text-sm">*</span></label>
+                                                                                            <input type="number"
+                                                                                                name="dealer_price"
+                                                                                                class="form-control"
+                                                                                                value="{{ $product_variants[0]->dealer_price ?? '' }}"
+                                                                                                min="0"
+                                                                                                step="0.01">
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
-                                                                                <div class="col-md-12">
-                                                                                    <div class="form-group">
-                                                                                        <label for="type"
-                                                                                            class="col-md-6 form-label">{{ labels('admin_labels.special_price', 'Special Price') }}
-                                                                                            : <span
-                                                                                                class="text-asterisks text-sm">*</span></label>
-                                                                                        <input type="number"
-                                                                                            name="simple_special_price"
-                                                                                            class="form-control discounted_price"
-                                                                                            value="{{ $product_variants[0]->special_price }}"
-                                                                                            min="0" step="0.01">
+
+                                                                                <div
+                                                                                    class="col-md-6 {{ $data->type == 'digital_product' ? 'd-none' : '' }}">
+                                                                                    <div class="dimensions "
+                                                                                        id="product-dimensions">
+
+                                                                                        <ul>
+                                                                                            <li>
+                                                                                                <h6>{{ labels('admin_labels.standard_shipping_weightage', 'Standard shipping weightage') }}
+                                                                                                </h6>
+                                                                                            </li>
+                                                                                        </ul>
+                                                                                        <div class="row">
+                                                                                            <div class="col-6">
+                                                                                                <div class="form-group">
+                                                                                                    <label for="weight"
+                                                                                                        class="form-label col-md-12">{{ labels('admin_labels.weight', 'Weight') }}
+                                                                                                        <small>(kg)</small>
+                                                                                                    </label>
+                                                                                                    <input type="number"
+                                                                                                        class="form-control"
+                                                                                                        name="weight"
+                                                                                                        placeholder="Weight"
+                                                                                                        id="weight"
+                                                                                                        value="{{ $product_variants[0]->weight }}"
+                                                                                                        step="0.01"
+                                                                                                        min=0>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="col-6">
+                                                                                                <div class="form-group">
+                                                                                                    <label for="height"
+                                                                                                        class="form-label col-md-12">{{ labels('admin_labels.height', 'Height') }}
+                                                                                                        <small>(cms)</small></label>
+                                                                                                    <input type="number"
+                                                                                                        min=0
+                                                                                                        class="form-control"
+                                                                                                        name="height"
+                                                                                                        placeholder="Height"
+                                                                                                        id="height"
+                                                                                                        value="{{ $product_variants[0]->height }}"
+                                                                                                        step="0.01">
+
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="row">
+                                                                                            <div class="col-6">
+                                                                                                <div class="form-group">
+                                                                                                    <label for="breadth"
+                                                                                                        class="form-label col-md-12">{{ labels('admin_labels.bredth', 'Bredth') }}
+                                                                                                        <small>(cms)</small>
+                                                                                                    </label>
+                                                                                                    <input type="number"
+                                                                                                        min=0
+                                                                                                        class="form-control"
+                                                                                                        name="breadth"
+                                                                                                        placeholder="Breadth"
+                                                                                                        id="breadth"
+                                                                                                        value="{{ $product_variants[0]->breadth }}"
+                                                                                                        step="0.01">
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="col-6">
+                                                                                                <div class="form-group">
+                                                                                                    <label for="length"
+                                                                                                        class="form-label col-md-12">{{ labels('admin_labels.length', 'Length') }}
+                                                                                                        <small>(cms)</small>
+                                                                                                    </label>
+                                                                                                    <input type="number"
+                                                                                                        min=0
+                                                                                                        class="form-control"
+                                                                                                        name="length"
+                                                                                                        placeholder="Length"
+                                                                                                        id="length"
+                                                                                                        value="{{ $product_variants[0]->length }}"
+                                                                                                        step="0.01">
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
 
                                                                             <div
-                                                                                class="col-md-6 {{ $data->type == 'digital_product' ? 'd-none' : '' }}">
-                                                                                <div class="dimensions "
-                                                                                    id="product-dimensions">
-
-                                                                                    <ul>
-                                                                                        <li>
-                                                                                            <h6>{{ labels('admin_labels.standard_shipping_weightage', 'Standard shipping weightage') }}
-                                                                                            </h6>
-                                                                                        </li>
-                                                                                    </ul>
-                                                                                    <div class="row">
-                                                                                        <div class="col-6">
-                                                                                            <div class="form-group">
-                                                                                                <label for="weight"
-                                                                                                    class="form-label col-md-12">{{ labels('admin_labels.weight', 'Weight') }}
-                                                                                                    <small>(kg)</small>
-                                                                                                </label>
-                                                                                                <input type="number"
-                                                                                                    class="form-control"
-                                                                                                    name="weight"
-                                                                                                    placeholder="Weight"
-                                                                                                    id="weight"
-                                                                                                    value="{{ $product_variants[0]->weight }}"
-                                                                                                    step="0.01" min=0>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div class="col-6">
-                                                                                            <div class="form-group">
-                                                                                                <label for="height"
-                                                                                                    class="form-label col-md-12">{{ labels('admin_labels.height', 'Height') }}
-                                                                                                    <small>(cms)</small></label>
-                                                                                                <input type="number" min=0
-                                                                                                    class="form-control"
-                                                                                                    name="height"
-                                                                                                    placeholder="Height"
-                                                                                                    id="height"
-                                                                                                    value="{{ $product_variants[0]->height }}"
-                                                                                                    step="0.01">
-
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div class="row">
-                                                                                        <div class="col-6">
-                                                                                            <div class="form-group">
-                                                                                                <label for="breadth"
-                                                                                                    class="form-label col-md-12">{{ labels('admin_labels.bredth', 'Bredth') }}
-                                                                                                    <small>(cms)</small>
-                                                                                                </label>
-                                                                                                <input type="number" min=0
-                                                                                                    class="form-control"
-                                                                                                    name="breadth"
-                                                                                                    placeholder="Breadth"
-                                                                                                    id="breadth"
-                                                                                                    value="{{ $product_variants[0]->breadth }}"
-                                                                                                    step="0.01">
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div class="col-6">
-                                                                                            <div class="form-group">
-                                                                                                <label for="length"
-                                                                                                    class="form-label col-md-12">{{ labels('admin_labels.length', 'Length') }}
-                                                                                                    <small>(cms)</small>
-                                                                                                </label>
-                                                                                                <input type="number" min=0
-                                                                                                    class="form-control"
-                                                                                                    name="length"
-                                                                                                    placeholder="Length"
-                                                                                                    id="length"
-                                                                                                    value="{{ $product_variants[0]->length }}"
-                                                                                                    step="0.01">
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
+                                                                                class="form-group  simple_stock_management {{ $data->type == 'digital_product' ? 'd-none' : '' }}">
+                                                                                <div class="col">
+                                                                                    <input type="checkbox"
+                                                                                        name="simple_stock_management_status"
+                                                                                        class="align-middle simple_stock_management_status form-check-input m-0"
+                                                                                        {{ isset($data->id) && $data->stock_type != null ? 'checked' : '' }}>
+                                                                                    <span
+                                                                                        class="align-middle">{{ labels('admin_labels.enable_stock_management', 'Enable Stock Management') }}</span>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
-
                                                                         <div
-                                                                            class="form-group  simple_stock_management {{ $data->type == 'digital_product' ? 'd-none' : '' }}">
-                                                                            <div class="col">
-                                                                                <input type="checkbox"
-                                                                                    name="simple_stock_management_status"
-                                                                                    class="align-middle simple_stock_management_status form-check-input m-0"
-                                                                                    {{ isset($data->id) && $data->stock_type != null ? 'checked' : '' }}>
-                                                                                <span
-                                                                                    class="align-middle">{{ labels('admin_labels.enable_stock_management', 'Enable Stock Management') }}</span>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div
-                                                                        class="simple-product-level-stock-management {{ $data->type == 'digital_product' ? 'd-none' : '' }} {{ (isset($data->id) && $data->stock_type == null) || $data->type == 'digital_product' ? 'collapse' : '' }}">
-                                                                        <div class="row d-flex">
-                                                                            <div class="col col-xs-4 col-md-4">
-                                                                                <div class="form-group">
-                                                                                    <label for=""
-                                                                                        class="form-label">{{ labels('admin_labels.sku', 'Sku') }}
-                                                                                        :</label>
-                                                                                    <input type="text"
-                                                                                        name="product_sku"
-                                                                                        class="col form-control simple-pro-sku"
-                                                                                        value="{{ isset($data->sku) ? $data->sku : '' }}">
+                                                                            class="simple-product-level-stock-management {{ $data->type == 'digital_product' ? 'd-none' : '' }} {{ (isset($data->id) && $data->stock_type == null) || $data->type == 'digital_product' ? 'collapse' : '' }}">
+                                                                            <div class="row d-flex">
+                                                                                <div class="col col-xs-4 col-md-4">
+                                                                                    <div class="form-group">
+                                                                                        <label for=""
+                                                                                            class="form-label">{{ labels('admin_labels.sku', 'Sku') }}
+                                                                                            :</label>
+                                                                                        <input type="text"
+                                                                                            name="product_sku"
+                                                                                            class="col form-control simple-pro-sku"
+                                                                                            value="{{ isset($data->sku) ? $data->sku : '' }}">
+                                                                                    </div>
                                                                                 </div>
-                                                                            </div>
-                                                                            <div class="col col-xs-4 col-md-4">
-                                                                                <div class="form-group">
-                                                                                    <label for=""
-                                                                                        class="form-label">{{ labels('admin_labels.total_stock', 'Total Stock') }}
-                                                                                        :</label>
-                                                                                    <input type="number" min="0"
-                                                                                        name="product_total_stock"
-                                                                                        class="col form-control stock-simple-mustfill-field"
-                                                                                        value="{{ isset($data->stock) ? $data->stock : '' }}">
+                                                                                <div class="col col-xs-4 col-md-4">
+                                                                                    <div class="form-group">
+                                                                                        <label for=""
+                                                                                            class="form-label">{{ labels('admin_labels.total_stock', 'Total Stock') }}
+                                                                                            :</label>
+                                                                                        <input type="number"
+                                                                                            min="0"
+                                                                                            name="product_total_stock"
+                                                                                            class="col form-control stock-simple-mustfill-field"
+                                                                                            value="{{ isset($data->stock) ? $data->stock : '' }}">
+                                                                                    </div>
                                                                                 </div>
-                                                                            </div>
-                                                                            <div class="col col-xs-4 col-md-4">
-                                                                                <div class="form-group">
-                                                                                    <label for=""
-                                                                                        class="form-label">{{ labels('admin_labels.stock_status', 'Stock Status') }}
-                                                                                        :</label>
-                                                                                    <select type="text"
-                                                                                        class="col form-control form-select stock-simple-mustfill-field"
-                                                                                        id="simple_product_stock_status">
-                                                                                        <option value="1"
-                                                                                            {{ isset($data->stock_type) && $data->stock_type != null && $data->availability == '1' ? 'selected' : '' }}>
-                                                                                            In Stock</option>
-                                                                                        <option value="0"
-                                                                                            {{ isset($data->stock_type) && $data->stock_type != null && $data->availability == '0' ? 'selected' : '' }}>
-                                                                                            Out Of Stock</option>
-                                                                                    </select>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="form-group collapse simple-product-save">
-                                                                        <div class="col-md-12">
-                                                                            <a href="javascript:void(0);"
-                                                                                class="btn btn-dark save-settings float-end">{{ labels('admin_labels.save_settings', 'Save Settings') }}</a>
-                                                                        </div>
-                                                                    </div>
-                                                                    @else
-
-                                                                    <div id="variant_stock_level">
-                                                                        <div class="form-group">
-                                                                            <div class="col">
-                                                                                <input type="checkbox"
-                                                                                    name="variant_stock_management_status"
-                                                                                    class="align-middle variant_stock_status form-check-input m-0"
-                                                                                    {{ isset($data->id) && $data->stock_type != null ? 'checked' : '' }}>
-                                                                                <span class="align-middle">
-                                                                                    {{ labels('admin_labels.enable_stock_management', 'Enable Stock Mamagement') }}</span>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="form-group <?= intval($data->stock_type) > 0 ? '' : 'collapse' ?>"
-                                                                            id="stock_level">
-                                                                            <label for="type"
-                                                                                class="col-md-12 form-label">{{ labels('admin_labels.choose_stock_management_type', 'Choose Stock Management Type') }}:</label>
-                                                                            <div class="col-md-12">
-                                                                                <select id="stock_level_type"
-                                                                                    class="form-select variant-stock-level-type"
-                                                                                    data-placeholder=" Type to search and select type">
-                                                                                    <option value=" ">Select Stock
-                                                                                        Type
-                                                                                    </option>
-                                                                                    <option value="product_level"
-                                                                                        {{ isset($data->id) && $data->stock_type == '1' ? 'Selected' : '' }}>
-                                                                                        Product Level (
-                                                                                        Stock
-                                                                                        Will Be Managed Generally )</option>
-                                                                                    <option value="variable_level"
-                                                                                        {{ isset($data->id) && $data->stock_type == '2' ? 'Selected' : '' }}>
-                                                                                        Variable Level (
-                                                                                        Stock Will Be Managed Variant Wise )
-                                                                                    </option>
-                                                                                </select>
-                                                                                <div
-                                                                                    class="form-group variant-product-level-stock-management <?= intval($data->stock_type) == 1 ? '' : 'collapse' ?>">
-                                                                                    <div class="row d-flex mt-5">
-                                                                                        <div class="col col-xs-4 col-md-4">
-                                                                                            <div class="form-group">
-                                                                                                <label for=""
-                                                                                                    class="form-label">{{ labels('admin_labels.sku', 'Sku') }}
-                                                                                                    :</label>
-                                                                                                <input type="text"
-                                                                                                    name="sku_variant_type"
-                                                                                                    class="col form-control"
-                                                                                                    value="<?= intval($data->stock_type) == 1 && isset($data->id) && !empty($data->sku) ? $data->sku : '' ?>">
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div class="col col-xs-4 col-md-4">
-                                                                                            <div class="form-group">
-                                                                                                <label for=""
-                                                                                                    class="form-label">{{ labels('admin_labels.total_stock', 'Total Stock') }}:</label>
-                                                                                                <input type="number"
-                                                                                                    min="1"
-                                                                                                    name="total_stock_variant_type"
-                                                                                                    class="col form-control variant-stock-mustfill-field"
-                                                                                                    value="<?= intval($data->stock_type) == 1 && isset($data->id) && !empty($data->stock) ? $data->stock : '' ?>">
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div class="col col-xs-4 col-md-4">
-                                                                                            <div class="form-group">
-                                                                                                <label for=""
-                                                                                                    class="form-label">{{ labels('admin_labels.stock_status', 'Stock Status') }}:</label>
-                                                                                                <select type="text"
-                                                                                                    id="stock_status_variant_type"
-                                                                                                    name="variant_status"
-                                                                                                    class="form-select col form-control variant-stock-mustfill-field">
-                                                                                                    <option value="1"
-                                                                                                        <?= intval($data->stock_type) == 1 && isset($data->id) && $data->availability == '1' ? 'Selected' : '' ?>>
-                                                                                                        In Stock
-                                                                                                    </option>
-                                                                                                    <option value="0"
-                                                                                                        <?= intval($data->stock_type) == 1 && isset($data->id) && $data->availability == '0' ? 'Selected' : '' ?>>
-                                                                                                        Out Of Stock
-                                                                                                    </option>
-                                                                                                </select>
-                                                                                            </div>
-                                                                                        </div>
-
+                                                                                <div class="col col-xs-4 col-md-4">
+                                                                                    <div class="form-group">
+                                                                                        <label for=""
+                                                                                            class="form-label">{{ labels('admin_labels.stock_status', 'Stock Status') }}
+                                                                                            :</label>
+                                                                                        <select type="text"
+                                                                                            class="col form-control form-select stock-simple-mustfill-field"
+                                                                                            id="simple_product_stock_status">
+                                                                                            <option value="1"
+                                                                                                {{ isset($data->stock_type) && $data->stock_type != null && $data->availability == '1' ? 'selected' : '' }}>
+                                                                                                In Stock</option>
+                                                                                            <option value="0"
+                                                                                                {{ isset($data->stock_type) && $data->stock_type != null && $data->availability == '0' ? 'selected' : '' }}>
+                                                                                                Out Of Stock</option>
+                                                                                        </select>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
-                                                                        <div class="form-group">
-                                                                            <div class="col float-end"> <a
-                                                                                    href="javascript:void(0);"
-                                                                                    class="btn btn-dark save-variant-general-settings">{{ labels('admin_labels.save_settings', 'Save Settings') }}</a>
+                                                                        <div
+                                                                            class="form-group collapse simple-product-save">
+                                                                            <div class="col-md-12">
+                                                                                <a href="javascript:void(0);"
+                                                                                    class="btn btn-dark save-settings float-end">{{ labels('admin_labels.save_settings', 'Save Settings') }}</a>
                                                                             </div>
                                                                         </div>
-                                                                    </div>
-                                                                   @endif
+                                                                    @else
+                                                                        <div id="variant_stock_level">
+                                                                            <div class="form-group">
+                                                                                <div class="col">
+                                                                                    <input type="checkbox"
+                                                                                        name="variant_stock_management_status"
+                                                                                        class="align-middle variant_stock_status form-check-input m-0"
+                                                                                        {{ isset($data->id) && $data->stock_type != null ? 'checked' : '' }}>
+                                                                                    <span class="align-middle">
+                                                                                        {{ labels('admin_labels.enable_stock_management', 'Enable Stock Mamagement') }}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="form-group <?= intval($data->stock_type) > 0 ? '' : 'collapse' ?>"
+                                                                                id="stock_level">
+                                                                                <label for="type"
+                                                                                    class="col-md-12 form-label">{{ labels('admin_labels.choose_stock_management_type', 'Choose Stock Management Type') }}:</label>
+                                                                                <div class="col-md-12">
+                                                                                    <select id="stock_level_type"
+                                                                                        class="form-select variant-stock-level-type"
+                                                                                        data-placeholder=" Type to search and select type">
+                                                                                        <option value=" ">Select Stock
+                                                                                            Type
+                                                                                        </option>
+                                                                                        <option value="product_level"
+                                                                                            {{ isset($data->id) && $data->stock_type == '1' ? 'Selected' : '' }}>
+                                                                                            Product Level (
+                                                                                            Stock
+                                                                                            Will Be Managed Generally )
+                                                                                        </option>
+                                                                                        <option value="variable_level"
+                                                                                            {{ isset($data->id) && $data->stock_type == '2' ? 'Selected' : '' }}>
+                                                                                            Variable Level (
+                                                                                            Stock Will Be Managed Variant
+                                                                                            Wise )
+                                                                                        </option>
+                                                                                    </select>
+                                                                                    <div
+                                                                                        class="form-group variant-product-level-stock-management <?= intval($data->stock_type) == 1 ? '' : 'collapse' ?>">
+                                                                                        <div class="row d-flex mt-5">
+                                                                                            <div
+                                                                                                class="col col-xs-4 col-md-4">
+                                                                                                <div class="form-group">
+                                                                                                    <label for=""
+                                                                                                        class="form-label">{{ labels('admin_labels.sku', 'Sku') }}
+                                                                                                        :</label>
+                                                                                                    <input type="text"
+                                                                                                        name="sku_variant_type"
+                                                                                                        class="col form-control"
+                                                                                                        value="<?= intval($data->stock_type) == 1 && isset($data->id) && !empty($data->sku) ? $data->sku : '' ?>">
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div
+                                                                                                class="col col-xs-4 col-md-4">
+                                                                                                <div class="form-group">
+                                                                                                    <label for=""
+                                                                                                        class="form-label">{{ labels('admin_labels.total_stock', 'Total Stock') }}:</label>
+                                                                                                    <input type="number"
+                                                                                                        min="1"
+                                                                                                        name="total_stock_variant_type"
+                                                                                                        class="col form-control variant-stock-mustfill-field"
+                                                                                                        value="<?= intval($data->stock_type) == 1 && isset($data->id) && !empty($data->stock) ? $data->stock : '' ?>">
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div
+                                                                                                class="col col-xs-4 col-md-4">
+                                                                                                <div class="form-group">
+                                                                                                    <label for=""
+                                                                                                        class="form-label">{{ labels('admin_labels.stock_status', 'Stock Status') }}:</label>
+                                                                                                    <select type="text"
+                                                                                                        id="stock_status_variant_type"
+                                                                                                        name="variant_status"
+                                                                                                        class="form-select col form-control variant-stock-mustfill-field">
+                                                                                                        <option
+                                                                                                            value="1"
+                                                                                                            <?= intval($data->stock_type) == 1 && isset($data->id) && $data->availability == '1' ? 'Selected' : '' ?>>
+                                                                                                            In Stock
+                                                                                                        </option>
+                                                                                                        <option
+                                                                                                            value="0"
+                                                                                                            <?= intval($data->stock_type) == 1 && isset($data->id) && $data->availability == '0' ? 'Selected' : '' ?>>
+                                                                                                            Out Of Stock
+                                                                                                        </option>
+                                                                                                    </select>
+                                                                                                </div>
+                                                                                            </div>
+
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="form-group">
+                                                                                <div class="col float-end"> <a
+                                                                                        href="javascript:void(0);"
+                                                                                        class="btn btn-dark save-variant-general-settings">{{ labels('admin_labels.save_settings', 'Save Settings') }}</a>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    @endif
                                                                 </div>
                                                                 <div id="digital_product_setting"
                                                                     class="{{ $data->type == 'digital_product' ? '' : 'collapse' }}">

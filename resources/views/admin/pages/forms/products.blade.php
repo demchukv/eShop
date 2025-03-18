@@ -596,8 +596,21 @@
                                                                                         class="text-asterisks text-sm">*</span></label>
                                                                                 <input type="number"
                                                                                     name="simple_special_price"
-                                                                                    class="form-control discounted_price"
+                                                                                    class="form-control dealer_price"
                                                                                     min="0" step="0.01">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-12">
+                                                                            <div class="form-group">
+                                                                                <label for="dealer_price"
+                                                                                    class="col-md-6 form-label">
+                                                                                    {{ labels('admin_labels.dealer_price', 'Dealer Price') }}:
+                                                                                    <span
+                                                                                        class="text-asterisks text-sm">*</span></label>
+                                                                                <input type="number" name="dealer_price"
+                                                                                    class="form-control" min="0"
+                                                                                    step="0.01"
+                                                                                    placeholder="Dealer Price">
                                                                             </div>
                                                                         </div>
                                                                     </div>

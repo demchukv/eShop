@@ -168,12 +168,14 @@
                                 </div>
                             </div>
                         </div>
+
                         <!--Payment Methods-->
                         <div wire:ignore class="block mb-3 payment-methods mb-4 payment-type">
                             <div class="block-content">
                                 <h3 class="title mb-3 text-uppercase">
                                     {{ labels('front_messages.payment_methods', 'Payment Methods') }}</h3>
                                 <div class="payment-accordion">
+
                                     @if ($payment_method->cod_method == 1)
                                         <div class="form-check mb-2 d-flex align-items-center">
                                             <input class="form-check-input" type="radio" name="payment_method"
@@ -492,32 +494,34 @@
                                     </div>
                                 @else
                                     @foreach ($promo_codes['data'] as $promocode)
-                                    <div class="address-div form-check-box">
-                                        <input class="form-check-input p-2 ms-0 me-1 promo-radio" type="radio"
-                                            id="select-promocode{{ $promocode['id'] }}"
-                                            data-promocode-id="{{ $promocode['id'] }}"
-                                            data-promocode="{{ $promocode['promo_code'] }}">
-                                        <label class="form-check-label" for="select-promocode{{ $promocode['id'] }}">
-                                            <div class="d-flex align-items-center">
-                                                <!-- Display the image (adjust src path based on your data) -->
-                                                <img src="{{ getmediaimageurl($promocode['image']) }}" alt="Promo" class="promo-image me-2">
+                                        <div class="address-div form-check-box">
+                                            <input class="form-check-input p-2 ms-0 me-1 promo-radio" type="radio"
+                                                id="select-promocode{{ $promocode['id'] }}"
+                                                data-promocode-id="{{ $promocode['id'] }}"
+                                                data-promocode="{{ $promocode['promo_code'] }}">
+                                            <label class="form-check-label"
+                                                for="select-promocode{{ $promocode['id'] }}">
+                                                <div class="d-flex align-items-center">
+                                                    <!-- Display the image (adjust src path based on your data) -->
+                                                    <img src="{{ getmediaimageurl($promocode['image']) }}"
+                                                        alt="Promo" class="promo-image me-2">
 
-                                                <div>
-                                                    <p class="m-0 text-uppercase fw-700 fs-6 d-flex">
-                                                        {{ $promocode['promo_code'] }}
-                                                    </p>
-                                                    <p class="m-0 text-muted">
-                                                        {{ Str::limit($promocode['message'], 100, '...') }}
-                                                    </p>
-                                                    <p class="m-0 text-danger fw-500">
-                                                        {{ labels('front_messages.valid_minimum_order_amount_of', 'Valid Minimum Order Amount Of') }}
-                                                        <span class="fw-600">{{ currentCurrencyPrice($promocode['min_order_amt'], true) }}</span>
-                                                    </p>
+                                                    <div>
+                                                        <p class="m-0 text-uppercase fw-700 fs-6 d-flex">
+                                                            {{ $promocode['promo_code'] }}
+                                                        </p>
+                                                        <p class="m-0 text-muted">
+                                                            {{ Str::limit($promocode['message'], 100, '...') }}
+                                                        </p>
+                                                        <p class="m-0 text-danger fw-500">
+                                                            {{ labels('front_messages.valid_minimum_order_amount_of', 'Valid Minimum Order Amount Of') }}
+                                                            <span
+                                                                class="fw-600">{{ currentCurrencyPrice($promocode['min_order_amt'], true) }}</span>
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </label>
-                                    </div>
-
+                                            </label>
+                                        </div>
                                     @endforeach
                                 @endif
                             </div>

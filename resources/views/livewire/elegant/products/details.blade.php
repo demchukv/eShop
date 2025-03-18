@@ -79,16 +79,6 @@
                     <div class="product-single-meta">
                         <h2 class="product-main-title mb-2 text-capitalize">{{ $product_details->name }}</h2>
 
-                        <!-- Реферальне посилання для дилерів -->
-                        @auth
-                            @if (Auth::user()->role->name === 'dealer' && $referral_link)
-                                <div class="referral-link mb-2 d-flex align-items-center gap-2">
-                                    <label class="fw-400">{{ labels('front_messages.referral_link', 'Referral Link') }}:
-                                        <span>{{ $referral_link }}</span></label>
-                                    <livewire:components.copy-button :text="$referral_link" />
-                                </div>
-                            @endif
-                        @endauth
                         <div class="product-review d-flex-center mb-2">
                             <input id="input-3-ltr-star-md" name="input-3-ltr-star-md"
                                 class="kv-ltr-theme-svg-star rating-loading d-none"
@@ -99,6 +89,23 @@
                             @if ($product_details->type != 'variable_product')
                                 @php
                                     $price = currentCurrencyPrice($product_details->variants[0]->price, true);
+                                    $dealer_price = currentCurrencyPrice(
+                                        $product_details->variants[0]->dealer_price,
+                                        true,
+                                    );
+                                    $diff_price =
+                                        $product_details->variants[0]->special_price &&
+                                        $product_details->variants[0]->special_price > 0
+                                            ? currentCurrencyPrice(
+                                                $product_details->variants[0]->special_price -
+                                                    $product_details->variants[0]->dealer_price,
+                                                true,
+                                            )
+                                            : currentCurrencyPrice(
+                                                $product_details->variants[0]->price -
+                                                    $product_details->variants[0]->dealer_price,
+                                                true,
+                                            );
                                     $special_price =
                                         $product_details->variants[0]->special_price &&
                                         $product_details->variants[0]->special_price > 0
@@ -107,8 +114,15 @@
                                 @endphp
                                 <span class="price old-price">{{ $special_price !== $price ? $price : '' }}</span>
                                 <span class="price product_price" id="price">{{ $special_price }}</span>
+                                @if (Auth::check() &&
+                                        (Auth::user()->role->name === 'dealer' || Auth::user()->role->name === 'manager') &&
+                                        $referral_link)
+                                    <span class="price fw-500 text-success px-3 fs-2"
+                                        id="dealer_price">{{ $dealer_price }}</span>
+                                @endif
                             @else
                                 @php
+                                    $diff_price = 0;
                                     $max_price = currentCurrencyPrice(
                                         $product_details->min_max_price['max_price'],
                                         true,
@@ -126,6 +140,22 @@
                                     {{ $special_min_price }}</span>
                             @endif
                         </div>
+                        <!-- Реферальне посилання для дилерів -->
+                        @auth
+                            @if (Auth::check() &&
+                                    (Auth::user()->role->name === 'dealer' || Auth::user()->role->name === 'manager') &&
+                                    $referral_link)
+                                <div class="alert alert-warning mb-2 " role="alert">
+                                    <div>You can earn up to: {{ $diff_price }}</div>
+                                    <div class="referral-link d-flex gap-2">
+                                        <label
+                                            class="fw-400">{{ labels('front_messages.referral_link', 'Referral Link') }}:
+                                            <span>{{ $referral_link }}</span></label>
+                                        <livewire:components.copy-button :text="$referral_link" />
+                                    </div>
+                                </div>
+                            @endif
+                        @endauth
 
                         {{-- @dd($product_details); --}}
                         <div class="mb-10px text-muted">{{ $product_details->short_description }}</div>

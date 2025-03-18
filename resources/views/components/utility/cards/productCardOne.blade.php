@@ -57,8 +57,13 @@
                                     : $price;
                         }
                     @endphp
-                    <span class="price old-price">{{ $special_price !== $price ? $price : '' }}</span>
-                    <span class="price fw-500"><span wire:model="price">{{ $special_price }}</span></span>
+
+                    @if (Auth::check() && (Auth::user()->role->name === 'dealer' || Auth::user()->role->name === 'manager'))
+                        <span class="price old-price">{{ $special_price !== $price ? $price : '' }}</span>
+                        <span class="price fw-500"><span wire:model="price">{{ $special_price }}</span></span>
+                    @else
+                        <span class="price fw-500">{{ $price }}</span>
+                    @endif
                 </div>
 
                 <div>

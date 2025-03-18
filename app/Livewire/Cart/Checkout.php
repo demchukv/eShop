@@ -55,16 +55,16 @@ class Checkout extends Component
         $user_details = fetchUsers($this->user_id);
         $wallet_balance = $user_details['balance'];
 
-        $promo_codes = getPromoCodes(store_id:$store_id);
+        $promo_codes = getPromoCodes(store_id: $store_id);
         $cart_data = $this->get_user_cart($this->user_id, $store_id, ($default_address[0]->id ?? ""));
         if (count($cart_data) < 1) {
             return $this->redirect(customUrl('/'), true);
         }
         $final_total = $cart_data['overall_amount'];
         if (isset($this->selected_promo_code) && !empty($this->selected_promo_code)) {
-            $is_promo_valid = validatePromoCode($this->selected_promo_code, $this->user_id, $final_total,1);
+            $is_promo_valid = validatePromoCode($this->selected_promo_code, $this->user_id, $final_total, 1);
             if ($is_promo_valid->original['error'] == false) {
-                $is_promo_valid->original['data'][0]->final_discount = currentCurrencyPrice($is_promo_valid->original['data'][0]->final_discount,true);
+                $is_promo_valid->original['data'][0]->final_discount = currentCurrencyPrice($is_promo_valid->original['data'][0]->final_discount, true);
                 $final_total = $is_promo_valid->original['data'][0]->final_total;
                 $this->dispatch('validate_promo_code', is_promo_valid: $is_promo_valid->original);
             } else {
@@ -90,7 +90,7 @@ class Checkout extends Component
         $this->cart_count = (count($cart_data) >= 1) ? count($cart_data['cart_items']) : "";
         $this->store_id = $store_id;
         $bread_crumb = [
-            'page_main_bread_crumb' => '<a wire:navigate href="'. customUrl('cart') .'">' . labels('front_messages.cart', 'Cart') .'</a>',
+            'page_main_bread_crumb' => '<a wire:navigate href="' . customUrl('cart') . '">' . labels('front_messages.cart', 'Cart') . '</a>',
             'right_breadcrumb' => array(labels('front_messages.checkout', 'Checkout'))
         ];
 
@@ -113,12 +113,13 @@ class Checkout extends Component
             }
         }
         // dd($product_availability);
-        $time_slot_config = getSettings('time_slot_config', true,true);
+        $time_slot_config = getSettings('time_slot_config', true, true);
         $time_slot_config = json_decode($time_slot_config);
         $time_slots = fetchDetails('time_slots', ['status' => 1]);
 
-        $payment_method = getSettings('payment_method', true,true);
-        $payment_method = json_decode($payment_method);
+        $payment_method = getSettings('payment_method', true, true);
+        $payment_method_ = json_decode($payment_method);
+
         return view('livewire.' . config('constants.theme') . '.cart.checkout', [
             'cart_data' => $cart_data,
             'final_total' => $final_total,

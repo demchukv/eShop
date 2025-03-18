@@ -566,7 +566,8 @@
                                                                     class="form-label">{{ labels('admin_labels.is_cod_allowed', 'IS COD Allowed') }}?</label>
                                                             </div>
                                                             <div class="d-flex">
-                                                                <label for="" class="me-6 text-muted">[Enable/Disable]</label>
+                                                                <label for=""
+                                                                    class="me-6 text-muted">[Enable/Disable]</label>
                                                                 <div class="form-check form-switch">
                                                                     <input class="form-check-input" type="checkbox"
                                                                         id="" name="cod_allowed"
@@ -775,6 +776,19 @@
                                                                                             name="simple_special_price"
                                                                                             class="form-control discounted_price"
                                                                                             value="{{ $product_variants[0]->special_price }}"
+                                                                                            min="0" step="0.01">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-12">
+                                                                                    <div class="form-group">
+                                                                                        <label for="dealer_price"
+                                                                                            class="col-md-6 form-label">{{ labels('admin_labels.dealer_price', 'Dealer Price') }}
+                                                                                            : <span
+                                                                                                class="text-asterisks text-sm">*</span></label>
+                                                                                        <input type="number"
+                                                                                            name="dealer_price"
+                                                                                            class="form-control dealer_price"
+                                                                                            value="{{ $product_variants[0]->dealer_price }}"
                                                                                             min="0" step="0.01">
                                                                                     </div>
                                                                                 </div>

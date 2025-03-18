@@ -16,6 +16,7 @@ class Product_variants extends Model
         'product_id',
         'price',
         'special_price',
+        'dealer_price',
         'weight',
         'height',
         'breadth',

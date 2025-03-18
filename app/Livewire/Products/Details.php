@@ -109,7 +109,7 @@ class Details extends Component
         $this->image = $details['product'][0]->image;
 
         // Генерація реферального посилання для дилерів
-        if (Auth::check() && Auth::user()->role->name === 'dealer') {
+        if (Auth::check() && (Auth::user()->role->name === 'dealer' || Auth::user()->role->name === 'manager')) {
             // Перевіряємо, чи вже є код для цього дилера та продукту
             $existingReferral = ReferralCode::where('product_id', $this->product_id)
                 ->where('dealer_id', $this->user_id)
