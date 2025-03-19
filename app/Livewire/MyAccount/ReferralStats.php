@@ -33,7 +33,7 @@ class ReferralStats extends Component
             ->map(function ($group) {
                 return $group->count(); // Підраховуємо кількість у кожній групі
             })
-            ->only(['members', 'dealer', 'manager', 'seller']) // Обмежуємо ролями members, dealer, manager
+            ->only(['members', 'dealer', 'manager', 'seller']) // Обмежуємо ролями members, dealer, manager, seller
             ->all();
 
         // dd($user->referrals()->toSql(), $user->referrals()->getBindings());

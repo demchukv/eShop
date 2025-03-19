@@ -41,7 +41,7 @@
                 <li class="nav-item"><a href="{{ customUrl('my-account/favorites') }}" wire:navigate
                         class="nav-link {{ url()->full() == customUrl('/my-account/favorites') ? 'active' : '' }}">{{ labels('front_messages.my_wishlist', 'My Wishlist') }}</a>
                 </li>
-                @if ($user_info->role_id == 8)
+                @if ($user_info->role->name == 'manager')
                     <li class="nav-item"><a href="{{ customUrl('/manager/product-approvals') }}" wire:navigate
                             class="nav-link {{ url()->full() == customUrl('/manager/product-approvals') ? 'active' : '' }}">{{ labels('front_messages.product_approval', 'Product Approval') }}</a>
                     </li>
