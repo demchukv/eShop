@@ -115,6 +115,19 @@
                                 @endif
                             @else
                                 @php
+                                    $max_dealer_price = 0;
+                                    $min_dealer_price = 100000000;
+                                    foreach ($product_details->variants as $variant) {
+                                        $max_dealer_price =
+                                            $variant->dealer_price > $max_dealer_price
+                                                ? $variant->dealer_price
+                                                : $max_dealer_price;
+                                        $min_dealer_price =
+                                            $variant->dealer_price < $min_dealer_price && $variant->dealer_price > 0
+                                                ? $variant->dealer_price
+                                                : $min_dealer_price;
+                                    }
+                                    $dealer_price = '';
                                     $diff_price = 0;
                                     $max_price = currentCurrencyPrice(
                                         $product_details->min_max_price['max_price'],
@@ -128,9 +141,18 @@
                                                 true,
                                             )
                                             : $max_price;
+                                    $diff_price = $product_details->min_max_price['max_price'] - $min_dealer_price;
                                 @endphp
+                                <span class="price old-price" id="special_price"></span>
                                 <span class="price product_price" id="price">{{ $max_price }} -
                                     {{ $special_min_price }}</span>
+                                @if (Auth::check() &&
+                                        (Auth::user()->role->name === 'dealer' || Auth::user()->role->name === 'manager') &&
+                                        $referral_link)
+                                    <span class="price fw-500 text-success px-3 fs-2"
+                                        id="dealer_price">{{ currentCurrencyPrice($min_dealer_price, true) }} -
+                                        {{ currentCurrencyPrice($max_dealer_price, true) }}</span>
+                                @endif
                             @endif
                         </div>
                         <!-- Реферальне посилання для дилерів -->
@@ -139,7 +161,7 @@
                                     (Auth::user()->role->name === 'dealer' || Auth::user()->role->name === 'manager') &&
                                     $referral_link)
                                 <div class="alert alert-warning mb-2 " role="alert">
-                                    <div>You can earn up to: {{ $diff_price }}</div>
+                                    <div>You can earn up to: <span id="diff_price">{{ $diff_price }}</span></div>
                                     <div class="referral-link d-flex gap-2">
                                         <label
                                             class="fw-400">{{ labels('front_messages.referral_link', 'Referral Link') }}:
@@ -220,7 +242,8 @@
                         <input type="hidden" class="variants" name="variants_ids" data-image-index=""
                             data-name="" value="{{ $variant->attribute_value_ids }}"
                             data-id="{{ $variant->id }}" data-price="{{ currentCurrencyPrice($variant->price) }}"
-                            data-special_price="{{ currentCurrencyPrice($variant->special_price) }}" />
+                            data-special_price="{{ currentCurrencyPrice($variant->special_price) }}"
+                            data-dealer_price="{{ currentCurrencyPrice($variant->dealer_price) }}" />
                     @endforeach
 
                     <div class="product-action w-100 d-flex-wrap my-3 my-md-4">
@@ -664,16 +687,5 @@
         if (inputElement) {
             inputElement.click();
         }
-    }
-</script>
-
-<!-- Додаємо скрипт для копіювання -->
-<script>
-    function copyReferralLink() {
-        var referralLink = document.getElementById('referralLink');
-        referralLink.select();
-        referralLink.setSelectionRange(0, 99999); // Для мобільних пристроїв
-        document.execCommand('copy');
-        alert('{{ labels('front_messages.link_copied', 'Link copied to clipboard!') }}');
     }
 </script>

@@ -2719,8 +2719,10 @@ function getMinMaxPriceOfProduct($product_id = '')
     // Calculate min and max prices considering tax
     $min_price = collect($response)->pluck('price')->min() + $price_tax_amount;
     $max_price = collect($response)->pluck('price')->max() + $price_tax_amount;
-    $special_min_price = collect($response)->pluck('special_price')->min() + $special_price_tax_amount;
+    // $special_min_price = max(0, collect($response)->pluck('special_price')->min() + $special_price_tax_amount);
+    $special_min_price = max(0, collect($response)->pluck('special_price')->filter(fn($price) => $price > 0)->min() + $special_price_tax_amount);
     $special_max_price = collect($response)->pluck('special_price')->max() + $special_price_tax_amount;
+
 
     // Calculate discount in percentage
     $discount_in_percentage = findDiscountInPercentage($special_min_price, $min_price);
