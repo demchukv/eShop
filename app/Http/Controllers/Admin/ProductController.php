@@ -129,7 +129,7 @@ class ProductController extends Controller
             $validator->sometimes('simple_price', 'required|numeric|gte:' . request()->input('simple_special_price') . '|string', function ($input) {
                 return true;
             });
-            $validator->sometimes('dealer_price', 'nullable|numeric|gte:0|lte:' . request()->input('dealer_price') . '|string', function ($input) {
+            $validator->sometimes('dealer_price', 'required|numeric|gte:' . request()->input('dealer_price') . '|string', function ($input) {
                 return true;
             });
 
@@ -149,7 +149,7 @@ class ProductController extends Controller
                 $validator->sometimes('variant_price.*', 'required|numeric', function ($input) {
                     return true;
                 });
-                $validator->sometimes('variant_dealer_price.*', 'nullable|numeric|gte:0|lte:' . request()->input('variant_dealer_price.*') . '', function ($input) {
+                $validator->sometimes('variant_dealer_price.*', 'required|numeric' . request()->input('variant_dealer_price.*') . '', function ($input) {
                     return true;
                 });
             }
@@ -323,7 +323,7 @@ class ProductController extends Controller
                         $product_variant_data['availability'] = isset($request->variant_status) ? $request->variant_status : '';
                         $variant_price = $request->variant_price;
                         $variant_special_price = (isset($request->variant_special_price) && !empty($request->variant_special_price)) ? $request->variant_special_price : '0';
-                        $variant_dealer_price = (isset($request->variant_dealer_price) && !empty($request->variant_dealer_price)) ? $request->variant_dealer_price : '0';
+                        $variant_dealer_price = $request->variant_dealer_price;
                         $variant_weight = $request->weight;
                         $variant_height = (isset($request->height)) ? $request->height : 0.0;
                         $variant_breadth = (isset($request->breadth)) ? $request->breadth : 0.0;
@@ -333,7 +333,7 @@ class ProductController extends Controller
                         $product_variant_data['product_id'] = $product->id;
                         $variant_price = $request->variant_price;
                         $variant_special_price = (isset($request->variant_special_price) && !empty($request->variant_special_price)) ? $request->variant_special_price : '0';
-                        $variant_dealer_price = (isset($request->variant_dealer_price) && !empty($request->variant_dealer_price)) ? $request->variant_dealer_price : '0';
+                        $variant_dealer_price = $request->variant_dealer_price;
                         $variant_sku = $request->variant_sku;
                         $variant_total_stock = $request->variant_total_stock;
                         $variant_stock_status = $request->variant_level_stock_status;
@@ -345,7 +345,7 @@ class ProductController extends Controller
                 } else {
                     $variant_price = $request->variant_price;
                     $variant_special_price = (isset($request->variant_special_price) && !empty($request->variant_special_price)) ? $request->variant_special_price : '0';
-                    $variant_dealer_price = (isset($request->variant_dealer_price) && !empty($request->variant_dealer_price)) ? $request->variant_dealer_price : '0';
+                    $variant_dealer_price = $request->variant_dealer_price;
                     $variant_weight = $request->weight;
                     $variant_height = (isset($request->height)) ? $request->height : 0.0;
                     $variant_breadth = (isset($request->breadth)) ? $request->breadth : 0.0;
@@ -915,7 +915,7 @@ class ProductController extends Controller
             $validator->sometimes('simple_price', 'required|numeric|gte:' . request()->input('simple_special_price') . '|string', function ($input) {
                 return true;
             });
-            $validator->sometimes('dealer_price', 'nullable|numeric|string', function ($input) { // Додаємо валідацію для dealer_price
+            $validator->sometimes('dealer_price', 'required|numeric|gte:' . request()->input('dealer_price') . '|string', function ($input) { // Додаємо валідацію для dealer_price
                 return true;
             });
 
@@ -1109,6 +1109,7 @@ class ProductController extends Controller
                         $product_variant_data['availability'] = isset($request->variant_status) ? $request->variant_status : '';
                         $variant_price = $request->variant_price;
                         $variant_special_price = (isset($request->variant_special_price) && !empty($request->variant_special_price)) ? $request->variant_special_price : '0';
+                        $variant_dealer_price = $request->variant_dealer_price;
                         $variant_weight = $request->weight;
                         $variant_height = (isset($request->height)) ? $request->height : 0.0;
                         $variant_breadth = (isset($request->breadth)) ? $request->breadth : 0.0;
@@ -1119,6 +1120,7 @@ class ProductController extends Controller
                         $product_variant_data['product_id'] = $data;
                         $variant_price = $request->variant_price;
                         $variant_special_price = (isset($request->variant_special_price) && !empty($request->variant_special_price)) ? $request->variant_special_price : '0';
+                        $variant_dealer_price = $request->variant_dealer_price;
                         $variant_sku = $request->variant_sku;
                         $variant_total_stock = $request->variant_total_stock;
                         $variant_stock_status = $request->variant_level_stock_status;
@@ -1131,6 +1133,7 @@ class ProductController extends Controller
 
                     $variant_price = $request->variant_price;
                     $variant_special_price = (isset($request->variant_special_price) && !empty($request->variant_special_price)) ? $request->variant_special_price : '0';
+                    $variant_dealer_price = $request->variant_dealer_price;
                     $variant_weight = $request->weight;
                     $variant_height = (isset($request->height)) ? $request->height : 0.0;
                     $variant_breadth = (isset($request->breadth)) ? $request->breadth : 0.0;

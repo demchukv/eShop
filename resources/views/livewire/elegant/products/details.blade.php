@@ -3,7 +3,9 @@
     <div class="container-fluid">
         {{-- @dd($product_details) --}}
 
-
+        {{-- @php
+            dd($product_details);
+        @endphp --}}
         <div class="product-single">
             <div class="row">
                 <div class="col-lg-6 col-md-6 col-sm-12 col-12 product-layout-img mb-4 mb-md-0">
@@ -93,19 +95,10 @@
                                         $product_details->variants[0]->dealer_price,
                                         true,
                                     );
-                                    $diff_price = currentCurrencyPrice(calculateDealerComission($product_details), true);
-                                    // $product_details->variants[0]->special_price &&
-                                    // $product_details->variants[0]->special_price > 0
-                                    //     ? currentCurrencyPrice(
-                                    //         $product_details->variants[0]->special_price -
-                                    //             $product_details->variants[0]->dealer_price,
-                                    //         true,
-                                    //     )
-                                    //     : currentCurrencyPrice(
-                                    //         $product_details->variants[0]->price -
-                                    //             $product_details->variants[0]->dealer_price,
-                                    //         true,
-                                    //     );
+                                    $diff_price = currentCurrencyPrice(
+                                        calculateDealerComission($product_details),
+                                        true,
+                                    );
                                     $special_price =
                                         $product_details->variants[0]->special_price &&
                                         $product_details->variants[0]->special_price > 0
