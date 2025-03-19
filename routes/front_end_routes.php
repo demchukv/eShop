@@ -53,7 +53,7 @@ use App\Livewire\MyAccount\LiveChat;
 use App\Livewire\Products\ComboProductDetails;
 use App\Livewire\Products\ComboProductListing;
 use App\Livewire\MyAccount\UserStatus;
-
+use App\Livewire\MyAccount\ReferralStats;
 
 /*
 |--------------------------------------------------------------------------
@@ -132,6 +132,7 @@ Route::middleware(App\Http\Middleware\checkAuth::class)->group(function () {
     Route::get('/my-account/live-customer-support', LiveChat::class)->name('my-account.livechat');
     Route::post('/my-account/support/add-ticket', [Support::class, 'add_ticket'])->name('my-account.support.add-ticket');
     Route::post('/my-account/support/get-ticket', [Support::class, 'get_ticket_by_id'])->name('my-account.support.get-ticket');
+    Route::get('/my-account/referral-stats', ReferralStats::class)->name('my-account.referral-stats');
 
     Route::get('/login/logout', [UserController::class, 'logout'])->name('logout');
 });

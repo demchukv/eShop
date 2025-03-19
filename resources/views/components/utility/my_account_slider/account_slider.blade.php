@@ -46,6 +46,9 @@
                             class="nav-link {{ url()->full() == customUrl('/manager/product-approvals') ? 'active' : '' }}">{{ labels('front_messages.product_approval', 'Product Approval') }}</a>
                     </li>
                 @endif
+                <li class="nav-item"><a href="{{ customUrl('my-account/referral-stats') }}" wire:navigate
+                        class="nav-link {{ url()->full() == customUrl('/my-account/referral-stats') ? 'active' : '' }}">{{ labels('front_messages.referrals', 'Referrals') }}</a>
+                </li>
                 <li class="nav-item"><a href="{{ customUrl('my-account/wallet') }}" wire:navigate
                         class="nav-link {{ url()->full() == customUrl('/my-account/wallet') ? 'active' : '' }}">{{ labels('front_messages.wallet', 'Wallet') }}</a>
                 </li>

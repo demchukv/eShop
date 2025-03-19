@@ -105,4 +105,14 @@ class User extends Authenticatable implements HasMedia
             $this->addMediaCollection('user_image')->useDisk('public');
         }
     }
+
+    /**
+     * Get the referrals for the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function referrals(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(User::class, 'friends_code', 'referral_code');
+    }
 }

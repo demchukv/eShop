@@ -141,7 +141,7 @@
                                                 true,
                                             )
                                             : $max_price;
-                                    $diff_price = $product_details->min_max_price['max_price'] - $min_dealer_price;
+                                    $diff_price = currentCurrencyPrice($product_details->min_max_price['max_price'] - $min_dealer_price, true);
                                 @endphp
                                 <span class="price old-price" id="special_price"></span>
                                 <span class="price product_price" id="price">{{ $max_price }} -
