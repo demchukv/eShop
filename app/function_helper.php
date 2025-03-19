@@ -9117,6 +9117,29 @@ function currentCurrencyPrice($price, $with_symbol = false)
     }
     return $amount;
 }
+// calculate dealer comission from price and dealer price
+function calculateDealerComission($product_details)
+{
+    if (Auth::check()) {
+        if (Auth::user()->role->name === 'dealer') {
+            if ($product_details->variants[0]->special_price && $product_details->variants[0]->special_price > 0) {
+                return ($product_details->variants[0]->special_price - $product_details->variants[0]->dealer_price) * 0.9;
+            } else {
+                return ($product_details->variants[0]->price - $product_details->variants[0]->dealer_price) * 0.9;
+            }
+        }
+        if (Auth::user()->role->name === 'manager') {
+            if ($product_details->variants[0]->special_price && $product_details->variants[0]->special_price > 0) {
+                return ($product_details->variants[0]->special_price - $product_details->variants[0]->dealer_price);
+            } else {
+                return ($product_details->variants[0]->price - $product_details->variants[0]->dealer_price);
+            }
+        }
+    } else {
+        return 0;
+    }
+}
+
 function getPriceCurrency($price)
 {
     $currencies = getAllCurrency();

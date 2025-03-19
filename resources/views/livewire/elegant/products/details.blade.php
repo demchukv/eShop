@@ -93,19 +93,19 @@
                                         $product_details->variants[0]->dealer_price,
                                         true,
                                     );
-                                    $diff_price =
-                                        $product_details->variants[0]->special_price &&
-                                        $product_details->variants[0]->special_price > 0
-                                            ? currentCurrencyPrice(
-                                                $product_details->variants[0]->special_price -
-                                                    $product_details->variants[0]->dealer_price,
-                                                true,
-                                            )
-                                            : currentCurrencyPrice(
-                                                $product_details->variants[0]->price -
-                                                    $product_details->variants[0]->dealer_price,
-                                                true,
-                                            );
+                                    $diff_price = currentCurrencyPrice(calculateDealerComission($product_details), true);
+                                    // $product_details->variants[0]->special_price &&
+                                    // $product_details->variants[0]->special_price > 0
+                                    //     ? currentCurrencyPrice(
+                                    //         $product_details->variants[0]->special_price -
+                                    //             $product_details->variants[0]->dealer_price,
+                                    //         true,
+                                    //     )
+                                    //     : currentCurrencyPrice(
+                                    //         $product_details->variants[0]->price -
+                                    //             $product_details->variants[0]->dealer_price,
+                                    //         true,
+                                    //     );
                                     $special_price =
                                         $product_details->variants[0]->special_price &&
                                         $product_details->variants[0]->special_price > 0
