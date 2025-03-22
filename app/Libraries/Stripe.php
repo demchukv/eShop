@@ -4,12 +4,17 @@ namespace App\Libraries;
 
 use Stripe\Checkout\Session;
 use Illuminate\Console\View\Components\Error;
+use Illuminate\Support\Facades\Log;
+
 const DEFAULT_TOLERANCE = 300;
 class Stripe
 {
     private $secret_key;
     private $public_key;
     private $currency_code;
+
+    private $percentage_fee = 0.029; // 2.9%
+    private $fixed_fee = 0.30;       // $0.30
 
     function __construct()
     {
@@ -20,9 +25,41 @@ class Stripe
         $this->public_key = $payment_method_settings['stripe_publishable_key'] ?? "";
         $this->currency_code = $payment_method_settings['stripe_currency_code'] ?? "";
     }
+
+    /**
+     * Розрахувати загальну суму з урахуванням комісії Stripe
+     *
+     * @param float $base_amount Базова сума, яку ви хочете отримати
+     * @return float Загальна сума, яку має сплатити клієнт
+     */
+    public function calculateTotalWithFee($base_amount)
+    {
+        $total_amount = ($base_amount + $this->fixed_fee) / (1 - $this->percentage_fee);
+        return number_format($total_amount, 2, '.', ''); // Округлення до 2 знаків
+    }
+
+    // метод для розрахунку і повернення комісії
+    public function calculateFee($amount)
+    {
+        $base_amount = (float) $amount;
+        $total_amount = $this->calculateTotalWithFee($base_amount);
+        $fee = $total_amount - $base_amount;
+
+        return [
+            'amount' => number_format($base_amount, 2, '.', ''),
+            'fee' => number_format($fee, 2, '.', ''),
+            'total_with_fee' => number_format($total_amount, 2, '.', ''),
+        ];
+    }
+
     public function createPaymentIntent($data)
     {
         \Stripe\Stripe::setApiKey($this->secret_key);
+
+        // Розрахуємо суму з урахуванням комісії
+        $base_amount = (float) $data['amount'];
+        $total_amount = $this->calculateTotalWithFee($base_amount);
+
         try {
             $response = Session::create([
                 'ui_mode' => 'embedded',
@@ -33,11 +70,13 @@ class Stripe
                             'product_data' => [
                                 'name' => "Paid for " . $data['product_name'],
                             ],
-                            'unit_amount' => number_format((float) $data['amount'], 2, ".", "") * 100,
+                            // 'unit_amount' => number_format((float) $data['amount'], 2, ".", "") * 100,
+                            'unit_amount' => $total_amount * 100, // Переводимо в центи
                         ],
                         'quantity' => 1,
                     ]
                 ],
+                // 'automatic_tax' => ['enabled' => true],
                 'mode' => 'payment',
                 "return_url" => url('payments/stripe-response?session_id={CHECKOUT_SESSION_ID}'),
                 "metadata" => $data,
@@ -49,6 +88,7 @@ class Stripe
         }
         $response['payment_method'] = 'stripe';
         $response['publicKey'] = $this->public_key;
+        Log::info('Returned createPaymentIntent', ["createPaymentIntent: ", $response]);
         return $response;
     }
 

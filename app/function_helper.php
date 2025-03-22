@@ -3363,9 +3363,13 @@ function getDeliveryCharge($address_id, $total = 0, $cartData = [], $store_id = 
                     if ($zipcode && isset($zipcode->minimum_free_delivery_order_amount)) {
                         $min_amount = $zipcode->minimum_free_delivery_order_amount;
                         $delivery_charge = $zipcode->delivery_charges;
+                    } else {
+                        // ? global
+                        $min_amount = $settings[0]->minimum_free_delivery_amount;
+                        $delivery_charge = $settings[0]->delivery_charge_amount;
                     }
                     $d_charge = intval($total) < $min_amount || $total === 0 ? $delivery_charge : 0;
-                    return number_format($d_charge, 2);
+                    return $d_charge ? number_format($d_charge, 2) : 0;
                 }
             } else if (isset($settings[0]->delivery_charge_type) && !empty($settings[0]->delivery_charge_type) && $settings[0]->delivery_charge_type == 'global_delivery_charge') {
                 $min_amount = $settings[0]->minimum_free_delivery_amount;

@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\TransactionController;
+use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
 {
@@ -797,7 +798,6 @@ class CartController extends Controller
 
     public function pre_payment_setup(Request $request)
     {
-
         $user_id = Auth::user()->id ?? 0;
         $store_id = session('store_id');
         if ($user_id == 0) {
@@ -882,6 +882,7 @@ class CartController extends Controller
                 $overall_amount -= $validate['data'][0]->final_discount;
             }
         }
+
         // Payment method specific logic
         if ($request['payment_method'] == 'razorpay') {
 
@@ -937,6 +938,7 @@ class CartController extends Controller
     public function place_order(Request $request, TransactionController $transactionController)
     {
         // dd($request);
+        Log::info('place_order $request = ', ['request' => $request]);
         if ($request->has('res')) {
             $res = $request->input('res');
             $request = new Request($res);
@@ -1366,5 +1368,10 @@ class CartController extends Controller
             }
             return response()->json($res);
         }
+    }
+
+    public function splitComissionsBetweenUsers($data)
+    {
+        return;
     }
 }

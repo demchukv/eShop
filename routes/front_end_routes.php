@@ -86,6 +86,7 @@ Route::middleware(App\Http\Middleware\checkAuth::class)->group(function () {
 
     Route::post('/payments/phonepe', [PaymentsController::class, 'phonepe'])->name('payments.phonepe');
     Route::post('/payments/stripe', [PaymentsController::class, 'stripe'])->name('payments.stripe');
+    Route::post('/payments/stripe/calculate-fee', [PaymentsController::class, 'calculateStripeFee'])->name('payments.stripe.calculate_fee');
     Route::get('/payments/stripe-response', [PaymentsController::class, 'stripe_response'])->name('payments.stripe_response');
     Route::post('/payments/razorpay', [PaymentsController::class, 'razorpay'])->name('payments.razorpay');
 

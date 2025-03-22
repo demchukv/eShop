@@ -149,6 +149,7 @@ Route::middleware(['CheckInstallation'])->group(function () {
     Route::get('admin/webhook/stripe_webhook', [Webhook::class, 'stripe_webhook'])->name('admin.stripe_webhook');
     Route::get('admin/webhook/phonepe_webhook', [Webhook::class, 'phonepe_webhook'])->name('admin.phonepe_webhook');
 });
+
 Route::get('admin/orders/generat_invoice_PDF/{id}', [OrderController::class, 'generatInvoicePDF'])->name('admin.orders.generatInvoicePDF');
 Route::get('/admin/stores', [StoreController::class, 'index'])->name('admin.stores.index');
 Route::post('admin/store', [StoreController::class, 'store'])->middleware(['demo_restriction'])->middleware('permissions:create store')->name('admin.stores.store');

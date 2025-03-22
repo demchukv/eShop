@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\TransactionController;
 use App\Libraries\Razorpay;
+use Illuminate\Support\Facades\Log;
 
 class PaymentsController extends Controller
 {
@@ -84,6 +85,7 @@ class PaymentsController extends Controller
         }
         $data['user_id'] = Auth::user()->id ?? 0;
         $checkout_session = $this->stripe->createPaymentIntent($data);
+
         return $checkout_session;
     }
 
@@ -93,6 +95,7 @@ class PaymentsController extends Controller
             $session_id = $request->query("session_id");
             $res = $this->stripe->stripe_response($session_id);
             $res = json_decode($res, true);
+            Log::info('Stripe response $res = ', $res);
             if ($res['status'] == "complete") {
                 $newRequest = new Request();
                 $res['data']['metadata']['stripe_payment_id'] = $res['data']['payment_intent'];
@@ -118,8 +121,11 @@ class PaymentsController extends Controller
                 $result = $cartController->place_order($newRequest, $transactionController);
                 $result = json_decode($result->getContent(), true);
                 if ($result['error'] == false) {
+                    Log::info('Get result stripe_response', $result);
+
                     return redirect(url('payments?response=order_success'));
                 }
+                Log::info('Get result with error stripe_response', $result);
                 return redirect(url('payments?response=order_failed'));
             }
             return redirect(url('payments?response=order_failed'));
@@ -128,6 +134,7 @@ class PaymentsController extends Controller
             'error' => true,
             'message' => "request not allowed"
         ];
+        Log::info('returned stripe response', ["stripe_response: response=>" . $response]);
         return json_encode($response);
     }
 
@@ -136,5 +143,26 @@ class PaymentsController extends Controller
         $amount = intval($request['amount'] * 100);
         $res = $this->razorpay->create_order($amount);
         return $res;
+    }
+
+    // метод для розрахунку комісії Stripe
+    public function calculateStripeFee(Request $request)
+    {
+        $amount = $request->input('amount');
+
+        if (empty($amount) || !is_numeric($amount) || $amount <= 0) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Invalid amount provided',
+            ]);
+        }
+
+        $feeData = $this->stripe->calculateFee($amount);
+
+        return response()->json([
+            'error' => false,
+            'fee' => $feeData['fee'],
+            'total_with_fee' => $feeData['total_with_fee'],
+        ]);
     }
 }

@@ -1,11 +1,12 @@
 <div id="page-content">
     <x-utility.breadcrumbs.breadcrumbTwo :$bread_crumb />
-    {{-- {{dd($payment_method)}} --}}
+
+    {{-- {{ dd($payment_method) }} --}}
     <!--Main Content-->
     <div class="container-fluid">
         <!--Checkout Content-->
         @if (count($cart_data) >= 1)
-            <form action="{{ Route('cart.place_order') }}" method="POST" id="place_order_form">
+            <form action="{{ Route('cart.place_order') }}" method="POST" id="place_order_form" x-data="checkout">
                 @csrf
                 <div class="row">
                     <div class="col-lg-6 col-md-6 col-sm-12">
@@ -175,11 +176,17 @@
                                 <h3 class="title mb-3 text-uppercase">
                                     {{ labels('front_messages.payment_methods', 'Payment Methods') }}</h3>
                                 <div class="payment-accordion">
-
+                                    <div>
+                                        @php
+                                            if (is_string($payment_method)) {
+                                                $payment_method = json_decode($payment_method);
+                                            }
+                                        @endphp
+                                    </div>
                                     @if ($payment_method->cod_method == 1)
                                         <div class="form-check mb-2 d-flex align-items-center">
                                             <input class="form-check-input" type="radio" name="payment_method"
-                                                id="cod" value="cod">
+                                                id="cod" value="cod" x-model="payment_method">
                                             <label class="form-check-label d-flex align-items-center ps-2"
                                                 for="cod" title="COD">
                                                 <div class="image payment-image">
@@ -194,7 +201,7 @@
                                     @if ($payment_method->phonepe_method == 1)
                                         <div class="form-check mb-2 d-flex align-items-center">
                                             <input class="form-check-input" type="radio" name="payment_method"
-                                                id="phonepe" value="phonepe">
+                                                id="phonepe" value="phonepe" x-model="payment_method">
                                             <label class="form-check-label d-flex align-items-center ps-2"
                                                 for="phonepe" value="phonepe" title="Phonepe">
                                                 <div class="image payment-image">
@@ -209,7 +216,7 @@
                                     @if ($payment_method->paypal_method == 1)
                                         <div class="form-check mb-2 d-flex align-items-center">
                                             <input class="form-check-input" type="radio" name="payment_method"
-                                                id="paypal-payment" value="paypal">
+                                                id="paypal-payment" value="paypal" x-model="payment_method">
                                             <label class="form-check-label d-flex align-items-center ps-2"
                                                 for="paypal-payment" value="paypal" title="Paypal">
                                                 <div class="image payment-image">
@@ -224,7 +231,7 @@
                                     @if ($payment_method->paystack_method == 1)
                                         <div class="form-check mb-2 d-flex align-items-center">
                                             <input class="form-check-input" type="radio" name="payment_method"
-                                                id="paystack-payment" value="paystack">
+                                                id="paystack-payment" value="paystack" x-model="payment_method">
                                             <label class="form-check-label d-flex align-items-center ps-2"
                                                 for="paystack-payment" value="paystack" title="Paystack">
                                                 <div class="image payment-image">
@@ -241,7 +248,7 @@
                                     @if ($payment_method->stripe_method == 1)
                                         <div class="form-check mb-2 d-flex align-items-center">
                                             <input class="form-check-input" type="radio" name="payment_method"
-                                                id="stripe-payment" value="stripe">
+                                                id="stripe-payment" value="stripe" x-model="payment_method">
                                             <label class="form-check-label d-flex align-items-center ps-2"
                                                 for="stripe-payment" value="stripe" title="stripe">
                                                 <div class="image payment-image">
@@ -256,7 +263,7 @@
                                     @if ($payment_method->razorpay_method == 1)
                                         <div class="form-check mb-2 d-flex align-items-center">
                                             <input class="form-check-input" type="radio" name="payment_method"
-                                                id="razorpay-payment" value="razorpay">
+                                                id="razorpay-payment" value="razorpay" x-model="payment_method">
                                             <label class="form-check-label d-flex align-items-center ps-2"
                                                 for="razorpay-payment" value="razorpay" title="razorpay">
                                                 <div class="image payment-image">
@@ -405,16 +412,25 @@
                                                 class="money">{{ currentCurrencyPrice($wallet_used_balance, true) }}</span>
                                     </div>
                                 @endif
+                                <!-- Додаємо рядок для комісії Stripe -->
+                                <div class="row g-0 border-bottom py-2 d-none stripe-fee-box">
+                                    <span class="col-6 col-sm-6 cart-subtotal-title"><strong>Stripe Fee</strong></span>
+                                    <span class="col-6 col-sm-6 cart-subtotal-title cart-subtotal text-end">
+                                        <span class="money" id="stripe-fee"></span>
+                                    </span>
+                                </div>
                                 <div class="row g-0 pt-2">
                                     <span
                                         class="col-6 col-sm-6 cart-subtotal-title fs-6"><strong>{{ labels('front_messages.total', 'Total') }}</strong></span>
                                     <span
                                         class="col-6 col-sm-6 cart-subtotal-title fs-5 cart-subtotal text-end text-primary"><b
-                                            class="money">{{ currentCurrencyPrice($final_total, true) }}</b></span>
+                                            class="money"
+                                            id="show-final-total">{{ currentCurrencyPrice($final_total, true) }}</b></span>
                                 </div>
                                 <input type="hidden" name="final_total" id="final_total"
                                     value="{{ $final_total }}">
-                                <p class="cart-shipping m-0">Inclusive of all taxes & Shipping</p>
+                                {{-- <p class="cart-shipping m-0">Inclusive of all taxes & Shipping</p> --}}
+                                <p class="cart-shipping m-0">Not include of all taxes & Shipping</p>
 
                                 <button type="submit" id="place_order_btn"
                                     class="btn btn-lg my-4 checkout w-100">{{ labels('front_messages.place_order', 'Place order') }}</button>
@@ -564,3 +580,122 @@
 @if ($payment_method->paystack_method == 1)
     <script src="https://js.paystack.co/v1/inline.js"></script>
 @endif
+
+@push('scripts')
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('checkout', () => ({
+                payment_method: '',
+                baseTotal: {{ $final_total }},
+                finalTotal: {{ $final_total }},
+                stripeFee: 0,
+                walletUsed: {{ $is_wallet_use ? $wallet_used_balance : 0 }},
+                isWalletUsed: {{ $is_wallet_use ? 'true' : 'false' }},
+
+                init() {
+                    this.$watch('payment_method', (value) => this.handlePaymentMethodChange(value));
+                    this.$watch('isWalletUsed', (value) => this.handleWalletChange(value));
+
+                    const walletCheckbox = document.getElementById('wallet-pay');
+                    walletCheckbox.addEventListener('change', () => {
+                        this.isWalletUsed = walletCheckbox.checked;
+                    });
+                },
+
+                handlePaymentMethodChange(payment_method) {
+                    console.log('Selected payment method:', payment_method);
+                    this.updateTotals();
+                },
+
+                handleWalletChange(isWalletUsed) {
+                    console.log('Wallet usage changed:', isWalletUsed);
+                    this.updateTotals();
+                },
+
+                updateTotals() {
+                    const walletBalance = parseFloat(document.getElementById('wallet-pay').dataset
+                        .walletBalance) || 0;
+                    this.walletUsed = this.isWalletUsed ? Math.min(walletBalance, this.baseTotal) : 0;
+                    const amountToPay = this.baseTotal - this.walletUsed;
+
+                    console.log('Base Total:', this.baseTotal);
+                    console.log('Wallet Used:', this.walletUsed);
+                    console.log('Amount to Pay:', amountToPay);
+
+                    if (this.payment_method === 'stripe') {
+                        const appUrl = document.getElementById("app_url")?.dataset.appUrl || window
+                            .location.origin;
+                        const formData = new FormData();
+                        formData.append('amount', amountToPay);
+
+                        fetch(`${appUrl}/payments/stripe/calculate-fee`, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector(
+                                        'meta[name="csrf-token"]').content,
+                                },
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+
+                                if (!data.error && data.fee && data.total_with_fee) {
+                                    this.stripeFee = parseFloat(data.fee) || 0;
+                                    this.finalTotal = this.baseTotal - this.walletUsed + this
+                                        .stripeFee;
+
+                                    console.log('Stripe Fee:', this.stripeFee);
+                                    console.log('Final Total:', this.finalTotal);
+
+                                    document.querySelector('.stripe-fee-box').classList.remove(
+                                        'd-none');
+                                    document.getElementById('stripe-fee').textContent = this
+                                        .formatCurrency(this.stripeFee);
+
+                                    document.getElementById('show-final-total').textContent = this
+                                        .formatCurrency(this
+                                            .finalTotal);
+                                    document.getElementById('final_total').value = this.finalTotal;
+
+                                    document.getElementById('is_wallet_used').value = this
+                                        .isWalletUsed ? 1 : 0;
+                                    document.getElementById('wallet_balance_used').value = this
+                                        .walletUsed;
+                                } else {
+                                    console.error('Stripe fee error:', data.message);
+                                    this.resetStripeFee();
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Fetch error:', error);
+                                this.resetStripeFee();
+                            });
+                    } else {
+                        this.finalTotal = this.baseTotal - this.walletUsed;
+                        this.resetStripeFee();
+
+                        document.getElementById('show-final-total').textContent = this
+                            .formatCurrency(this
+                                .finalTotal);
+
+                        document.getElementById('final_total').value = this.finalTotal;
+
+                        document.getElementById('is_wallet_used').value = this.isWalletUsed ? 1 : 0;
+                        document.getElementById('wallet_balance_used').value = this.walletUsed;
+                    }
+                },
+
+                resetStripeFee() {
+                    this.stripeFee = 0;
+                    document.querySelector('.stripe-fee-box').classList.add('d-none');
+                    document.getElementById('stripe-fee').textContent = '';
+                },
+
+                formatCurrency(amount) {
+                    const currencySymbol = document.getElementById('currency_code').value || '$';
+                    return `${currencySymbol}${parseFloat(amount).toFixed(2)}`;
+                }
+            }));
+        });
+    </script>
+@endpush
