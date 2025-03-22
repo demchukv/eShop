@@ -413,7 +413,7 @@
                                     </div>
                                 @endif
                                 <!-- Додаємо рядок для комісії Stripe -->
-                                <div class="row g-0 border-bottom py-2 d-none stripe-fee-box">
+                                <div wire:ignore class="row g-0 border-bottom py-2 d-none stripe-fee-box">
                                     <span class="col-6 col-sm-6 cart-subtotal-title"><strong>Stripe Fee</strong></span>
                                     <span class="col-6 col-sm-6 cart-subtotal-title cart-subtotal text-end">
                                         <span class="money" id="stripe-fee"></span>
@@ -424,8 +424,9 @@
                                         class="col-6 col-sm-6 cart-subtotal-title fs-6"><strong>{{ labels('front_messages.total', 'Total') }}</strong></span>
                                     <span
                                         class="col-6 col-sm-6 cart-subtotal-title fs-5 cart-subtotal text-end text-primary"><b
-                                            class="money"
+                                            class="money" wire:ignore
                                             id="show-final-total">{{ currentCurrencyPrice($final_total, true) }}</b></span>
+
                                 </div>
                                 <input type="hidden" name="final_total" id="final_total"
                                     value="{{ $final_total }}">
@@ -603,12 +604,10 @@
                 },
 
                 handlePaymentMethodChange(payment_method) {
-                    console.log('Selected payment method:', payment_method);
                     this.updateTotals();
                 },
 
                 handleWalletChange(isWalletUsed) {
-                    console.log('Wallet usage changed:', isWalletUsed);
                     this.updateTotals();
                 },
 
@@ -617,10 +616,6 @@
                         .walletBalance) || 0;
                     this.walletUsed = this.isWalletUsed ? Math.min(walletBalance, this.baseTotal) : 0;
                     const amountToPay = this.baseTotal - this.walletUsed;
-
-                    console.log('Base Total:', this.baseTotal);
-                    console.log('Wallet Used:', this.walletUsed);
-                    console.log('Amount to Pay:', amountToPay);
 
                     if (this.payment_method === 'stripe') {
                         const appUrl = document.getElementById("app_url")?.dataset.appUrl || window
@@ -644,15 +639,13 @@
                                     this.finalTotal = this.baseTotal - this.walletUsed + this
                                         .stripeFee;
 
-                                    console.log('Stripe Fee:', this.stripeFee);
-                                    console.log('Final Total:', this.finalTotal);
-
                                     document.querySelector('.stripe-fee-box').classList.remove(
                                         'd-none');
                                     document.getElementById('stripe-fee').textContent = this
                                         .formatCurrency(this.stripeFee);
 
-                                    document.getElementById('show-final-total').textContent = this
+                                    document.getElementById('show-final-total').textContent =
+                                        this
                                         .formatCurrency(this
                                             .finalTotal);
                                     document.getElementById('final_total').value = this.finalTotal;
@@ -662,7 +655,6 @@
                                     document.getElementById('wallet_balance_used').value = this
                                         .walletUsed;
                                 } else {
-                                    console.error('Stripe fee error:', data.message);
                                     this.resetStripeFee();
                                 }
                             })
