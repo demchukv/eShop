@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Log;
+use App\Models\CommissionDistribution;
+use App\Models\OrderItems;
+use App\Models\SellerData;
 
 class CartController extends Controller
 {
@@ -943,8 +946,8 @@ class CartController extends Controller
             $request = new Request($res);
             $request['final_total'] = $request['amount'];
         }
-        $store_id = session('store_id') ?? '';
-        $user_id = Auth::user()->id ?? "";
+        $store_id = session('store_id') ?? ''; // айді поточного магазину. У нас це завжди 2
+        $user_id = Auth::user()->id ?? ""; // айді поточного користувача
         if ($user_id == "") {
             $response = [
                 'error' => true,
@@ -1227,6 +1230,11 @@ class CartController extends Controller
                         ];
                         return response()->json($response);
                     }
+
+                    // Якщо замовлення створено, розподіляємо кошти по рахунках користувачів
+                    $data['order_id'] = $res['order_id'];
+                    $this->splitCommissionsBetweenUsers($data);
+
                     if ($data['payment_method'] == "bank_transfer" || $data['payment_method'] == 'stripe' || $data['payment_method'] == 'phonepe' || $data['payment_method'] == 'paypal' || $data['payment_method'] == 'paystack' || $data['payment_method'] == 'razorpay') {
                         if ($data['payment_method'] == 'phonepe') {
                             $transaction_id = $request['phonepe_transaction_id'];
@@ -1257,6 +1265,7 @@ class CartController extends Controller
                         $transactionController->store($data);
                     }
                 }
+
                 if (isset($res->original) && !empty($res->original)) {
                     return response()->json($res->original);
                 } else {
@@ -1369,8 +1378,79 @@ class CartController extends Controller
         }
     }
 
-    public function splitComissionsBetweenUsers($data)
+    public function splitCommissionsBetweenUsers($data)
     {
-        return;
+        $order_id = $data['order_id'] ?? null;
+        if (!$order_id) {
+            Log::error('No order_id provided for commission distribution', $data);
+            return;
+        }
+
+        // Отримуємо елементи замовлення з таблиці order_items
+        $order_items = OrderItems::where('order_id', $order_id)
+            ->select('id', 'product_variant_id', 'quantity', 'seller_id')
+            ->get();
+
+        if ($order_items->isEmpty()) {
+            Log::error('No order items found for order_id: ' . $order_id);
+            return;
+        }
+
+        foreach ($order_items as $item) {
+            // Отримуємо дані з Product_variants за product_variant_id
+            $variant = Product_variants::where('id', $item->product_variant_id)
+                ->select('price', 'special_price', 'dealer_price')
+                ->first();
+
+            if (!$variant) {
+                Log::warning('Product variant not found for product_variant_id: ' . $item->product_variant_id);
+                continue;
+            }
+
+            // Отримуємо user_id із seller_data за seller_id
+            $seller = SellerData::where('id', $item->seller_id)->select('id', 'user_id')->first();
+            if (!$seller || !$seller->user_id) {
+                Log::warning('Seller or user_id not found for seller_id: ' . $item->seller_id);
+                continue;
+            }
+
+            // Визначаємо ціну для розрахунків (special_price, якщо є і менше price, інакше price)
+            $price = $variant->special_price > 0 && $variant->special_price < $variant->price ? $variant->special_price : $variant->price;
+            $dealer_price = $variant->dealer_price ?? 0;
+            $quantity = $item->quantity;
+            $seller_id = $seller->user_id;
+
+            if ($dealer_price <= 0 || !$seller_id) {
+                Log::warning('Invalid dealer_price or seller_id for order_item_id: ' . $item->id);
+                continue;
+            }
+
+            // Розрахунок сум для продавця (95% від dealer_price)
+            $seller_amount = $dealer_price * 0.95 * $quantity;
+            $this->createCommissionRecord($order_id, $seller_id, $seller_amount, "95% commission from dealer_price for seller");
+
+            // Розрахунок суми для компанії (5% від dealer_price)
+            $company_amount = $dealer_price * 0.05 * $quantity;
+            $this->createCommissionRecord($order_id, 1, $company_amount, "5% commission from dealer_price for company");
+
+            // Різниця між price та dealer_price (для рефералів)
+            $referral_amount = ($price - $dealer_price) * $quantity;
+            if ($referral_amount > 0) {
+                $this->createCommissionRecord($order_id, 1, $referral_amount, "Referral commission (to be distributed)");
+            }
+        }
+
+        Log::info('Commissions distributed for order_id: ' . $order_id);
+    }
+
+    // Допоміжна функція для створення запису в commission_distributions
+    private function createCommissionRecord($order_id, $user_id, $amount, $message)
+    {
+        CommissionDistribution::create([
+            'order_id' => $order_id,
+            'user_id' => $user_id,
+            'amount' => $amount,
+            'message' => $message,
+        ]);
     }
 }
