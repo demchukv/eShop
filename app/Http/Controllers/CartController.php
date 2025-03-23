@@ -938,7 +938,6 @@ class CartController extends Controller
     public function place_order(Request $request, TransactionController $transactionController)
     {
         // dd($request);
-        Log::info('place_order $request = ', ['request' => $request]);
         if ($request->has('res')) {
             $res = $request->input('res');
             $request = new Request($res);
