@@ -30,6 +30,7 @@ use App\Http\Controllers\vendor\Chatify\MessagesController;
 use App\Http\Controllers\SellerInviteController;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\Seller\PendingPaymentController;
 
 
 Route::get('seller/orders/generatParcelInvoicePDF/{id}', [OrderController::class, 'generatParcelInvoicePDF'])->name('seller.orders.generatParcelInvoicePDF');
@@ -201,6 +202,10 @@ Route::group(
         //Transaction
         Route::get('seller/transaction/wallet_transactions', [TransactionController::class, 'wallet_transactions'])->name('seller.transaction.wallet_transactions');
         Route::get('seller/transaction/wallet_transactions_list', [TransactionController::class, 'wallet_transactions_list'])->name('seller.transaction.wallet_transactions_list');
+
+        // Pending Payments
+        Route::get('seller/pending_payments', [PendingPaymentController::class, 'pending_payments'])->name('seller.pending_payments');
+        Route::get('seller/pending_payments/list', [PendingPaymentController::class, 'pending_payments_list'])->name('seller.pending_payments.list');
 
         //Payment Request
         Route::get('seller/payment_request/withdrawal_requests', [PaymentRequestController::class, 'withdrawal_requests'])->name('seller.payment_request.withdrawal_requests');

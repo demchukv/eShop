@@ -196,6 +196,13 @@
                  </a>
              </li>
              <li class="nav-item ">
+                 <a class="nav-link {{ Request::is('seller/pending_payments') ? 'active' : '' }}"
+                     href="{{ route('seller.pending_payments') }}">
+                     <span
+                         class="nav-link-text ">{{ labels('admin_labels.pending_payments', 'Pending Payments') }}</span>
+                 </a>
+             </li>
+             <li class="nav-item ">
                  <a class="nav-link {{ Request::is('seller/payment_request/withdrawal_requests') ? 'active' : '' }}"
                      href="{{ route('seller.payment_request.withdrawal_requests') }}">
                      <span class="nav-link-text ">
