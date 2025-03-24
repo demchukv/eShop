@@ -843,6 +843,22 @@
                     </div>
                 </div>
 
+                <!-- Новий блок Payment Distribution -->
+                <div class="card mt-5">
+                    <h6>{{ labels('admin_labels.payment_distribution', 'Payment Distribution') }}</h6>
+                    @forelse ($payment_distribution as $dist)
+                        <div class="mt-3 flex">
+                            <span
+                                class="text-muted float-start">{{ $dist['username'] }}<br><small>{{ $dist['message'] }}</small></span>
+                            <span class="float-end">{{ formateCurrency(formatePriceDecimal($dist['amount'])) }}</span>
+                        </div>
+                    @empty
+                        <div class="mt-3 text-muted text-center">
+                            {{ labels('admin_labels.no_data', 'No payment distribution data available') }}
+                        </div>
+                    @endforelse
+                </div>
+
             </div>
         </div>
     </section>

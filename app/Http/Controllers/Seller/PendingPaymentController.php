@@ -46,6 +46,7 @@ class PendingPaymentController extends Controller
             return [
                 'id' => $payment->id,
                 'order_id' => $payment->order_id,
+                'order_url' => route('seller.orders.edit', $payment->order_id), // Додаємо URL
                 'amount' => $payment->amount,
                 'message' => $payment->message,
                 'status' => ucfirst($payment->status),

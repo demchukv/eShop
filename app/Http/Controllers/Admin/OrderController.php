@@ -19,6 +19,7 @@ use LaravelDaily\Invoices\Invoice;
 use LaravelDaily\Invoices\Classes\Buyer;
 use LaravelDaily\Invoices\Classes\InvoiceItem;
 use LaravelDaily\Invoices\Classes\Party;
+use App\Models\CommissionDistribution;
 
 
 class OrderController extends Controller
@@ -668,12 +669,14 @@ class OrderController extends Controller
 
     public function edit($id)
     {
+        $order_id = $id;
         $store_id = getStoreId();
         $res = getOrderDetails(['o.id' => $id], '', '', $store_id);
 
         if ($res == null || empty($res)) {
             return view('admin.pages.views.no_data_found');
         } else {
+            // Логіка для вибірки доступних кур’єрів
             if (isExist(['id' => $res[0]->address_id], 'addresses')) {
                 $zipcode = fetchDetails('addresses', ['id' => $res[0]->address_id], 'pincode');
 
@@ -715,12 +718,13 @@ class OrderController extends Controller
                     ->toArray();
             }
 
-
+            // Банківські перекази та транзакції
             if ($res[0]->payment_method == "bank_transfer") {
                 $bank_transfer = fetchDetails('order_bank_transfers', ['order_id' => $res[0]->order_id]);
                 $transaction_search_res = fetchDetails('transactions', ['order_id' => $res[0]->order_id]);
             }
 
+            // Збір даних про товари та продавців
             $items = $seller = [];
             foreach ($res as $row) {
 
@@ -805,6 +809,20 @@ class OrderController extends Controller
                 array_push($seller, $value);
             }
 
+            // Новий код: Отримання даних із моделі CommissionDistribution
+            $payment_distribution = CommissionDistribution::where('order_id', $order_id)
+                ->with('user')
+                ->get()
+                ->map(function ($dist) {
+                    return [
+                        'id' => $dist->id,
+                        'user_id' => $dist->user_id,
+                        'username' => $dist->user->username,
+                        'amount' => $dist->amount,
+                        'message' => $dist->message,
+                    ];
+                })->toArray();
+            // dd($payment_distribution);
 
 
             $sellers = $seller;
@@ -821,7 +839,7 @@ class OrderController extends Controller
             $currencyDetails = fetchDetails('currencies', ['is_default' => 1], 'symbol');
             $currency = !empty($currencyDetails) ? $currencyDetails[0]->symbol : '';
 
-            return view('admin.pages.forms.edit_orders', compact('delivery_res', 'order_detls', 'bank_transfer', 'store_id', 'transaction_search_res', 'items', 'settings', 'shipping_method', 'sellers', 'currency'));
+            return view('admin.pages.forms.edit_orders', compact('delivery_res', 'order_detls', 'bank_transfer', 'store_id', 'transaction_search_res', 'items', 'settings', 'shipping_method', 'sellers', 'currency', 'payment_distribution'));
         }
     }
 

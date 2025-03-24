@@ -96,7 +96,8 @@
                                                 <th data-field="id" data-sortable="true">
                                                     {{ labels('admin_labels.id', 'ID') }}
                                                 </th>
-                                                <th data-field="order_id" data-sortable="false">
+                                                <th data-field="order_id" data-sortable="false"
+                                                    data-formatter="orderIdFormatter">
                                                     {{ labels('admin_labels.order_id', 'Order ID') }}
                                                 </th>
                                                 <th data-field="amount" data-sortable="false">
@@ -134,6 +135,10 @@
                 offset: p.offset,
                 search: p.search
             };
+        }
+
+        function orderIdFormatter(value, row) {
+            return '<a href="' + row.order_url + '">' + value + '</a>';
         }
     </script>
 @endsection
