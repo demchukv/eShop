@@ -1503,6 +1503,7 @@ class CartController extends Controller
             'user_id' => $user_id,
             'amount' => $amount,
             'message' => $message,
+            'status' => CommissionDistribution::STATUS_PENDING,
         ]);
     }
 }

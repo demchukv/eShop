@@ -23,7 +23,7 @@
                         <div class="pending-commissions mt-3">
                             <p class="pending-total">
                                 {{ labels('front_messages.pending_commissions', 'Pending Commissions') }}:
-                                {{ $currency_symbol }} <span>{{ number_format($pendingTotal, 2) }}</span>
+                                {{ $currency_symbol }} <span>{{ number_format($pending_total, 2) }}</span>
                             </p>
                         </div>
                         <div class="d-flex align-item-center justify-content-start mt-2 gap-2">
@@ -297,13 +297,15 @@
                         <div id="Pending-tab" class="tab-content" wire:ignore.self>
                             <div class="table-responsive">
                                 <table class='table' id="pending_commissions" data-toggle="table"
-                                    data-loading-template="loadingTemplate" data-click-to-select="true"
-                                    data-side-pagination="client" data-pagination="true"
+                                    data-loading-template="loadingTemplate"
+                                    data-url="{{ route('my-account.pending_commissions') }}"
+                                    data-click-to-select="true" data-side-pagination="server" data-pagination="true"
                                     data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
                                     data-show-columns="true" data-show-refresh="true" data-trim-on-search="false"
                                     data-search-highlight="true" data-sort-name="id" data-sort-order="desc"
                                     data-mobile-responsive="true" data-toolbar="" data-show-export="true"
-                                    data-maintain-selected="true" data-export-types='["txt","excel","csv"]'>
+                                    data-maintain-selected="true" data-export-types='["txt","excel","csv"]'
+                                    data-query-params="pending_commissions_params">
                                     <thead>
                                         <tr>
                                             <th data-field="id" data-sortable="true">
@@ -314,22 +316,12 @@
                                                 {{ labels('front_messages.amount', 'Amount') }}</th>
                                             <th data-field="message" data-sortable="false">
                                                 {{ labels('front_messages.message', 'Message') }}</th>
+                                            <th data-field="status" data-sortable="false">
+                                                {{ labels('front_messages.status', 'Status') }}</th>
                                             <th data-field="created_at" data-sortable="true">
                                                 {{ labels('front_messages.date', 'Date') }}</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        @foreach ($pendingCommissions as $commission)
-                                            <tr>
-                                                <td>{{ $commission->id }}</td>
-                                                <td>{{ $commission->order_id }}</td>
-                                                <td>{{ $currency_symbol }} {{ number_format($commission->amount, 2) }}
-                                                </td>
-                                                <td>{{ $commission->message }}</td>
-                                                <td>{{ $commission->created_at }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -372,5 +364,15 @@
             offset: p.offset,
             search: p.search
         }
+    }
+
+    function pending_commissions_params(p) {
+        return {
+            limit: p.limit,
+            sort: p.sort,
+            order: p.order,
+            offset: p.offset,
+            search: p.search
+        };
     }
 </script>

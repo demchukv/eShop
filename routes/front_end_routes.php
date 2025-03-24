@@ -123,6 +123,7 @@ Route::middleware(App\Http\Middleware\checkAuth::class)->group(function () {
     Route::get('/my-account/wallet_withdrawal_request', [Customers::class, 'wallet_withdrawal_request'])->name('my-account.wallet_withdrawal_request');
     Route::get('/my-account/get_transaction', [Customers::class, 'get_transaction'])->name('my-account.get_transaction');
     Route::get('/my-account/get_notifications', [NotificationsController::class, 'get_notifications'])->name('my-account.get_notifications');
+    Route::get('/my-account/pending_commissions', [Customers::class, 'getPendingCommissions'])->name('my-account.pending_commissions');
 
     Route::get('/my-account/transactions', Transactions::class)->name('my-account.transactions');
     Route::get('/my-account/wallet', Wallet::class)->name('my-account.wallet');
