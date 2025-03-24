@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\CommissionDistribution;
 use App\Models\OrderItems;
 use App\Models\SellerData;
+use App\Models\User;
 
 class CartController extends Controller
 {
@@ -1414,6 +1415,9 @@ class CartController extends Controller
                 continue;
             }
 
+            $user = Auth::user();
+            $seller_user = User::find($seller->user_id);
+
             // Визначаємо ціну для розрахунків (special_price, якщо є і менше price, інакше price)
             $price = $variant->special_price > 0 && $variant->special_price < $variant->price ? $variant->special_price : $variant->price;
             $dealer_price = $variant->dealer_price ?? 0;
@@ -1427,16 +1431,64 @@ class CartController extends Controller
 
             // Розрахунок сум для продавця (95% від dealer_price)
             $seller_amount = $dealer_price * 0.95 * $quantity;
-            $this->createCommissionRecord($order_id, $seller_id, $seller_amount, "95% commission from dealer_price for seller");
+            $this->createCommissionRecord($order_id, $seller_id, $seller_amount, "95% from dealer_price for seller");
 
             // Розрахунок суми для компанії (5% від dealer_price)
-            $company_amount = $dealer_price * 0.05 * $quantity;
-            $this->createCommissionRecord($order_id, 1, $company_amount, "5% commission from dealer_price for company");
+            if ($seller_user->friends_code) {
+                // якщо продавця запросив менеджер, то нараховуємо 1% від dealer_price менеджеру і 4% від dealer_price компанії
+                $manager = User::where('referral_code', $seller_user->friends_code)->first();
+                if ($manager && $manager->role->name === 'manager') {
+                    $manager_amount = $dealer_price * 0.01 * $quantity;
+                    $this->createCommissionRecord($order_id, $manager->id, $manager_amount, "1% commission from dealer_price for manager");
+                    $company_amount = $dealer_price * 0.04 * $quantity;
+                    $this->createCommissionRecord($order_id, 1, $company_amount, "4% commission from dealer_price for company");
+                } else {
+                    $company_amount = $dealer_price * 0.05 * $quantity;
+                    $this->createCommissionRecord($order_id, 1, $company_amount, "5% commission from dealer_price for company");
+                }
+            } else {
+                // якщо продавця не запросив менеджер, то нараховуємо 5% від dealer_price компанії
+                $company_amount = $dealer_price * 0.05 * $quantity;
+                $this->createCommissionRecord($order_id, 1, $company_amount, "5% commission from dealer_price for company");
+            }
+
 
             // Різниця між price та dealer_price (для рефералів)
-            $referral_amount = ($price - $dealer_price) * $quantity;
+            $price_difference = ($price - $dealer_price) * $quantity;
+
+            // 10% від різниці між price та dealer_price для компанії
+            $company_amount = $price_difference * 0.1;
+            $this->createCommissionRecord($order_id, 1, $company_amount, "10% commission from price_difference for company");
+
+            // 90% від різниці між price та dealer_price для рефералів
+            $referral_amount = $price_difference * 0.9;
             if ($referral_amount > 0) {
-                $this->createCommissionRecord($order_id, 1, $referral_amount, "Referral commission (to be distributed)");
+                if (!$user->friends_code && $user->role->name === 'members') {
+                    // якщо користувач не є рефералом, то розподіляємо комісію на компанію
+                    $this->createCommissionRecord($order_id, 1, $referral_amount, "User don't have friends_code. Referral commission for company");
+                }
+                if (!$user->friends_code && $user->role->name === 'manager') {
+                    // якщо користувач не є рефералом, але це менеджер,то повертаємо комісію йому
+                    $this->createCommissionRecord($order_id, $user->id, $referral_amount, "User don't have friends_code. Referral commission for company");
+                }
+                if (!$user->friends_code && $user->role->name === 'dealer') {
+                    // якщо користувач не є рефералом, але це менеджер,то повертаємо комісію йому
+                    $this->createCommissionRecord($order_id, $user->id, $referral_amount, "User don't have friends_code. Referral commission for company");
+                }
+                if ($user->friends_code) {
+                    $referral_user = User::where('referral_code', $user->friends_code)->first();
+                    if ($referral_user) {
+                        if ($referral_user->role->name === 'manager') {
+                            // якщо реферал є менеджером, то розподіляємо комісію на менеджера
+                            $this->createCommissionRecord($order_id, $referral_user->id, $referral_amount, "Referral commission for user");
+                        }
+                        if ($referral_user->role->name === 'dealer') {
+                            // якщо реферал є дилером, то розподіляємо комісію на дилера і його менеджера
+                            // TODO: розділити комісію між дилером і менеджером, якщо він є.
+                            $this->createCommissionRecord($order_id, $referral_user->id, $referral_amount, "Referral commission for user");
+                        }
+                    }
+                }
             }
         }
 

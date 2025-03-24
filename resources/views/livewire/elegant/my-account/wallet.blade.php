@@ -19,6 +19,13 @@
                             <p class="wallet-name">{{ $user_info['username'] }}</p>
                             <p class="wallet-text">{{ labels('front_messages.wallet', 'Wallet') }}</p>
                         </div>
+                        <!-- Додаємо загальну суму, що очікується -->
+                        <div class="pending-commissions mt-3">
+                            <p class="pending-total">
+                                {{ labels('front_messages.pending_commissions', 'Pending Commissions') }}:
+                                {{ $currency_symbol }} <span>{{ number_format($pendingTotal, 2) }}</span>
+                            </p>
+                        </div>
                         <div class="d-flex align-item-center justify-content-start mt-2 gap-2">
                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
                                 data-bs-target="#add_wallet_modal">{{ labels('front_messages.add', 'Add') }}</button>
@@ -191,6 +198,9 @@
                         <li rel="Withdraw-tab"><a
                                 class="tablink">{{ labels('front_messages.withdraw_request', 'Withdraw Request') }}</a>
                         </li>
+                        <li rel="Pending-tab"><a
+                                class="tablink">{{ labels('front_messages.pending_commissions', 'Pending Commissions') }}</a>
+                        </li>
                     </ul>
 
                     <div class="tab-container">
@@ -278,6 +288,48 @@
                                             </th>
                                         </tr>
                                     </thead>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- Нова вкладка Pending Commissions -->
+                        <h3 class="tabs-ac-style d-md-none" rel="Pending-tab">
+                            {{ labels('front_messages.pending_commissions', 'Pending Commissions') }}</h3>
+                        <div id="Pending-tab" class="tab-content" wire:ignore.self>
+                            <div class="table-responsive">
+                                <table class='table' id="pending_commissions" data-toggle="table"
+                                    data-loading-template="loadingTemplate" data-click-to-select="true"
+                                    data-side-pagination="client" data-pagination="true"
+                                    data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
+                                    data-show-columns="true" data-show-refresh="true" data-trim-on-search="false"
+                                    data-search-highlight="true" data-sort-name="id" data-sort-order="desc"
+                                    data-mobile-responsive="true" data-toolbar="" data-show-export="true"
+                                    data-maintain-selected="true" data-export-types='["txt","excel","csv"]'>
+                                    <thead>
+                                        <tr>
+                                            <th data-field="id" data-sortable="true">
+                                                {{ labels('front_messages.id', 'ID') }}</th>
+                                            <th data-field="order_id" data-sortable="false">
+                                                {{ labels('front_messages.order_id', 'Order ID') }}</th>
+                                            <th data-field="amount" data-sortable="false">
+                                                {{ labels('front_messages.amount', 'Amount') }}</th>
+                                            <th data-field="message" data-sortable="false">
+                                                {{ labels('front_messages.message', 'Message') }}</th>
+                                            <th data-field="created_at" data-sortable="true">
+                                                {{ labels('front_messages.date', 'Date') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($pendingCommissions as $commission)
+                                            <tr>
+                                                <td>{{ $commission->id }}</td>
+                                                <td>{{ $commission->order_id }}</td>
+                                                <td>{{ $currency_symbol }} {{ number_format($commission->amount, 2) }}
+                                                </td>
+                                                <td>{{ $commission->message }}</td>
+                                                <td>{{ $commission->created_at }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
