@@ -1469,11 +1469,11 @@ class CartController extends Controller
                 }
                 if (!$user->friends_code && $user->role->name === 'manager') {
                     // якщо користувач не є рефералом, але це менеджер,то повертаємо комісію йому
-                    $this->createCommissionRecord($order_id, $user->id, $referral_amount, "User don't have friends_code. Referral commission for company");
+                    $this->createCommissionRecord($order_id, $user->id, $referral_amount, "User don't have friends_code and is manager. Referral commission for company");
                 }
                 if (!$user->friends_code && $user->role->name === 'dealer') {
                     // якщо користувач не є рефералом, але це менеджер,то повертаємо комісію йому
-                    $this->createCommissionRecord($order_id, $user->id, $referral_amount, "User don't have friends_code. Referral commission for company");
+                    $this->createCommissionRecord($order_id, $user->id, $referral_amount, "User don't have friends_code and is dealer. Referral commission for company");
                 }
                 if ($user->friends_code) {
                     $referral_user = User::where('referral_code', $user->friends_code)->first();
@@ -1485,7 +1485,13 @@ class CartController extends Controller
                         if ($referral_user->role->name === 'dealer') {
                             // якщо реферал є дилером, то розподіляємо комісію на дилера і його менеджера
                             // TODO: розділити комісію між дилером і менеджером, якщо він є.
-                            $this->createCommissionRecord($order_id, $referral_user->id, $referral_amount, "Referral commission for user");
+                            if ($referral_user->friends_code) {
+                                $referral_manager = User::where('referral_code', $referral_user->friends_code)->first();
+                                $this->createCommissionRecord($order_id, $referral_manager->id, $referral_amount * 0.5, "Referral commission for user");
+                                $this->createCommissionRecord($order_id, $referral_user->id, $referral_amount * 0.5, "Referral commission for user");
+                            } else {
+                                $this->createCommissionRecord($order_id, $referral_user->id, $referral_amount, "Referral commission for user");
+                            }
                         }
                     }
                 }
