@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Symfony\Component\HttpFoundation\Response;
 
+
 class SetDefaultStore
 {
     /**
@@ -43,9 +44,9 @@ class SetDefaultStore
             if (isset($request->query()['store']) && ($request->query()['store'] != null)) {
                 $store_slug = $request->query()['store'];
                 $store = fetchDetails('stores', ['slug' => $store_slug], "*");
-                if (count($store) <= 0) {
-                    return redirect(customUrl(url()->current()));
-                }
+                // if (count($store) <= 0) {
+                //     return redirect(customUrl(url()->current()));
+                // }
                 if (isset($store[0]) && $store[0]->id != session('store_id')) {
                     session()->forget(['store_id', 'store_name', 'store_image', 'store_slug']);
                     session()->put('store_id', $store[0]->id);

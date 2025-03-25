@@ -1249,8 +1249,7 @@ document.addEventListener("livewire:navigated", () => {
 
     $(".slider-link").on("click", function (e) {
         let link = $(this).data("link");
-        let url = setUrlParameter(link, "store", store_slug);
-        Livewire.navigate(url);
+        Livewire.navigate(link);
     });
 
     var currency_symbol = $("#currency").val();
@@ -1284,21 +1283,11 @@ document.addEventListener("livewire:navigated", () => {
                 position: "topRight",
             });
             setTimeout(() => {
-                let url = setUrlParameter(
-                    appUrl + "/login",
-                    "store",
-                    store_slug
-                );
-                Livewire.navigate(url);
+                Livewire.navigate(appUrl + "/login");
             }, 1500);
             return false;
         }
-        let url = setUrlParameter(
-            appUrl + "cart/checkout",
-            "store",
-            store_slug
-        );
-        Livewire.navigate(url);
+        Livewire.navigate(appUrl + "cart/checkout");
         return false;
     }
 
@@ -1313,17 +1302,11 @@ document.addEventListener("livewire:navigated", () => {
                 position: "topRight",
             });
             setTimeout(() => {
-                let url = setUrlParameter(
-                    appUrl + "/login",
-                    "store",
-                    store_slug
-                );
-                Livewire.navigate(url);
+                Livewire.navigate(appUrl + "/login");
             }, 1500);
             return false;
         }
-        let url = setUrlParameter(appUrl + "cart/", "store", store_slug);
-        Livewire.navigate(url);
+        Livewire.navigate(appUrl + "cart/");
         return false;
     }
 
@@ -1806,8 +1789,7 @@ document.addEventListener("livewire:navigated", () => {
                         position: "topRight",
                     });
                 }
-                let url = setUrlParameter(current_url, "store", store_slug);
-                Livewire.navigate(url);
+                Livewire.navigate(current_url);
             },
         });
     });
@@ -2645,14 +2627,14 @@ document.addEventListener("livewire:navigated", () => {
         CustomSmsAuth();
     }
 
-    let store = setUrlParameter(custom_url, "store", store_slug);
-    // let store = setUrlParameter(custom_url);
+    // let store = setUrlParameter(custom_url, "store", store_slug);
+    let store = custom_url;
     let split_url = custom_url.split("?");
     const urlParams = new URLSearchParams("?".concat(split_url[1]));
     const store_exsist = urlParams.get("store");
-    if (store_exsist == null) {
-        Livewire.navigate(store);
-    }
+    // if (store_exsist == null) {
+    //     Livewire.navigate(store);
+    // }
 });
 
 $(function () {
