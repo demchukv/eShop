@@ -70,7 +70,8 @@
     <script src="{{ asset('js/datepicker/js/bootstrap-datepicker.min.js') }}" defer></script>
     <script src="{{ asset('frontend/elegant/js/swiper-bundle.min.js') }}" defer></script>
     <script src="{{ asset('frontend/elegant/js/shareon.iife.js') }}" data-navigate-track="reload" defer></script>
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" defer></script>
+    {{-- <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" defer></script> --}}
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" defer></script>
 </head>
 @php
     $is_rtl = session('is_rtl') ?? 0;
@@ -107,7 +108,7 @@
     @endif
     <x-include-modal.modals />
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/lightbox.css') }}">
-     @filepondScripts
+    @filepondScripts
     @livewireScripts
     @stack('scripts')
 </body>

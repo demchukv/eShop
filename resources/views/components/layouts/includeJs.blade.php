@@ -10,4 +10,5 @@
 <script src="{{ asset('frontend/elegant/js/vendor/jquery.elevatezoom.js') }}" defer></script>
 <script src="{{ asset('frontend/elegant/js/lightbox.js') }}" defer></script>
 <script src="{{ asset('frontend/elegant/js/custom.js') }}" defer></script>
-<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" defer></script>
+{{-- <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" defer></script> --}}
+<script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" defer></script>

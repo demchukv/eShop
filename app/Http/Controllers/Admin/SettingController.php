@@ -1011,11 +1011,14 @@ class SettingController extends Controller
     public function storeShippingSettings(Request $request)
     {
 
-        if (!isset($request->local_shipping_method) && !isset($request->shiprocket_shipping_method)) {
+        // Перевірка, чи обрано хоча б один метод доставки
+        if (!isset($request->local_shipping_method) && !isset($request->shiprocket_shipping_method) && !isset($request->couriers_list_method)) {
             if ($request->ajax()) {
-                return response()->json(['message' => 'Please select shipping method']);
+                return response()->json(['message' => 'Please select at least one shipping method']);
             }
         }
+
+        // Валідація для Shiprocket
         if (($request->shiprocket_shipping_method) == "on") {
             $validator = Validator::make($request->all(), [
                 'email' => 'required',
@@ -1023,10 +1026,27 @@ class SettingController extends Controller
                 'webhook_token' => 'required',
             ]);
         }
+
+        // Валідація для Enable Free Delivery
         if (($request->standard_shipping_free_delivery) == "on") {
             $validator = Validator::make($request->all(), [
                 'minimum_free_delivery_order_amount' => 'required',
             ]);
+        }
+
+        // Валідація для Couriers List
+        if ($request->couriers_list_method == "on") {
+            $validator = Validator::make($request->all(), [
+                'couriers_list.*.name' => 'required|string|max:255',
+                'couriers_list.*.tracking_url' => 'nullable|url|max:255',
+            ]);
+            if ($validator->fails()) {
+                $errors = $validator->errors();
+                if ($request->ajax()) {
+                    return response()->json(['errors' => $errors->all()], 422);
+                }
+                return redirect()->back()->withErrors($errors)->withInput();
+            }
         }
 
 
@@ -1051,6 +1071,8 @@ class SettingController extends Controller
                 'webhook_token' => $request->webhook_token,
                 'standard_shipping_free_delivery' => isset($request->standard_shipping_free_delivery) && $request->standard_shipping_free_delivery == "on" ? 1 : 0,
                 'minimum_free_delivery_order_amount' => $request->minimum_free_delivery_order_amount,
+                'couriers_list_method' => isset($request->couriers_list_method) && $request->couriers_list_method == "on" ? 1 : 0,
+                'couriers_list' => $request->couriers_list ?? [], // Список кур’єрів
             ], JSON_UNESCAPED_SLASHES),
         ];
         // Check if settings already exist in the database
