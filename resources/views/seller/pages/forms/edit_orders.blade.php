@@ -362,11 +362,20 @@
                                                                 aria-expanded="false">
                                                                 <i class='bx bx-download'></i>
                                                             </a>
-                                                            <ul class="dropdown-menu" aria-labelledby="exportOptionsDropdown">
-                                                                <li><button class="dropdown-item" type="button" onclick="exportTableData('seller_parcel_table','csv')">CSV</button></li>
-                                                                <li><button class="dropdown-item" type="button" onclick="exportTableData('seller_parcel_table','json')">JSON</button></li>
-                                                                <li><button class="dropdown-item" type="button" onclick="exportTableData('seller_parcel_table','sql')">SQL</button></li>
-                                                                <li><button class="dropdown-item" type="button" onclick="exportTableData('seller_parcel_table','excel')">Excel</button></li>
+                                                            <ul class="dropdown-menu"
+                                                                aria-labelledby="exportOptionsDropdown">
+                                                                <li><button class="dropdown-item" type="button"
+                                                                        onclick="exportTableData('seller_parcel_table','csv')">CSV</button>
+                                                                </li>
+                                                                <li><button class="dropdown-item" type="button"
+                                                                        onclick="exportTableData('seller_parcel_table','json')">JSON</button>
+                                                                </li>
+                                                                <li><button class="dropdown-item" type="button"
+                                                                        onclick="exportTableData('seller_parcel_table','sql')">SQL</button>
+                                                                </li>
+                                                                <li><button class="dropdown-item" type="button"
+                                                                        onclick="exportTableData('seller_parcel_table','excel')">Excel</button>
+                                                                </li>
                                                             </ul>
                                                         </div>
                                                     </div>
@@ -985,7 +994,7 @@
                                                             ($shiprocket_order['data']['status_code'] != 4 ||
                                                                 $shiprocket_order['data']['status'] !=
                                                                     'PICKUP
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    SCHEDULED') &&
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            SCHEDULED') &&
                                                             $shiprocket_order['data']['status'] != 'CANCELED' &&
                                                             $shiprocket_order['data']['status'] != 'CANCELLATION REQUESTED')
                                                         <button type="button" title="Send Pickup Request"
@@ -1188,4 +1197,99 @@
             </div>
         </div>
     </div>
+
+    <!-- Нова модаль для Custom Carrier -->
+    <div class="modal fade" id="custom_carrier_modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create a Custom Carrier Parcel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="custom_carrier_form" action="{{ route('seller.parcels.create_custom_carrier') }}"
+                        method="POST">
+                        @csrf
+                        <input type="hidden" name="order_id" value="{{ $order_detls[0]->id }}">
+                        <input type="hidden" name="parcel_id" id="parcel_id">
+
+                        <!-- Вибір перевізника -->
+                        <div class="form-group">
+                            <label for="carrier_name">Select Carrier</label>
+                            <select name="carrier_name" id="carrier_name" class="form-control" required>
+                                <option value="">Choose a carrier</option>
+                                @php
+                                    $shippingSettings = json_decode(getSettings('shipping_method', true), true);
+                                    $couriers = $shippingSettings['couriers_list'] ?? [];
+                                @endphp
+                                @foreach ($couriers as $courier)
+                                    <option value="{{ $courier['slug'] }}">{{ $courier['name'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Введення трек-коду -->
+                        <div class="form-group">
+                            <label for="tracking_number">Tracking Number</label>
+                            <input type="text" name="tracking_number" id="tracking_number" class="form-control"
+                                placeholder="Enter tracking number" required>
+                        </div>
+
+                        <!-- Статус -->
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select name="status" id="status" class="form-control">
+                                <option value="processed">Processed</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                            </select>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">Create Parcel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.querySelector('#custom_carrier_modal');
+            modal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const parcelId = button.getAttribute('data-parcel-id') || '';
+                const carrierId = button.getAttribute('data-carrier-id') || '';
+                const trackingNumber = button.getAttribute('data-tracking-number') || '';
+                const status = button.getAttribute('data-status') || 'processed';
+                console.log(parcelId, carrierId, trackingNumber, status);
+
+                const parcelInput = modal.querySelector('#parcel_id');
+                const carrierSelect = modal.querySelector('#carrier_name');
+                const trackingInput = modal.querySelector('#tracking_number');
+                const statusSelect = modal.querySelector('#status');
+
+                parcelInput.value = parcelId;
+                carrierSelect.value = carrierId || '';
+                trackingInput.value = trackingNumber || '';
+                statusSelect.value = status;
+
+            });
+
+            // modal.addEventListener('hidden.bs.modal', function() {
+            //     const parcelInput = modal.querySelector('#parcel_id');
+            //     const carrierSelect = modal.querySelector('#carrier_name');
+            //     const trackingInput = modal.querySelector('#tracking_number');
+            //     const statusSelect = modal.querySelector('#status');
+
+            //     parcelInput.value = '';
+            //     carrierSelect.value = '';
+            //     trackingInput.value = '';
+            //     statusSelect.value = 'processed';
+            // });
+        });
+    </script>
 @endsection

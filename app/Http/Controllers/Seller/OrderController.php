@@ -1698,6 +1698,9 @@ class OrderController extends Controller
         $order = $request->input('order', 'ASC');
         $order_id = $request->input('order_id', 0);
 
+        $shippingSettings = json_decode(getSettings('shipping_method', true), true);
+        $isCustomCarrierEnabled = $shippingSettings['couriers_list_method'] ?? false;
+
         $query = Parcel::select('parcels.id', 'parcels.order_id', 'parcels.name', 'parcels.active_status as status', 'parcels.type as order_parcel_type', 'parcels.created_at', 'parcels.otp')
             ->join('parcel_items', 'parcel_items.parcel_id', '=', 'parcels.id')
             ->join('orders', 'orders.id', '=', 'parcels.order_id')
@@ -1815,7 +1818,8 @@ class OrderController extends Controller
                 $quantities[] = $item->quantity;
                 $item->image = getMediaImageUrl($item->image);
             }
-            $order_tracking_data = fetchDetails('order_trackings', ['parcel_id' => $parcel->id, 'shipment_id' => 0], ['courier_agency', 'tracking_id', 'url']);
+            // $order_tracking_data = fetchDetails('order_trackings', ['parcel_id' => $parcel->id, 'shipment_id' => 0], ['courier_agency', 'tracking_id', 'url']);
+            $order_tracking_data = fetchDetails('order_trackings', ['parcel_id' => $parcel->id, 'shipment_id' => 0], ['courier_agency', 'tracking_id', 'url', 'carrier_id', 'tracking_number']);
 
             $action = '<div class="d-flex action-icons">
                         <a href="javascript:void(0)" class="me-2 btn btn-primary view_parcel_items"
@@ -1842,8 +1846,20 @@ class OrderController extends Controller
                             data-tracking-data=\'' . htmlspecialchars(json_encode($order_tracking_data), ENT_QUOTES, 'UTF-8') . '\'
                             data-bs-toggle="modal" data-bs-target="#order_tracking_modal">
                             <i class="bx bx-map text-white"></i>
-                        </a>
-                    </div>';
+                        </a>';
+            if ($isCustomCarrierEnabled) {
+                $carrier_id = !empty($order_tracking_data) && isset($order_tracking_data[0]->carrier_id) ? $order_tracking_data[0]->carrier_id : '';
+                $tracking_number = !empty($order_tracking_data) && isset($order_tracking_data[0]->tracking_number) ? $order_tracking_data[0]->tracking_number : '';
+                $action .= '<a href="javascript:void(0)" class="me-2 btn btn-secondary custom_carrier_btn"
+                data-id="' . $parcel->id . '"
+                data-parcel-id="' . $parcel->id . '"
+                data-carrier-id="' . $carrier_id . '"
+                data-tracking-number="' . $tracking_number . '"
+                data-bs-toggle="modal"
+                data-bs-target="#custom_carrier_modal"
+                title="Create Custom Carrier Parcel"><i class="bx bx-truck"></i></a>';
+            }
+            $action .= '</div>';
             $rows[] = [
                 'id' => $parcel->id,
                 'order_id' => $parcel->order_id,

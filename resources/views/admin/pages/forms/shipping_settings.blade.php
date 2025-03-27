@@ -161,8 +161,8 @@
                                                     </div>
                                                     <div class="col-md-5">
                                                         <input type="text" class="form-control"
-                                                            name="couriers_list[{{ $index }}][tracking_url]"
-                                                            value="{{ $courier['tracking_url'] }}"
+                                                            name="couriers_list[{{ $index }}][slug]"
+                                                            value="{{ $courier['slug'] }}"
                                                             placeholder="Tracking URL (optional)">
                                                     </div>
                                                     <div class="col-md-2">
@@ -231,7 +231,7 @@
                             <input type="text" class="form-control" name="couriers_list[${index}][name]" placeholder="Courier Name" required>
                         </div>
                         <div class="col-md-5">
-                            <input type="text" class="form-control" name="couriers_list[${index}][tracking_url]" placeholder="Tracking URL (optional)">
+                            <input type="text" class="form-control" name="couriers_list[${index}][slug]" placeholder="Courier Slug (e.g., ups, dhl)">
                         </div>
                         <div class="col-md-2">
                             <button type="button" class="btn btn-danger remove-courier">Remove</button>

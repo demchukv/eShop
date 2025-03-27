@@ -1025,6 +1025,13 @@ class SettingController extends Controller
                 'password' => 'required',
                 'webhook_token' => 'required',
             ]);
+            if ($validator->fails()) {
+                $errors = $validator->errors();
+                if ($request->ajax()) {
+                    return response()->json(['errors' => $errors->all()], 422);
+                }
+                return redirect()->back()->withErrors($errors)->withInput();
+            }
         }
 
         // Валідація для Enable Free Delivery
@@ -1032,13 +1039,22 @@ class SettingController extends Controller
             $validator = Validator::make($request->all(), [
                 'minimum_free_delivery_order_amount' => 'required',
             ]);
+            if ($validator->fails()) {
+                $errors = $validator->errors();
+                if ($request->ajax()) {
+                    return response()->json(['errors' => $errors->all()], 422);
+                }
+                return redirect()->back()->withErrors($errors)->withInput();
+            }
         }
 
         // Валідація для Couriers List
         if ($request->couriers_list_method == "on") {
             $validator = Validator::make($request->all(), [
                 'couriers_list.*.name' => 'required|string|max:255',
-                'couriers_list.*.tracking_url' => 'nullable|url|max:255',
+                'couriers_list.*.slug' => 'required|string|max:50|regex:/^[a-z0-9-]+$/',
+            ], [
+                'couriers_list.*.slug.regex' => 'The courier slug must contain only lowercase letters, numbers, and hyphens.',
             ]);
             if ($validator->fails()) {
                 $errors = $validator->errors();
@@ -1050,14 +1066,14 @@ class SettingController extends Controller
         }
 
 
-        if ($validator->fails()) {
-            $errors = $validator->errors();
+        // if ($validator->fails()) {
+        //     $errors = $validator->errors();
 
-            if ($request->ajax()) {
-                return response()->json(['errors' => $errors->all()], 422);
-            }
-            return redirect()->back()->withErrors($errors)->withInput();
-        }
+        //     if ($request->ajax()) {
+        //         return response()->json(['errors' => $errors->all()], 422);
+        //     }
+        //     return redirect()->back()->withErrors($errors)->withInput();
+        // }
 
 
         // Prepare the data to be stored

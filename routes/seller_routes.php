@@ -31,7 +31,7 @@ use App\Http\Controllers\SellerInviteController;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Seller\PendingPaymentController;
-
+use App\Http\Controllers\Seller\ParcelController;
 
 Route::get('seller/orders/generatParcelInvoicePDF/{id}', [OrderController::class, 'generatParcelInvoicePDF'])->name('seller.orders.generatParcelInvoicePDF');
 Route::get('seller/orders/generatInvoicePDF/{id}/{seller_id?}', [OrderController::class, 'generatInvoicePDF'])
@@ -40,9 +40,11 @@ Route::get('seller/zones/zones_data', [AreaController::class, 'zone_data']);
 Route::get("seller/area/get_cities", [AreaController::class, 'getCities']);
 Route::get("seller/area/get_zipcodes", [AreaController::class, 'get_zipcodes']);
 Route::group(
-    ['middleware' => ['auth', 'role:seller', 'CheckPurchaseCode']],
+    ['middleware' => ['auth', 'role:seller']],
     function () {
 
+        Route::post('seller/parcels/create-custom-carrier', [ParcelController::class, 'createCustomCarrier'])->name('seller.parcels.create_custom_carrier');
+        Route::get('/seller/parcels/track/{trackingId}', [ParcelController::class, 'trackParcel'])->name('seller.parcels.track');
         // account
 
         Route::get('seller/account/{id}', [UserController::class, 'edit']);
@@ -285,6 +287,7 @@ Route::group(
         Route::post('seller/orders/generate_invoice', [OrderController::class, 'generate_invoice'])->name('seller.orders.generate_invoice')->middleware(['demo_restriction']);
         Route::post('seller/orders/getSellerOrderTrackingList', [OrderController::class, 'getSellerOrderTrackingList']);
         Route::post('seller/orders/update_shiprocket_order_status', [OrderController::class, 'update_shiprocket_order_status']);
+
 
         Route::get('seller/orders/list', [OrderController::class, 'list'])->name('seller.orders.list');
 

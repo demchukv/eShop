@@ -32,5 +32,8 @@ class OrderTracking extends Model
         'courier_agency',
         'tracking_id',
         'url',
+        // Нові поля для Custom Carrier
+        'carrier_id',        // Ідентифікатор перевізника зі списку
+        'tracking_number',   // Трек-код, введений продавцем
     ];
 }
