@@ -998,7 +998,7 @@
                                                             ($shiprocket_order['data']['status_code'] != 4 ||
                                                                 $shiprocket_order['data']['status'] !=
                                                                     'PICKUP
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    SCHEDULED') &&
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    SCHEDULED') &&
                                                             $shiprocket_order['data']['status'] != 'CANCELED' &&
                                                             $shiprocket_order['data']['status'] != 'CANCELLATION REQUESTED')
                                                         <button type="button" title="Send Pickup Request"
@@ -1116,18 +1116,18 @@
                                             <div class="form-group">
                                                 <label for="tracking_id">Tracking ID</label>
                                                 <input type="text" class="form-control" id="tracking_id"
-                                                    name="tracking_id" placeholder="Enter tracking ID"
-                                                    value="{{ $order_detls[0]->tracking_id }}" required>
+                                                    name="tracking_id" placeholder="Enter tracking ID" required>
                                             </div>
 
                                             <div class="form-group">
                                                 <label for="url">Tracking URL</label>
                                                 <input type="url" class="form-control" id="url" name="url"
-                                                    placeholder="Enter tracking URL" value="{{ $order_detls[0]->url }}">
+                                                    placeholder="Enter tracking URL">
                                             </div>
+
                                             <input type="hidden" class="parcel_id" name="parcel_id" id="parcel_id">
                                             <input type="hidden" name="order_id"
-                                                value="{{ $order_detls[0]->order_id }}">
+                                                value="{{ $order_tracking[0]->order_id }}">
                                         </div>
                                         <!-- /.card-body -->
 
@@ -1272,6 +1272,7 @@
                 dropdownParent: $('#parcel_status_modal')
             });
 
+
             // Обробка відправки форми
             $('#courier-selection-form').on('submit', function(e) {
                 e.preventDefault();
@@ -1282,12 +1283,15 @@
                     data: $(this).serialize(),
                     success: function(response) {
                         if (!response.error) {
-                            alert(response.message);
-                            // Очистка форми або додаткова логіка
-                            // $('#courier-selection-form')[0].reset();
-                            // $('#courier_select').val('').trigger('change');
+                            iziToast.success({
+                                title: 'Success',
+                                message: response.message
+                            })
                         } else {
-                            alert(response.message);
+                            iziToast.error({
+                                title: 'Error',
+                                message: response.message
+                            })
                         }
                     },
                     error: function(xhr) {

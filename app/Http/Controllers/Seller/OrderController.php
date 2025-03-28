@@ -1127,41 +1127,77 @@ class OrderController extends Controller
         // Ініціалізація AfterShipApiController
         $afterShipApiController = new AfterShipApiController();
 
-        if (isExist(['parcel_id' => $parcel_id, 'shipment_id' => 0], 'order_trackings', null)) {
+        // Перевіряємо, чи існує запис у таблиці order_trackings
+        $existingTracking = OrderTracking::where('parcel_id', $parcel_id)->where('shipment_id', 0)->first();
+
+        if ($existingTracking) {
+            // Якщо запис існує, оновлюємо його
             if (updateDetails($data, ['parcel_id' => $parcel_id, 'shipment_id' => 0], 'order_trackings') == TRUE) {
-                $response['error'] = false;
-                $response['message'] = labels('admin_labels.tracking_details_update_successfully', 'Tracking details Update Successfuly.');
+                // Перевіряємо, чи є aftership_tracking_id
+                if (empty($existingTracking->aftership_tracking_id)) {
+                    try {
+                        // Викликаємо createTracking, якщо aftership_tracking_id відсутній
+                        $afterShipResponse = $afterShipApiController->createTracking($request);
+
+                        if ($afterShipResponse->getStatusCode() === 201) {
+                            $afterShipData = json_decode($afterShipResponse->getContent(), true);
+                            $trackingData = $afterShipData['tracking'] ?? [];
+
+                            // Оновлюємо запис у базі даними від AfterShip
+                            $existingTracking->update([
+                                'courier_agency' => $trackingData['slug'] ?? $courier_agency,
+                                'tracking_id' => $trackingData['tracking_id'] ?? $tracking_id,
+                                'aftership_tracking_id' => $trackingData['id'] ?? null,
+                                'aftership_data' => json_encode($trackingData),
+                                'status' => 'pending',
+                            ]);
+
+                            $response['error'] = false;
+                            $response['message'] = labels('admin_labels.tracking_details_update_successfully', 'Tracking details updated successfully and synced with AfterShip.');
+                            $response['data'] = $afterShipData;
+                        } else {
+                            $response['error'] = true;
+                            $response['message'] = labels('admin_labels.tracking_details_update_successfully', 'Tracking details updated locally, but failed to sync with AfterShip: ') . json_decode($afterShipResponse->getContent(), true)['error'];
+                            $response['data'] = json_decode($afterShipResponse->getContent(), true);
+                        }
+                    } catch (\Exception $e) {
+                        $response['error'] = true;
+                        $response['message'] = 'Tracking updated locally, but AfterShip integration failed: ' . $e->getMessage();
+                    }
+                } else {
+                    // Якщо aftership_tracking_id уже є, просто повертаємо успіх без виклику AfterShip
+                    $response['error'] = false;
+                    $response['message'] = labels('admin_labels.tracking_details_update_successfully', 'Tracking details updated successfully.');
+                }
             } else {
                 $response['error'] = true;
                 $response['message'] = labels('admin_labels.tracking_details_update_failed', 'Not Updated. Try again later.');
             }
         } else {
-            // Створення нового запису в базі
+            // Якщо запису немає, створюємо новий
             $orderTracking = OrderTracking::create($data);
             if ($orderTracking) {
                 try {
-                    // Виклик методу createTracking для створення трекінгу в AfterShip
+                    // Викликаємо createTracking для нового запису
                     $afterShipResponse = $afterShipApiController->createTracking($request);
 
                     if ($afterShipResponse->getStatusCode() === 201) {
-                        // Успішно створено трекінг в AfterShip, оновлюємо локальний запис
                         $afterShipData = json_decode($afterShipResponse->getContent(), true);
                         $trackingData = $afterShipData['tracking'] ?? [];
 
                         // Оновлюємо запис у базі даними від AfterShip
                         $orderTracking->update([
-                            'carrier_id' => $trackingData['slug'] ?? $courier_agency,
-                            'tracking_number' => $trackingData['tracking_number'] ?? $tracking_id,
-                            'aftership_tracking_id' => $trackingData['id'] ?? null, // Зберігаємо ID трекінгу від AfterShip
-                            'aftership_data' => json_encode($trackingData),         // Зберігаємо повну відповідь від AfterShip
-                            'status' => 'pending',                                  // Початковий статус
+                            'courier_agency' => $trackingData['slug'] ?? $courier_agency,
+                            'tracking_id' => $trackingData['tracking_id'] ?? $tracking_id,
+                            'aftership_tracking_id' => $trackingData['id'] ?? null,
+                            'aftership_data' => json_encode($trackingData),
+                            'status' => 'pending',
                         ]);
 
                         $response['error'] = false;
                         $response['message'] = labels('admin_labels.tracking_details_insert_successfully', 'Tracking details inserted successfully and synced with AfterShip.');
                         $response['data'] = $afterShipData;
                     } else {
-                        // Помилка від AfterShip, але запис у базі створено
                         $response['error'] = true;
                         $response['message'] = labels('admin_labels.tracking_details_insert_successfully', 'Tracking details inserted locally, but failed to sync with AfterShip: ') . json_decode($afterShipResponse->getContent(), true)['error'];
                         $response['data'] = json_decode($afterShipResponse->getContent(), true);

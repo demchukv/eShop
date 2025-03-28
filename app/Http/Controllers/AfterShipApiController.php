@@ -254,12 +254,17 @@ class AfterShipApiController extends Controller
         // Оновлюємо запис у базі
         $orderTracking = OrderTracking::where('aftership_tracking_id', $trackingId)->first();
         if ($orderTracking) {
-            $orderTracking->update([
-                'status' => $status,
-                'aftership_data' => json_encode($payload['tracking']), // Оновлюємо повні дані
-                'tracking_number' => $payload['tracking']['tracking_number'] ?? $orderTracking->tracking_number,
-                'carrier_id' => $payload['tracking']['slug'] ?? $orderTracking->carrier_id,
-            ]);
+            try {
+                $orderTracking->update([
+                    'status' => $status,
+                    'aftership_data' => json_encode($payload['tracking']), // Оновлюємо повні дані
+                    'tracking_number' => $payload['tracking']['tracking_number'] ?? $orderTracking->tracking_number,
+                    'carrier_id' => $payload['tracking']['slug'] ?? $orderTracking->carrier_id,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to update tracking: ' . $e->getMessage());
+                return response()->json(['error' => 'Database update failed'], 500);
+            }
 
             // Оновлюємо статус у order_items (опціонально)
             \App\Models\OrderItems::where('order_id', $orderTracking->order_id)
@@ -269,6 +274,12 @@ class AfterShipApiController extends Controller
                 'tracking_id' => $trackingId,
                 'status' => $status,
             ]);
+            // Очищаємо кеш для даного трекінгу
+            $cacheFile = storage_path('app/aftership_tracking_' . $trackingId . '_cache.json');
+            if (file_exists($cacheFile)) {
+                unlink($cacheFile);
+                \Log::info('Cache cleared for tracking ID: ' . $trackingId);
+            }
 
             return response()->json(['message' => 'Webhook processed successfully'], 200);
         }

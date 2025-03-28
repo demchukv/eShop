@@ -9541,8 +9541,9 @@ $(document).on("show.bs.modal", "#parcel_status_modal", function (event) {
     current_selected_image = triggerElement;
 
     let parcel_items = $(current_selected_image).data("items");
+    let parcel_id = $(current_selected_image).data("parcel-id");
     let tracking_data = $(current_selected_image).data("tracking-data");
-    console.log(tracking_data);
+
     let order_tracking = $("#order_tracking").val();
     if (order_tracking != undefined) {
         order_tracking = JSON.parse(order_tracking);
@@ -9667,7 +9668,6 @@ $(document).on("show.bs.modal", "#parcel_status_modal", function (event) {
                 "</label>";
         }
         $("#parcel_id").val(element.parcel_id);
-        $(".parcel_id").val(element.parcel_id);
         $("#deliver_by").val(element.delivery_boy_id);
         $(".parcel_status").val(element.active_status);
         tbody.innerHTML += `
@@ -9683,6 +9683,23 @@ $(document).on("show.bs.modal", "#parcel_status_modal", function (event) {
     `;
     });
     container.appendChild(card);
+
+    // Нова логіка: Заповнення форми #courier-selection-form
+    const $form = $(this).find("#courier-selection-form"); // Отримуємо форму в межах модального вікна
+    if (tracking_data && tracking_data.length > 0) {
+        let latestTracking = tracking_data[0]; // Беремо перший запис трекінгу
+
+
+        // Заповнення полів форми
+        $form.find("[name='courier_agency']").val(latestTracking.courier_agency).trigger("change"); // Для Select2
+        $form.find("[name='tracking_id']").val(latestTracking.tracking_id);
+        $form.find("[name='url']").val(latestTracking.url);
+        $form.find("[name='parcel_id']").val(parcel_id);
+    } else {
+        // Скидаємо форму
+        $form[0].reset();
+        $form.find("[name='courier_agency']").val("").trigger("change"); // Очищаємо Select2
+    }
 });
 
 // Utility functions
