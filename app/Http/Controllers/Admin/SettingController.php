@@ -1086,6 +1086,7 @@ class SettingController extends Controller
                 'minimum_free_delivery_order_amount' => $request->minimum_free_delivery_order_amount,
                 'couriers_list_method' => isset($request->couriers_list_method) && $request->couriers_list_method == "on" ? 1 : 0,
                 'aftership_apikey' => $request->aftership_apikey ?? "", // AfterShip API key
+                'aftership_secret' => $request->aftership_secret ?? "", // AfterShip API key
             ], JSON_UNESCAPED_SLASHES),
         ];
         // Check if settings already exist in the database

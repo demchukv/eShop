@@ -35,5 +35,7 @@ class OrderTracking extends Model
         // Нові поля для Custom Carrier
         'carrier_id',        // Ідентифікатор перевізника зі списку
         'tracking_number',   // Трек-код, введений продавцем
+        'aftership_tracking_id', // ID трекінгу від AfterShip
+        'aftership_data',        // Повна відповідь від API AfterShip (тип text)
     ];
 }

@@ -150,8 +150,17 @@
                                     <label class="mb-3"
                                         for="aftership_apikey">{{ labels('admin_labels.aftership_apikey', 'Aftership API key') }}<span
                                             class="text-asterisks text-sm">*</span></label>
-                                    <input type="text" class="form-control" name="aftership_apikey" id=""
+                                    <input type="text" class="form-control" name="aftership_apikey"
+                                        id="aftership_apikey"
                                         value="<?= isKeySetAndNotEmpty($settings, 'aftership_apikey') ? $settings['aftership_apikey'] : '' ?>" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="mb-3"
+                                        for="aftership_secret">{{ labels('admin_labels.aftership_webhook_secret', 'Aftership Webhook secret') }}<span
+                                            class="text-asterisks text-sm">*</span></label>
+                                    <input type="text" class="form-control" name="aftership_secret"
+                                        id="aftership_secret"
+                                        value="<?= isKeySetAndNotEmpty($settings, 'aftership_secret') ? $settings['aftership_secret'] : '' ?>" />
                                 </div>
 
 

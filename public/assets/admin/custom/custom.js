@@ -484,20 +484,20 @@ $("#upload-media").on("click", function () {
                 ? media_type != "image"
                     ? appUrl + "assets/admin/images/" + media_type + "-file.png"
                     : encodeURI(
-                          appUrl +
-                              "storage/" +
-                              result[index].sub_directory +
-                              "/" +
-                              result[index].name
-                      )
+                        appUrl +
+                        "storage/" +
+                        result[index].sub_directory +
+                        "/" +
+                        result[index].name
+                    )
                 : media_type != "image"
-                ? appUrl + "assets/admin/images/" + media_type + "-file.png"
-                : result[index].object_url;
+                    ? appUrl + "assets/admin/images/" + media_type + "-file.png"
+                    : result[index].object_url;
 
             var inputImgPath = isPublicDisk
                 ? encodeURI(
-                      result[index].sub_directory + "/" + result[index].name
-                  )
+                    result[index].sub_directory + "/" + result[index].name
+                )
                 : result[index].object_url;
 
             $(current_selected_image)
@@ -505,41 +505,9 @@ $("#upload-media").on("click", function () {
                 .find(".image-upload-section")
                 .append(
                     '<div class="bg-white grow image product-image-container rounded shadow text-center m-2"><div class="image-upload-div"><img class="img-fluid mb-2" alt="' +
-                        result[index].name +
-                        '" title="' +
-                        result[index].name +
-                        '" src=' +
-                        imagePath +
-                        ' ><input type="hidden" name=' +
-                        input +
-                        " value=" +
-                        inputImgPath +
-                        "></div>" +
-                        removable_btn +
-                        "</div>"
-                );
-        }
-    } else {
-        var isPublicDisk = result[0].disk == "public" ? 1 : 0;
-        var imagePath = isPublicDisk
-            ? media_type != "image"
-                ? appUrl + "assets/admin/images/" + media_type + "-file.png"
-                : encodeURI(path)
-            : media_type != "image"
-            ? appUrl + "assets/admin/images/" + media_type + "-file.png"
-            : result[0].object_url;
-
-        var inputImgPath = isPublicDisk
-            ? encodeURI(result[0].sub_directory + "/" + result[0].name)
-            : result[0].object_url;
-        $(current_selected_image)
-            .closest(".form-group")
-            .find(".image-upload-section")
-            .html(
-                '<div class="bg-white grow image product-image-container rounded shadow text-center m-2"><div class="image-upload-div"><img class="img-fluid" alt="' +
-                    result[0].name +
+                    result[index].name +
                     '" title="' +
-                    result[0].name +
+                    result[index].name +
                     '" src=' +
                     imagePath +
                     ' ><input type="hidden" name=' +
@@ -549,6 +517,38 @@ $("#upload-media").on("click", function () {
                     "></div>" +
                     removable_btn +
                     "</div>"
+                );
+        }
+    } else {
+        var isPublicDisk = result[0].disk == "public" ? 1 : 0;
+        var imagePath = isPublicDisk
+            ? media_type != "image"
+                ? appUrl + "assets/admin/images/" + media_type + "-file.png"
+                : encodeURI(path)
+            : media_type != "image"
+                ? appUrl + "assets/admin/images/" + media_type + "-file.png"
+                : result[0].object_url;
+
+        var inputImgPath = isPublicDisk
+            ? encodeURI(result[0].sub_directory + "/" + result[0].name)
+            : result[0].object_url;
+        $(current_selected_image)
+            .closest(".form-group")
+            .find(".image-upload-section")
+            .html(
+                '<div class="bg-white grow image product-image-container rounded shadow text-center m-2"><div class="image-upload-div"><img class="img-fluid" alt="' +
+                result[0].name +
+                '" title="' +
+                result[0].name +
+                '" src=' +
+                imagePath +
+                ' ><input type="hidden" name=' +
+                input +
+                " value=" +
+                inputImgPath +
+                "></div>" +
+                removable_btn +
+                "</div>"
             );
     }
 
@@ -619,7 +619,7 @@ function copyToClipboard(element) {
     try {
         navigator.clipboard
             .writeText(temp.val())
-            .then(function () {})
+            .then(function () { })
             .catch(function (err) {
                 iziToast.error({
                     message: "Failed to copy text: ",
@@ -1170,8 +1170,8 @@ function load_attribute_section() {
             width: $(".swatche_type").data("width")
                 ? $(".swatche_type").data("width")
                 : $(".swatche_type").hasClass("w-100")
-                ? "100%"
-                : "style",
+                    ? "100%"
+                    : "style",
             placeholder: $(".swatche_type").data("placeholder"),
             allowClear: Boolean($(".swatche_type").data("allow-clear")),
         });
@@ -1642,8 +1642,8 @@ function load_category_section(
             width: $(".select_multiple").data("width")
                 ? $(".select_multiple").data("width")
                 : $(".select_multiple").hasClass("w-100")
-                ? "100%"
-                : "style",
+                    ? "100%"
+                    : "style",
             placeholder: $(".select_multiple").data("placeholder"),
             allowClear: Boolean($(".select_multiple").data("allow-clear")),
             dropdownParent: $("#set_commission_model"),
@@ -1658,8 +1658,8 @@ $(".select_multiple").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-            ? "100%"
-            : "style",
+                ? "100%"
+                : "style",
         placeholder: $(this).data("placeholder"),
         allowClear: Boolean($(this).data("allow-clear")),
     });
@@ -1866,8 +1866,8 @@ $(".select_single , .multiple_values , #product-type, #attribute").each(
             width: $(this).data("width")
                 ? $(this).data("width")
                 : $(this).hasClass("w-100")
-                ? "100%"
-                : "style",
+                    ? "100%"
+                    : "style",
             placeholder: $(this).data("placeholder"),
             allowClear: Boolean($(this).data("allow-clear")),
         });
@@ -2088,8 +2088,8 @@ $(function () {
                     width: $(this).data("width")
                         ? $(this).data("width")
                         : $(this).hasClass("w-100")
-                        ? "100%"
-                        : "style",
+                            ? "100%"
+                            : "style",
                     placeholder: $(this).data("placeholder"),
                     allowClear: Boolean($(this).data("allow-clear")),
                 });
@@ -2276,8 +2276,8 @@ $(document).on(
                     width: $(this).data("width")
                         ? $(this).data("width")
                         : $(this).hasClass("w-100")
-                        ? "100%"
-                        : "style",
+                            ? "100%"
+                            : "style",
                     placeholder: $(this).data("placeholder"),
                     allowClear: Boolean($(this).data("allow-clear")),
                 });
@@ -2289,8 +2289,8 @@ $(document).on(
                     width: $(this).data("width")
                         ? $(this).data("width")
                         : $(this).hasClass("w-100")
-                        ? "100%"
-                        : "style",
+                            ? "100%"
+                            : "style",
                     placeholder: $(this).data("placeholder"),
                     allowClear: Boolean($(this).data("allow-clear")),
                 });
@@ -2317,8 +2317,8 @@ $(".multiple_values").select2({
     width: $(this).data("width")
         ? $(this).data("width")
         : $(this).hasClass("w-100")
-        ? "100%"
-        : "style",
+            ? "100%"
+            : "style",
     placeholder: $(this).data("placeholder"),
     allowClear: Boolean($(this).data("allow-clear")),
 });
@@ -3388,8 +3388,8 @@ function create_attributes(value, selected_attr) {
             width: $(this).data("width")
                 ? $(this).data("width")
                 : $(this).hasClass("w-100")
-                ? "100%"
-                : "style",
+                    ? "100%"
+                    : "style",
             placeholder: $(this).data("placeholder"),
             allowClear: Boolean($(this).data("allow-clear")),
         })
@@ -3420,8 +3420,8 @@ function create_attributes(value, selected_attr) {
             width: $(this).data("width")
                 ? $(this).data("width")
                 : $(this).hasClass("w-100")
-                ? "100%"
-                : "style",
+                    ? "100%"
+                    : "style",
             placeholder: $(this).data("placeholder"),
             allowClear: Boolean($(this).data("allow-clear")),
         })
@@ -3465,7 +3465,7 @@ if (document.getElementById("system-update-dropzone")) {
                     this.files[_i].name === file.name &&
                     this.files[_i].size === file.size &&
                     this.files[_i].lastModifiedDate.toString() ===
-                        file.lastModifiedDate.toString()
+                    file.lastModifiedDate.toString()
                 ) {
                     this.removeFile(file);
                     i++;
@@ -3474,7 +3474,7 @@ if (document.getElementById("system-update-dropzone")) {
         }
     });
 
-    systemDropzone.on("error", function (file, response) {});
+    systemDropzone.on("error", function (file, response) { });
 
     systemDropzone.on("sending", function (file, xhr, formData) {
         xhr.onreadystatechange = function () {
@@ -3603,7 +3603,7 @@ $(document).on("submit", "#save-product", function (e) {
                     ) {
                         if (
                             $(".variant-stock-level-type").val() ==
-                                "product_level" &&
+                            "product_level" &&
                             $(".variant-stock-mustfill-field").filter(
                                 function () {
                                     return this.value === "";
@@ -4128,8 +4128,8 @@ $(".search_admin_category").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-            ? "100%"
-            : "style",
+                ? "100%"
+                : "style",
         allowClear: Boolean($(this).data("allow-clear")),
     });
 });
@@ -4176,8 +4176,8 @@ $(".search_admin_product").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-            ? "100%"
-            : "style",
+                ? "100%"
+                : "style",
         allowClear: Boolean($(this).data("allow-clear")),
     });
 });
@@ -4210,8 +4210,8 @@ $(".search_admin_product_for_combo").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-            ? "100%"
-            : "style",
+                ? "100%"
+                : "style",
         allowClear: Boolean($(this).data("allow-clear")),
     });
 });
@@ -4242,8 +4242,8 @@ $(".search_admin_digital_product").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-            ? "100%"
-            : "style",
+                ? "100%"
+                : "style",
         allowClear: Boolean($(this).data("allow-clear")),
     });
 });
@@ -4284,8 +4284,8 @@ $(".search_admin_combo_product").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-            ? "100%"
-            : "style",
+                ? "100%"
+                : "style",
         allowClear: Boolean($(this).data("allow-clear")),
     });
 });
@@ -4317,8 +4317,8 @@ $(".search_seller_combo_product").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-            ? "100%"
-            : "style",
+                ? "100%"
+                : "style",
         allowClear: Boolean($(this).data("allow-clear")),
         dropdownParent: $(".search_seller_combo_product_parent"),
     });
@@ -4351,8 +4351,8 @@ $(".search_seller_product").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-            ? "100%"
-            : "style",
+                ? "100%"
+                : "style",
         allowClear: Boolean($(this).data("allow-clear")),
         dropdownParent: $(".search_seller_product_parent"),
     });
@@ -4385,8 +4385,8 @@ $(".search_seller_digital_product").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-            ? "100%"
-            : "style",
+                ? "100%"
+                : "style",
         allowClear: Boolean($(this).data("allow-clear")),
     });
 });
@@ -4436,8 +4436,8 @@ $(".default_currency").select2({
     width: $(this).data("width")
         ? $(this).data("width")
         : $(this).hasClass("w-100")
-        ? "100%"
-        : "style",
+            ? "100%"
+            : "style",
     placeholder: $(this).data("placeholder"),
     allowClear: Boolean($(this).data("allow-clear")),
 });
@@ -5726,7 +5726,7 @@ $(document).on("click", ".edit_stock", function (e, rows) {
                     : "";
             var stockType =
                 result.fetched_data.product[0].stock_type != undefined &&
-                result.fetched_data.product[0].stock_type != 1
+                    result.fetched_data.product[0].stock_type != 1
                     ? result.fetched_data.product[0].name
                     : "";
 
@@ -5736,7 +5736,7 @@ $(document).on("click", ".edit_stock", function (e, rows) {
                     : productName;
             var stock =
                 result.fetched_data.product[0].stock != undefined &&
-                result.fetched_data.product[0].stock !== ""
+                    result.fetched_data.product[0].stock !== ""
                     ? result.fetched_data.product[0].stock
                     : result.fetched;
             $('input[name="product_name"]').val(pname);
@@ -5806,8 +5806,8 @@ $(".search_stores").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-            ? "100%"
-            : "style",
+                ? "100%"
+                : "style",
         allowClear: Boolean($(this).data("allow-clear")),
     });
 });
@@ -5869,6 +5869,27 @@ function formatCategories(category) {
     var image = category.image;
     var $category = $(
         '<div class="row">' +
+        '<div class="col-md-1 align-self-center">' +
+        '<div class="">' +
+        '<img class="img-fluid" src="' +
+        image +
+        '"></div>' +
+        "</div>" +
+        '<div class="col-md-4 category-name mt-4">' +
+        category.text +
+        "</div>" +
+        "</div>" +
+        "</div>"
+    );
+
+    return $category;
+}
+
+function formatCategoriesSelection(category) {
+    if (category.element.dataset.select2Text === undefined) {
+        var image = category.image;
+        var $category = $(
+            '<div class="row">' +
             '<div class="col-md-1 align-self-center">' +
             '<div class="">' +
             '<img class="img-fluid" src="' +
@@ -5880,27 +5901,6 @@ function formatCategories(category) {
             "</div>" +
             "</div>" +
             "</div>"
-    );
-
-    return $category;
-}
-
-function formatCategoriesSelection(category) {
-    if (category.element.dataset.select2Text === undefined) {
-        var image = category.image;
-        var $category = $(
-            '<div class="row">' +
-                '<div class="col-md-1 align-self-center">' +
-                '<div class="">' +
-                '<img class="img-fluid" src="' +
-                image +
-                '"></div>' +
-                "</div>" +
-                '<div class="col-md-4 category-name mt-4">' +
-                category.text +
-                "</div>" +
-                "</div>" +
-                "</div>"
         );
     } else {
         $category = category.element.dataset.select2Text;
@@ -5936,20 +5936,56 @@ function formatOffers(offer) {
 
     var $offer = $(
         '<div class="row">' +
+        '<div class="col-md-1 align-self-center">' +
+        '<div class="">' +
+        '<img class="img-fluid" src="' +
+        image +
+        '"></div>' +
+        "</div>" +
+        '<div class="align-self-center col-md-10">' +
+        '<div class="">' +
+        (offer.min_discount != 0 && offer.max_discount != 0
+            ? "Min - Max Discount : " +
+            offer.min_discount +
+            "% - " +
+            offer.max_discount +
+            "%"
+            : "") +
+        "</div>" +
+        '<small class="">ID - ' +
+        offer.id +
+        " </small> |" +
+        '<small class="">Type - ' +
+        offer.text +
+        " </small> " +
+        "</div>" +
+        "</div>"
+    );
+
+    return $offer;
+}
+
+function formatoffersSelection(offer) {
+    if (offer.element.dataset.select2Text === undefined) {
+        var $offer = $(
+            '<div class="row">' +
             '<div class="col-md-1 align-self-center">' +
             '<div class="">' +
             '<img class="img-fluid" src="' +
-            image +
+            offer.image +
             '"></div>' +
             "</div>" +
             '<div class="align-self-center col-md-10">' +
             '<div class="">' +
-            (offer.min_discount != 0 && offer.max_discount != 0
+            (offer.min_discount != 0 &&
+                offer.max_discount != 0 &&
+                offer.min_discount != undefined &&
+                offer.max_discount != undefined
                 ? "Min - Max Discount : " +
-                  offer.min_discount +
-                  "% - " +
-                  offer.max_discount +
-                  "%"
+                offer.min_discount +
+                "% - " +
+                offer.max_discount +
+                "%"
                 : "") +
             "</div>" +
             '<small class="">ID - ' +
@@ -5960,42 +5996,6 @@ function formatOffers(offer) {
             " </small> " +
             "</div>" +
             "</div>"
-    );
-
-    return $offer;
-}
-
-function formatoffersSelection(offer) {
-    if (offer.element.dataset.select2Text === undefined) {
-        var $offer = $(
-            '<div class="row">' +
-                '<div class="col-md-1 align-self-center">' +
-                '<div class="">' +
-                '<img class="img-fluid" src="' +
-                offer.image +
-                '"></div>' +
-                "</div>" +
-                '<div class="align-self-center col-md-10">' +
-                '<div class="">' +
-                (offer.min_discount != 0 &&
-                offer.max_discount != 0 &&
-                offer.min_discount != undefined &&
-                offer.max_discount != undefined
-                    ? "Min - Max Discount : " +
-                      offer.min_discount +
-                      "% - " +
-                      offer.max_discount +
-                      "%"
-                    : "") +
-                "</div>" +
-                '<small class="">ID - ' +
-                offer.id +
-                " </small> |" +
-                '<small class="">Type - ' +
-                offer.text +
-                " </small> " +
-                "</div>" +
-                "</div>"
         );
     } else {
         $offer = offer.element.dataset.select2Text;
@@ -6029,6 +6029,32 @@ function formatZones(zone) {
 
     var $zone = $(
         '<div class="row">' +
+        '<div class="align-self-center col-md-10">' +
+        '<small class="">ID - ' +
+        zone.id +
+        " </small> | " +
+        '<small class="">Name - ' +
+        zone.text +
+        " </small> " +
+        '<div class="">' +
+        (zone.serviceable_cities
+            ? "Serviceable Cities: " + zone.serviceable_cities + " | "
+            : "") +
+        (zone.serviceable_zipcodes
+            ? "Serviceable Zipcodes: " + zone.serviceable_zipcodes
+            : "") +
+        "</div>" +
+        "</div>" +
+        "</div>"
+    );
+
+    return $zone;
+}
+
+function formatzonesSelection(zone) {
+    if (zone.element.dataset.select2Text === undefined) {
+        var $zone = $(
+            '<div class="row">' +
             '<div class="align-self-center col-md-10">' +
             '<small class="">ID - ' +
             zone.id +
@@ -6046,32 +6072,6 @@ function formatZones(zone) {
             "</div>" +
             "</div>" +
             "</div>"
-    );
-
-    return $zone;
-}
-
-function formatzonesSelection(zone) {
-    if (zone.element.dataset.select2Text === undefined) {
-        var $zone = $(
-            '<div class="row">' +
-                '<div class="align-self-center col-md-10">' +
-                '<small class="">ID - ' +
-                zone.id +
-                " </small> | " +
-                '<small class="">Name - ' +
-                zone.text +
-                " </small> " +
-                '<div class="">' +
-                (zone.serviceable_cities
-                    ? "Serviceable Cities: " + zone.serviceable_cities + " | "
-                    : "") +
-                (zone.serviceable_zipcodes
-                    ? "Serviceable Zipcodes: " + zone.serviceable_zipcodes
-                    : "") +
-                "</div>" +
-                "</div>" +
-                "</div>"
         );
     } else {
         $zone = zone.element.dataset.select2Text;
@@ -6332,13 +6332,13 @@ $("#delivery_boys_details").on("check.bs.table", function (e, row) {
     d_boy_cash = row.cash_received;
     $("#details").val(
         "Id: " +
-            row.id +
-            " | Name:" +
-            row.username +
-            " | Mobile: " +
-            row.mobile +
-            " | Cash: " +
-            row.cash_received
+        row.id +
+        " | Name:" +
+        row.username +
+        " | Mobile: " +
+        row.mobile +
+        " | Cash: " +
+        row.cash_received
     );
     $("#delivery_boy_id").val(row.id);
 });
@@ -6402,32 +6402,32 @@ $(document).on("click", ".edit_delivery_boy", function (e, rows) {
         success: function (result) {
             var name =
                 result.userData.username != undefined &&
-                result.userData.username !== ""
+                    result.userData.username !== ""
                     ? result.userData.username
                     : "";
             var mobile =
                 result.userData.mobile != undefined &&
-                result.userData.mobile !== ""
+                    result.userData.mobile !== ""
                     ? result.userData.mobile
                     : "";
             var email =
                 result.userData.email != undefined &&
-                result.userData.email !== ""
+                    result.userData.email !== ""
                     ? result.userData.email
                     : "";
             var address =
                 result.userData.address != undefined &&
-                result.userData.address !== ""
+                    result.userData.address !== ""
                     ? result.userData.address
                     : "";
             var bonus_type =
                 result.userData.bonus_type != undefined &&
-                result.userData.bonus_type !== ""
+                    result.userData.bonus_type !== ""
                     ? result.userData.bonus_type
                     : "";
             var bonus =
                 result.userData.bonus != undefined &&
-                result.userData.bonus !== ""
+                    result.userData.bonus !== ""
                     ? result.userData.bonus
                     : 0;
 
@@ -6435,8 +6435,8 @@ $(document).on("click", ".edit_delivery_boy", function (e, rows) {
                 result.userData.front_licence_image.indexOf("https:") === -1
                     ? result.userData.front_licence_image !== ""
                         ? appUrl +
-                          "storage/delivery_boys" +
-                          result.userData.front_licence_image
+                        "storage/delivery_boys" +
+                        result.userData.front_licence_image
                         : appUrl + "assets/img/no-image.jpg"
                     : result.userData.front_licence_image;
 
@@ -6444,8 +6444,8 @@ $(document).on("click", ".edit_delivery_boy", function (e, rows) {
                 result.userData.back_licence_image.indexOf("https:") === -1
                     ? result.userData.front_licence_image !== ""
                         ? appUrl +
-                          "storage/delivery_boys" +
-                          result.userData.back_licence_image
+                        "storage/delivery_boys" +
+                        result.userData.back_licence_image
                         : appUrl + "assets/img/no-image.jpg"
                     : result.userData.back_licence_image;
 
@@ -6547,7 +6547,7 @@ $(window).on("load", function () {
                         appUrl +
                         "storage/" +
                         JSON.parse(store_thumbnail)[store_ids[i]][
-                            "store_thumbnail"
+                        "store_thumbnail"
                         ];
                 } else {
                     var thumbnailUrl = "";
@@ -6601,7 +6601,7 @@ $(window).on("load", function () {
                     '<label class="form-label" for="basic-default-company">Description <span class="text-danger text-sm">*</span></label>' +
                     '<textarea id="basic-default-message" value="" name="description[]" class="form-control" placeholder="Write some description here">' +
                     JSON.parse(store_description)[store_ids[i]][
-                        "store_description"
+                    "store_description"
                     ] +
                     "</textarea>" +
                     "</div>" +
@@ -7087,8 +7087,8 @@ $(document).on("change", ".change_ticket_status", function () {
         if (
             confirm(
                 "Are you sure you want to mark the ticket as " +
-                    $(".change_ticket_status option:selected").text() +
-                    "? "
+                $(".change_ticket_status option:selected").text() +
+                "? "
             )
         ) {
             var id = $(this).data("ticket_id");
@@ -7248,8 +7248,8 @@ if (from == "seller") {
                             product.product_image.indexOf("https:") === -1
                                 ? product.product_image !== ""
                                     ? appUrl +
-                                      "storage/" +
-                                      product.product_image
+                                    "storage/" +
+                                    product.product_image
                                     : appUrl + "assets/img/no-image.jpg"
                                 : product.product_image;
 
@@ -7257,17 +7257,15 @@ if (from == "seller") {
                         <div class="top-selling-product-list d-flex align-items-center">
                             <p class="body-default m-0">${index + 1}.</p>
                             <div >
-                                <img src="${imageUrl}" alt="${
-                            product.name
-                        }" class="product-img-box">
+                                <img src="${imageUrl}" alt="${product.name
+                            }" class="product-img-box">
                             </div>
                             <div>
                                 <p class="lead mb-2">${product.name}</p>
                                 <div class="d-flex total-product-sale">
                                     <i class='bx bx-badge-check body-default me-1'></i>
-                                    <p class="body-default m-0">Sold: ${
-                                        product.total_sold
-                                    }</p>
+                                    <p class="body-default m-0">Sold: ${product.total_sold
+                            }</p>
                                 </div>
                             </div>
                         </div>
@@ -7297,8 +7295,8 @@ if (from == "seller") {
                             product.product_image.indexOf("https:") === -1
                                 ? product.product_image !== ""
                                     ? appUrl +
-                                      "storage/" +
-                                      product.product_image
+                                    "storage/" +
+                                    product.product_image
                                     : appUrl + "assets/img/no-image.jpg"
                                 : product.product_image;
 
@@ -7306,20 +7304,17 @@ if (from == "seller") {
                         <div class="most-popular-product-list d-flex align-items-center">
                             <p class="body-default m-0">${index + 1}.</p>
                             <div >
-                                <img src="${imageUrl}" alt="${
-                            product.name
-                        }" class="product-img-box">
+                                <img src="${imageUrl}" alt="${product.name
+                            }" class="product-img-box">
                             </div>
                             <div>
                                 <p class="lead mb-2">${product.name}</p>
                                 <div class="d-flex total-product-sale">
                                     <i class='bx bxs-star body-default me-1'></i>
-                                    <p class="body-default me-1 product-rating">${
-                                        product.average_rating
-                                    }</p>
-                                    <p class="body-default m-0 total-reviews">(${
-                                        product.total_reviews
-                                    } Reviews)</p>
+                                    <p class="body-default me-1 product-rating">${product.average_rating
+                            }</p>
+                                    <p class="body-default m-0 total-reviews">(${product.total_reviews
+                            } Reviews)</p>
                                 </div>
                             </div>
                         </div>
@@ -7792,8 +7787,8 @@ $(function () {
         } else {
             $("#datepicker span").html(
                 start.format("MMMM D, YYYY") +
-                    " - " +
-                    end.format("MMMM D, YYYY")
+                " - " +
+                end.format("MMMM D, YYYY")
             );
             userSelectedDates = true; // Mark that the user has selected dates
         }
@@ -9546,6 +9541,8 @@ $(document).on("show.bs.modal", "#parcel_status_modal", function (event) {
     current_selected_image = triggerElement;
 
     let parcel_items = $(current_selected_image).data("items");
+    let tracking_data = $(current_selected_image).data("tracking-data");
+    console.log(tracking_data);
     let order_tracking = $("#order_tracking").val();
     if (order_tracking != undefined) {
         order_tracking = JSON.parse(order_tracking);
@@ -9669,19 +9666,17 @@ $(document).on("show.bs.modal", "#parcel_status_modal", function (event) {
                 formatStatus(element.item_status) +
                 "</label>";
         }
-
         $("#parcel_id").val(element.parcel_id);
+        $(".parcel_id").val(element.parcel_id);
         $("#deliver_by").val(element.delivery_boy_id);
         $(".parcel_status").val(element.active_status);
         tbody.innerHTML += `
         <tr>
             <td>${count++}</td>
             <td>${element.product_name}</td>
-            <td><a href='${
-                element.image
-            }' class="image-box-100" data-toggle='lightbox' data-gallery='order-images'> <img src='${
-            element.image
-        }' alt="${element.product_name}"></a></td>
+            <td><a href='${element.image
+            }' class="image-box-100" data-toggle='lightbox' data-gallery='order-images'> <img src='${element.image
+            }' alt="${element.product_name}"></a></td>
             <td>${element.quantity}</td>
             <td>${status}</td>
         </tr>
@@ -9853,7 +9848,7 @@ function delete_parcel(id) {
                             response.data.map((val) => {
                                 $(
                                     "#product_variant_id_" +
-                                        val.product_variant_id
+                                    val.product_variant_id
                                 ).html(JSON.stringify(val));
                             });
                             iziToast.success({

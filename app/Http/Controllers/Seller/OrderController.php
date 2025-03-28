@@ -1067,7 +1067,7 @@ class OrderController extends Controller
         $validator = Validator::make($request->all(), [
             'courier_agency' => 'required|string',
             'tracking_id' => 'required',
-            'url' => 'required',
+            'url' => 'nullable|url',
             'parcel_id' => 'required',
 
         ], [
@@ -1124,6 +1124,9 @@ class OrderController extends Controller
             'url' => $url,
         );
 
+        // Ініціалізація AfterShipApiController
+        $afterShipApiController = new AfterShipApiController();
+
         if (isExist(['parcel_id' => $parcel_id, 'shipment_id' => 0], 'order_trackings', null)) {
             if (updateDetails($data, ['parcel_id' => $parcel_id, 'shipment_id' => 0], 'order_trackings') == TRUE) {
                 $response['error'] = false;
@@ -1133,12 +1136,43 @@ class OrderController extends Controller
                 $response['message'] = labels('admin_labels.tracking_details_update_failed', 'Not Updated. Try again later.');
             }
         } else {
-            if (OrderTracking::create($data)) {
-                $response['error'] = false;
-                $response['message'] = labels('admin_labels.tracking_details_insert_successfully', 'Tracking details Insert Successfuly.');
+            // Створення нового запису в базі
+            $orderTracking = OrderTracking::create($data);
+            if ($orderTracking) {
+                try {
+                    // Виклик методу createTracking для створення трекінгу в AfterShip
+                    $afterShipResponse = $afterShipApiController->createTracking($request);
+
+                    if ($afterShipResponse->getStatusCode() === 201) {
+                        // Успішно створено трекінг в AfterShip, оновлюємо локальний запис
+                        $afterShipData = json_decode($afterShipResponse->getContent(), true);
+                        $trackingData = $afterShipData['tracking'] ?? [];
+
+                        // Оновлюємо запис у базі даними від AfterShip
+                        $orderTracking->update([
+                            'carrier_id' => $trackingData['slug'] ?? $courier_agency,
+                            'tracking_number' => $trackingData['tracking_number'] ?? $tracking_id,
+                            'aftership_tracking_id' => $trackingData['id'] ?? null, // Зберігаємо ID трекінгу від AfterShip
+                            'aftership_data' => json_encode($trackingData),         // Зберігаємо повну відповідь від AfterShip
+                            'status' => 'pending',                                  // Початковий статус
+                        ]);
+
+                        $response['error'] = false;
+                        $response['message'] = labels('admin_labels.tracking_details_insert_successfully', 'Tracking details inserted successfully and synced with AfterShip.');
+                        $response['data'] = $afterShipData;
+                    } else {
+                        // Помилка від AfterShip, але запис у базі створено
+                        $response['error'] = true;
+                        $response['message'] = labels('admin_labels.tracking_details_insert_successfully', 'Tracking details inserted locally, but failed to sync with AfterShip: ') . json_decode($afterShipResponse->getContent(), true)['error'];
+                        $response['data'] = json_decode($afterShipResponse->getContent(), true);
+                    }
+                } catch (\Exception $e) {
+                    $response['error'] = true;
+                    $response['message'] = 'Tracking inserted locally, but AfterShip integration failed: ' . $e->getMessage();
+                }
             } else {
                 $response['error'] = true;
-                $response['message'] = labels('admin_labels.tracking_details_insert_failed', 'Not Inserted. Try again later.');
+                $response['message'] = labels('admin_labels.tracking_details_insert_failed', 'Not inserted. Try again later.');
             }
         }
 
@@ -1750,7 +1784,6 @@ class OrderController extends Controller
         $rows = [];
 
         foreach ($parcels as $parcel) {
-
             if ($parcel->status == 'awaiting') {
                 $status = '<label class="badge bg-secondary">' . ucfirst($parcel->status) . '</label>';
             }
@@ -1842,9 +1875,11 @@ class OrderController extends Controller
                         </a>
                         <a href="javascript:void(0)" class="me-2 btn btn-warning parcel_status_btn"
                             data-id="' . $parcel->id . '"
+                            data-parcel-id="' . $parcel->id . '"
                             data-parcel-name="' . htmlspecialchars($parcel->name, ENT_QUOTES, 'UTF-8') . '"
                             data-status="' . htmlspecialchars($parcel->status, ENT_QUOTES, 'UTF-8') . '"
                             data-items=\'' . htmlspecialchars(json_encode($parcelItems), ENT_QUOTES, 'UTF-8') . '\'
+                            data-tracking-data=\'' . htmlspecialchars(json_encode($order_tracking_data), ENT_QUOTES, 'UTF-8') . '\'
                             data-bs-toggle="modal" data-bs-target="#parcel_status_modal">
                             <i class="bx bx-pencil text-white"></i>
                         </a>
@@ -1856,18 +1891,6 @@ class OrderController extends Controller
                             data-bs-toggle="modal" data-bs-target="#order_tracking_modal">
                             <i class="bx bx-map text-white"></i>
                         </a>';
-            if ($isCustomCarrierEnabled) {
-                $carrier_id = !empty($order_tracking_data) && isset($order_tracking_data[0]->carrier_id) ? $order_tracking_data[0]->carrier_id : '';
-                $tracking_number = !empty($order_tracking_data) && isset($order_tracking_data[0]->tracking_number) ? $order_tracking_data[0]->tracking_number : '';
-                $action .= '<a href="javascript:void(0)" class="me-2 btn btn-secondary custom_carrier_btn"
-                data-id="' . $parcel->id . '"
-                data-parcel-id="' . $parcel->id . '"
-                data-carrier-id="' . $carrier_id . '"
-                data-tracking-number="' . $tracking_number . '"
-                data-bs-toggle="modal"
-                data-bs-target="#custom_carrier_modal"
-                title="Create Custom Carrier Parcel"><i class="bx bx-truck"></i></a>';
-            }
             $action .= '</div>';
             $rows[] = [
                 'id' => $parcel->id,

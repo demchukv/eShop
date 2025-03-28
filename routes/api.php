@@ -3,6 +3,7 @@
 use App\Http\Controllers\App\v1\ApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AfterShipApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,6 +60,8 @@ Route::get('get_paypal_link', [ApiController::class, 'get_paypal_link']);
 Route::get('/paypal_transaction_webview', [ApiController::class, 'paypal_transaction_webview'])->name('paypal_transaction_webview');
 Route::get('get_zones', [ApiController::class, 'get_zones'])->name('get_zones');
 Route::get('test', [ApiController::class, 'test'])->name('test');
+
+Route::post('/aftership/webhook', [AfterShipApiController::class, 'handleWebhook'])->name('aftership.webhook');
 // -------------------------------------------------------------------------------------
 
 Route::group(['middleware' => ['check_token', 'auth:sanctum']], function () {
@@ -113,4 +116,6 @@ Route::group(['middleware' => ['check_token', 'auth:sanctum']], function () {
     Route::post('razorpay_create_order', [ApiController::class, 'razorpay_create_order']);
     // Route::get('get_paypal_link', [ApiController::class, 'get_paypal_link']);
     // Route::get('/paypal_transaction_webview', [ApiController::class, 'paypal_transaction_webview'])->name('paypal_transaction_webview');
+    Route::get('/aftership/tracking', [AfterShipApiController::class, 'getTrackingById'])->name('aftership.tracking');
+    Route::post('/aftership/clear-cache', [AfterShipApiController::class, 'clearTrackingCache']);
 });
