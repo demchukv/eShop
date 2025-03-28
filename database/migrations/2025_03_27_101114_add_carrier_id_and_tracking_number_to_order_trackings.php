@@ -23,8 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('order_trackings', function (Blueprint $table) {
-            $table->drop('carrier_id');
-            $table->drop('tracking_number');
+            $table->dropColumn('carrier_id');
+            $table->dropColumn('tracking_number');
         });
     }
 };

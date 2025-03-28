@@ -1342,6 +1342,10 @@ class CartController extends Controller
             $res = placeOrder($data, 1);
 
             if (!empty($res)) {
+                // Якщо замовлення створено, розподіляємо кошти по рахунках користувачів
+                $data['order_id'] = $res['order_id'];
+                $this->splitCommissionsBetweenUsers($data);
+
                 if ($data['payment_method'] == "bank_transfer" || $data['payment_method'] == 'stripe' || $data['payment_method'] == 'phonepe' || $data['payment_method'] == 'paypal' || $data['payment_method'] == 'paystack' || $data['payment_method'] == 'razorpay') {
                     if ($data['payment_method'] == 'phonepe') {
                         $transaction_id = $request['phonepe_transaction_id'];

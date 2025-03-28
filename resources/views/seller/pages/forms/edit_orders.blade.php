@@ -772,9 +772,13 @@
                     @endif
 
                     <ul class="nav nav-pills mb-3 d-block" id="pills-tab" role="tablist">
-                        @if ($order_detls[0]->is_shiprocket_order == 0)
+                        @if ($order_detls[0]->is_shiprocket_order == 0 && $order_detls[0]->is_custom_courier == 0)
                             <div class="d-flex justify-content-center align-items-center">
                                 <h5 class="text-middle-line mt-2" type="button"><span>Local Shipping</span></h5>
+                            </div>
+                        @elseif($order_detls[0]->is_custom_courier == 1)
+                            <div class="d-flex justify-content-center align-items-center">
+                                <h5 class="text-middle-line mt-2" type="button"><span>Select courier</span></h5>
                             </div>
                         @else
                             <div class="d-flex justify-content-center align-items-center">
@@ -994,7 +998,7 @@
                                                             ($shiprocket_order['data']['status_code'] != 4 ||
                                                                 $shiprocket_order['data']['status'] !=
                                                                     'PICKUP
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            SCHEDULED') &&
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                SCHEDULED') &&
                                                             $shiprocket_order['data']['status'] != 'CANCELED' &&
                                                             $shiprocket_order['data']['status'] != 'CANCELLATION REQUESTED')
                                                         <button type="button" title="Send Pickup Request"
@@ -1061,7 +1065,7 @@
                             @endif
                         @endif
                     </ul>
-                    @if ($order_detls[0]->is_shiprocket_order == 0)
+                    @if ($order_detls[0]->is_shiprocket_order == 0 && $order_detls[0]->is_custom_courier == 0)
                         <select name="status" class="form-control parcel_status mb-3">
                             <option value=''>Select Status</option>
                             <option value="received">Received</option>
@@ -1071,7 +1075,7 @@
                         </select>
                     @endif
                     <div class="tab-content" id="pills-tabContent">
-                        @if ($order_detls[0]->is_shiprocket_order == '0')
+                        @if ($order_detls[0]->is_shiprocket_order == '0' && $order_detls[0]->is_custom_courier == '0')
                             <div class="tab-pane fade show active" id="pills-local" role="tabpanel"
                                 aria-labelledby="pills-local-tab">
                                 <select id="deliver_by" name="deliver_by" class="form-control mb-2">
@@ -1083,6 +1087,54 @@
                                         </option>
                                     @endforeach
                                 </select>
+                            </div>
+                        @elseif ($order_detls[0]->is_custom_courier == '1')
+                            <div class="tab-pane fade show active" id="pills-aftership" role="tabpanel"
+                                aria-labelledby="pills-aftership-tab">
+                                <div class="card card-info aftersip_couriers_box">
+                                    <!-- form start -->
+                                    <form id="courier-selection-form" method="POST"
+                                        action="{{ route('seller.orders.update_order_tracking') }}">
+                                        @csrf
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <label for="courier_select">Select Courier</label>
+                                                <select class="form-control select2" id="courier_select"
+                                                    name="courier_agency" style="width: 100%;" required>
+                                                    <option value="">-- Select Courier --</option>
+                                                    @if (!empty($couriersList) && $couriersList->getData()->meta->code == 200)
+                                                        @foreach ($couriersList->getData()->data->couriers as $courier)
+                                                            <option value="{{ $courier->slug }}">{{ $courier->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    @else
+                                                        <option value="">Courier not found</option>
+                                                    @endif
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="tracking_id">Tracking ID</label>
+                                                <input type="text" class="form-control" id="tracking_id"
+                                                    name="tracking_id" placeholder="Enter tracking ID" required>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="url">Tracking URL</label>
+                                                <input type="url" class="form-control" id="url" name="url"
+                                                    placeholder="Enter tracking URL" required>
+                                            </div>
+
+                                            <input type="hidden" name="parcel_id" value="{{ $order_detls[0]->id }}">
+                                            <input type="hidden" name="order_id" value="{{ $order_detls[0]->id }}">
+                                        </div>
+                                        <!-- /.card-body -->
+
+                                        <div class="d-flex justify-content-end p-2">
+                                            <button type="submit" class="btn btn-primary">Зберегти</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         @else
                             <div class="tab-pane fade show active" id="pills-standard" role="tabpanel"
@@ -1187,7 +1239,7 @@
 
                     </div>
 
-                    @if ($order_detls[0]->is_shiprocket_order == 0)
+                    @if ($order_detls[0]->is_shiprocket_order == 0 && $order_detls[0]->is_custom_courier == 0)
                         <div class="d-flex justify-content-end p-2">
                             <button type="button"
                                 class="btn btn-primary btn-sm me-1 parcel_order_status_update">Update</button>
@@ -1197,99 +1249,54 @@
             </div>
         </div>
     </div>
-
-    <!-- Нова модаль для Custom Carrier -->
-    <div class="modal fade" id="custom_carrier_modal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Create a Custom Carrier Parcel</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="custom_carrier_form" action="{{ route('seller.parcels.create_custom_carrier') }}"
-                        method="POST">
-                        @csrf
-                        <input type="hidden" name="order_id" value="{{ $order_detls[0]->id }}">
-                        <input type="hidden" name="parcel_id" id="parcel_id">
-
-                        <!-- Вибір перевізника -->
-                        <div class="form-group">
-                            <label for="carrier_name">Select Carrier</label>
-                            <select name="carrier_name" id="carrier_name" class="form-control" required>
-                                <option value="">Choose a carrier</option>
-                                @php
-                                    $shippingSettings = json_decode(getSettings('shipping_method', true), true);
-                                    $couriers = $shippingSettings['couriers_list'] ?? [];
-                                @endphp
-                                @foreach ($couriers as $courier)
-                                    <option value="{{ $courier['slug'] }}">{{ $courier['name'] }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Введення трек-коду -->
-                        <div class="form-group">
-                            <label for="tracking_number">Tracking Number</label>
-                            <input type="text" name="tracking_number" id="tracking_number" class="form-control"
-                                placeholder="Enter tracking number" required>
-                        </div>
-
-                        <!-- Статус -->
-                        <div class="form-group">
-                            <label for="status">Status</label>
-                            <select name="status" id="status" class="form-control">
-                                <option value="processed">Processed</option>
-                                <option value="shipped">Shipped</option>
-                                <option value="delivered">Delivered</option>
-                            </select>
-                        </div>
-
-                        <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary">Create Parcel</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+@endsection
+<!-- Додаємо стилі та скрипти -->
+@section('styles')
+    {{-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> --}}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css"
+        rel="stylesheet" />
 @endsection
 
 @section('scripts')
+    {{-- <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> --}}
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const modal = document.querySelector('#custom_carrier_modal');
-            modal.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                const parcelId = button.getAttribute('data-parcel-id') || '';
-                const carrierId = button.getAttribute('data-carrier-id') || '';
-                const trackingNumber = button.getAttribute('data-tracking-number') || '';
-                const status = button.getAttribute('data-status') || 'processed';
-                console.log(parcelId, carrierId, trackingNumber, status);
-
-                const parcelInput = modal.querySelector('#parcel_id');
-                const carrierSelect = modal.querySelector('#carrier_name');
-                const trackingInput = modal.querySelector('#tracking_number');
-                const statusSelect = modal.querySelector('#status');
-
-                parcelInput.value = parcelId;
-                carrierSelect.value = carrierId || '';
-                trackingInput.value = trackingNumber || '';
-                statusSelect.value = status;
-
+        $(document).ready(function() {
+            // Ініціалізація Select2 з темою Bootstrap
+            $('#courier_select').select2({
+                theme: 'bootstrap',
+                placeholder: '-- Select courier --',
+                allowClear: true,
+                width: '100%',
+                minimumInputLength: 2,
+                dropdownParent: $('#parcel_status_modal')
             });
 
-            // modal.addEventListener('hidden.bs.modal', function() {
-            //     const parcelInput = modal.querySelector('#parcel_id');
-            //     const carrierSelect = modal.querySelector('#carrier_name');
-            //     const trackingInput = modal.querySelector('#tracking_number');
-            //     const statusSelect = modal.querySelector('#status');
+            $('#parcel_status_modal').on('shown.bs.modal', function() {
+                $('.select2-search__field').focus(); // Примусово сфокусувати поле пошуку
+            });
+            // Обробка відправки форми
+            $('#courier-selection-form').on('submit', function(e) {
+                e.preventDefault();
 
-            //     parcelInput.value = '';
-            //     carrierSelect.value = '';
-            //     trackingInput.value = '';
-            //     statusSelect.value = 'processed';
-            // });
+                $.ajax({
+                    url: $(this).attr('action'),
+                    method: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (!response.error) {
+                            alert(response.message);
+                            // Очистка форми або додаткова логіка
+                            // $('#courier-selection-form')[0].reset();
+                            // $('#courier_select').val('').trigger('change');
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        alert('Error occurred: ' + xhr.responseText);
+                    }
+                });
+            });
         });
     </script>
 @endsection

@@ -129,8 +129,7 @@
                         <div class="row mt-4">
                             <div class="col-md-12">
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <label class="mb-3" for="couriers_list_method">{{ 'Enable Couriers List' }}
-                                        <small>(Manage a list of courier services)</small></label>
+                                    <label class="mb-3" for="couriers_list_method">{{ 'Enable Couriers List' }}</label>
                                     <div class="card-body d-flex justify-content-end">
                                         <a class="toggle form-switch me-1 mb-1" title="Deactivate"
                                             href="javascript:void(0)">
@@ -147,35 +146,15 @@
                         <div class="couriers-list-section"
                             style="display: <?= @$settings['couriers_list_method'] == '1' ? 'block' : 'none' ?>;">
                             <div class="row">
-                                <div class="col-md-12">
-                                    <h6>{{ 'Couriers List' }}</h6>
-                                    <div id="couriers-list">
-                                        @if (isset($settings['couriers_list']) && is_array($settings['couriers_list']))
-                                            @foreach ($settings['couriers_list'] as $index => $courier)
-                                                <div class="courier-entry row mb-2">
-                                                    <div class="col-md-5">
-                                                        <input type="text" class="form-control"
-                                                            name="couriers_list[{{ $index }}][name]"
-                                                            value="{{ $courier['name'] }}" placeholder="Courier Name"
-                                                            required>
-                                                    </div>
-                                                    <div class="col-md-5">
-                                                        <input type="text" class="form-control"
-                                                            name="couriers_list[{{ $index }}][slug]"
-                                                            value="{{ $courier['slug'] }}"
-                                                            placeholder="Tracking URL (optional)">
-                                                    </div>
-                                                    <div class="col-md-2">
-                                                        <button type="button"
-                                                            class="btn btn-danger remove-courier">Remove</button>
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        @endif
-                                    </div>
-                                    <button type="button" class="btn btn-secondary mt-2" id="add-courier">Add
-                                        Courier</button>
+                                <div class="form-group">
+                                    <label class="mb-3"
+                                        for="aftership_apikey">{{ labels('admin_labels.aftership_apikey', 'Aftership API key') }}<span
+                                            class="text-asterisks text-sm">*</span></label>
+                                    <input type="text" class="form-control" name="aftership_apikey" id=""
+                                        value="<?= isKeySetAndNotEmpty($settings, 'aftership_apikey') ? $settings['aftership_apikey'] : '' ?>" />
                                 </div>
+
+
                             </div>
                         </div>
 
@@ -212,40 +191,3 @@
         </div>
     </div>
 @endsection
-
-@push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Показати/сховати секцію Couriers List
-            document.querySelector('input[name="couriers_list_method"]').addEventListener('change', function() {
-                document.querySelector('.couriers-list-section').style.display = this.checked ? 'block' :
-                    'none';
-            });
-
-            // Додати нового кур’єра
-            document.getElementById('add-courier').addEventListener('click', function() {
-                var index = document.querySelectorAll('#couriers-list .courier-entry').length;
-                var html = `
-                    <div class="courier-entry row mb-2">
-                        <div class="col-md-5">
-                            <input type="text" class="form-control" name="couriers_list[${index}][name]" placeholder="Courier Name" required>
-                        </div>
-                        <div class="col-md-5">
-                            <input type="text" class="form-control" name="couriers_list[${index}][slug]" placeholder="Courier Slug (e.g., ups, dhl)">
-                        </div>
-                        <div class="col-md-2">
-                            <button type="button" class="btn btn-danger remove-courier">Remove</button>
-                        </div>
-                    </div>`;
-                document.getElementById('couriers-list').insertAdjacentHTML('beforeend', html);
-            });
-
-            // Видалити кур’єра
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('remove-courier')) {
-                    e.target.closest('.courier-entry').remove();
-                }
-            });
-        });
-    </script>
-@endpush

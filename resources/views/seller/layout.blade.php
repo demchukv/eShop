@@ -2,8 +2,11 @@
 <html lang="en">
 
 <head>
-@include('seller.include_css')
+    @include('seller.include_css')
+    @stack('styles')
+    @yield('styles')
 </head>
+
 <body>
     <div id="db-wrapper">
         <!-- navbar vertical -->
@@ -18,7 +21,10 @@
     </div>
     <x-seller.footer />
     <!-- Scripts -->
-    @include('seller.include_script')
+    @stack('scripts')
+    @include('admin.include_script')
+    {{-- @yield('scripts') --}}
+</body>
 </body>
 
 </html>

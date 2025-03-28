@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
-@include('admin.include_css')
+    @include('admin.include_css')
+    @stack('styles')
+    @yield('styles')
 </head>
+
 <body>
     <div id="db-wrapper">
 
@@ -17,8 +21,9 @@
     </div>
     <x-admin.footer />
     <!-- Scripts -->
+    @include('admin.include_script')
     @stack('scripts')
+    @yield('scripts')
 </body>
-@include('admin.include_script')
 
 </html>

@@ -3800,6 +3800,7 @@ function placeOrder($data, $for_web = '')
             'order_payment_currency_code' => $data['order_payment_currency_code'] ?? "",
             'order_payment_currency_conversion_rate' => $order_payment_currency_data[0]->exchange_rate ?? '',
             'base_currency_code' => $base_currency,
+            'is_custom_courier' => isset($data['delivery_type']) && !empty($data['delivery_type']) && $data['delivery_type'] == 'custom_courier' ? 1 : 0,
         ];
 
         if (isset($data['address_id']) && !empty($data['address_id'])) {
@@ -4653,6 +4654,7 @@ function checkCartProductsDeliverable($user_id, $zipcode = "", $zipcode_id = "",
             /* check in local shipping first */
             $tmpRow['is_deliverable'] = false;
             $tmpRow['delivery_by'] = '';
+            // локальн адоставка курєром
             if (isset($settings['local_shipping_method']) && $settings['local_shipping_method'] == 1) {
                 $seller_deliverable_details = fetchDetails('seller_store', ['seller_id' => $cart[$i]->seller_id, 'store_id' => $store_id], ['city', 'zipcode']);
                 // dd($zipcode_id);
@@ -4681,6 +4683,11 @@ function checkCartProductsDeliverable($user_id, $zipcode = "", $zipcode_id = "",
             }
             // dd($cart[$i]);
 
+            // доставка перевізнико зі списку і автоматичний трекінг накладних
+            if (isset($settings['couriers_list_method']) && $settings['couriers_list_method'] == 1) {
+                $tmpRow['is_deliverable'] = true;
+                $tmpRow['delivery_by'] = "custom_courier";
+            }
             /* check in standard shipping then */
             if (isset($settings['shiprocket_shipping_method']) && $settings['shiprocket_shipping_method'] == 1) {
 

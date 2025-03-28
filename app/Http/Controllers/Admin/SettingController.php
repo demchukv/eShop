@@ -1051,10 +1051,7 @@ class SettingController extends Controller
         // Валідація для Couriers List
         if ($request->couriers_list_method == "on") {
             $validator = Validator::make($request->all(), [
-                'couriers_list.*.name' => 'required|string|max:255',
-                'couriers_list.*.slug' => 'required|string|max:50|regex:/^[a-z0-9-]+$/',
-            ], [
-                'couriers_list.*.slug.regex' => 'The courier slug must contain only lowercase letters, numbers, and hyphens.',
+                'aftership_apikey' => 'required|string|max:255',
             ]);
             if ($validator->fails()) {
                 $errors = $validator->errors();
@@ -1088,7 +1085,7 @@ class SettingController extends Controller
                 'standard_shipping_free_delivery' => isset($request->standard_shipping_free_delivery) && $request->standard_shipping_free_delivery == "on" ? 1 : 0,
                 'minimum_free_delivery_order_amount' => $request->minimum_free_delivery_order_amount,
                 'couriers_list_method' => isset($request->couriers_list_method) && $request->couriers_list_method == "on" ? 1 : 0,
-                'couriers_list' => $request->couriers_list ?? [], // Список кур’єрів
+                'aftership_apikey' => $request->aftership_apikey ?? "", // AfterShip API key
             ], JSON_UNESCAPED_SLASHES),
         ];
         // Check if settings already exist in the database

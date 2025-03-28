@@ -21,6 +21,7 @@ use LaravelDaily\Invoices\Invoice;
 use LaravelDaily\Invoices\Classes\Buyer;
 use LaravelDaily\Invoices\Classes\InvoiceItem;
 use LaravelDaily\Invoices\Classes\Party;
+use App\Http\Controllers\AfterShipApiController;
 
 class OrderController extends Controller
 {
@@ -498,6 +499,7 @@ class OrderController extends Controller
 
         $is_customer_privacy_permission = (isset($seller_permissions['customer_privacy']) && $seller_permissions['customer_privacy'] == 1) ? 1 : 0;
 
+
         if ($res == null || empty($res)) {
             return view('admin.pages.views.no_data_found');
         } else {
@@ -613,7 +615,14 @@ class OrderController extends Controller
             $currency = !empty($currencyDetails) ? $currencyDetails[0]->symbol : '';
             $mobile_data = fetchDetails('addresses', ['id' => $order_detls[0]->address_id], 'mobile');
             $order_tracking = fetchDetails('order_trackings', ['order_id' => $main_order_id]);
-            return view('seller.pages.forms.edit_orders', compact('delivery_res', 'store_id', 'order_detls', 'mobile_data', 'bank_transfer', 'items', 'settings', 'shipping_method', 'sellers', 'currency', 'order_tracking', 'is_customer_privacy_permission'));
+            if ($shipping_method['couriers_list_method'] == 1) {
+                $afterShipApiController = new AfterShipApiController();
+                $couriersList = $afterShipApiController->getCouriersList();
+            } else {
+                $couriersList = [];
+            }
+
+            return view('seller.pages.forms.edit_orders', compact('delivery_res', 'store_id', 'order_detls', 'mobile_data', 'bank_transfer', 'items', 'settings', 'shipping_method', 'sellers', 'currency', 'order_tracking', 'is_customer_privacy_permission', 'couriersList'));
         }
     }
 

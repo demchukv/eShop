@@ -112,6 +112,7 @@ class Checkout extends Component
                 // dd($product_availability);
             }
         }
+
         // dd($product_availability);
         $time_slot_config = getSettings('time_slot_config', true, true);
         $time_slot_config = json_decode($time_slot_config);
