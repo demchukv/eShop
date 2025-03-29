@@ -5,17 +5,31 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\OrderTracking;
+use App\Models\Parcel;
+use App\Models\Parcelitem;
+use App\Models\OrderItems;
 
+use Tracking\Client;
+use Tracking\Config;
+use Tracking\Exception\AfterShipError;
+use Tracking\API\Tracking\CreateTrackingRequest;
+use Tracking\API\Tracking\CreateTrackingResponse;
 
 class AfterShipApiController extends Controller
 {
-    public $api_version = '2025-01';
-    public $api_url = 'https://api.aftership.com/tracking/';
-    public $as_api_key;
+    // public $api_version = '2025-01';
+    // public $api_url = 'https://api.aftership.com/tracking/';
+    protected $as_api_key;
+    protected $client;
+
 
     public function __construct()
     {
         $this->as_api_key = $this->setAfterShipApiKey();
+        $this->client = new Client([
+            'apiKey' => $this->as_api_key,
+            'authenticationType' => Config::AUTHENTICATION_TYPE_API_KEY,
+        ]);
     }
 
     public function setAfterShipApiKey()
@@ -42,71 +56,58 @@ class AfterShipApiController extends Controller
         }
 
         // Якщо кешу немає або він застарів - робимо запит до API
-        $response = Http::withHeaders([
-            'as-api-key' => $this->as_api_key,
-            'Content-Type' => 'application/json',
-        ])->get($this->api_url . $this->api_version . "/couriers/all");
-
-        if ($response->successful()) {
-            $data = $response->json();
-
+        try {
+            $response = $this->client->courier->getAllCouriers();
+            \Log::error('Return couriers list from AfterShip API');
             // Зберігаємо отримані дані у файл
-            file_put_contents($cacheFile, json_encode($data));
-
-            return response()->json($data);
-        } else {
-            if ($response) {
-                return response()->json(['error' => 'Error loading data from AfterShip', 'aftership' => $response->json()], 400);
-            } else {
-                return response()->json(['error' => 'Unable to fetch couriers list'], 500);
-            }
+            file_put_contents($cacheFile, json_encode($response));
+            return response()->json($response);
+        } catch (AfterShipError $e) {
+            return response()->json(['error' => 'Error loading data from AfterShip', 'aftership' => $e->getMessage()], 400);
         }
     }
 
 
     public function createTracking(Request $request)
     {
-        // Валідація вхідних даних
         $request->validate([
             'order_id' => 'required|exists:orders,id',
             'parcel_id' => 'required|exists:parcels,id',
-            'courier_agency' => 'required|string|max:255', // slug перевізника з AfterShip
-            'tracking_id' => 'required|string|max:255',    // Номер відстеження
-            'url' => 'nullable|url',                       // URL відстеження (опціонально)
+            'courier_agency' => 'required|string|max:255',
+            'tracking_id' => 'required|string|max:255',
+            'url' => 'nullable|url',
         ]);
 
-        // Формуємо дані для API AfterShip
-        $trackingData = [
-            'tracking' => [
-                'tracking_number' => $request->tracking_id,
-                'slug' => $request->courier_agency,
-                'order_id' => (string) $request->order_id, // Перетворюємо в string для AfterShip
-            ]
-        ];
+        $payload = new CreateTrackingRequest();
+        $payload->tracking_number = $request->tracking_id;
+        $payload->slug = $request->courier_agency;
+        $payload->order_id = (string) $request->order_id;
 
-        // Виконуємо POST-запит до AfterShip API
-        $response = Http::withHeaders([
-            'as-api-key' => $this->as_api_key,
-            'Content-Type' => 'application/json',
-        ])->post($this->api_url . $this->api_version . '/trackings', $trackingData);
+        \Log::info('Send tracking data for register shipment: ' . json_encode([
+            'tracking_number' => $payload->tracking_number,
+            'slug' => $payload->slug,
+            'order_id' => $payload->order_id,
+        ]));
 
-        // Перевіряємо успішність запиту
-        if ($response->successful()) {
-            $data = $response->json();
+        try {
+            // Виконуємо запит до AfterShip API через SDK
+            $trackingInfo = $this->client->tracking->createTracking($payload);
+            \Log::info('AfterShip response: ' . json_encode($trackingInfo));
 
             // Оновлюємо або створюємо запис у локальній базі даних
             $orderTracking = OrderTracking::updateOrCreate(
-                ['parcel_id' => $request->parcel_id], // Унікальний ключ для пошуку
+                ['parcel_id' => $request->parcel_id],
                 [
                     'order_id' => $request->order_id,
-                    'carrier_id' => $request->courier_agency, // Зберігаємо slug перевізника
-                    'courier_agency' => $request->courier_agency, // Зберігаємо slug перевізника
-                    'tracking_number' => $request->tracking_id, // Номер відстеження
-                    'tracking_id' => $request->tracking_id, // Номер відстеження
-                    'url' => $request->url ?? null, // URL відстеження
-                    'status' => 'pending', // Початковий статус
-                    'data' => json_encode($data['data']['tracking']), // Зберігаємо повну відповідь від AfterShip
-                    'date' => now(), // Дата створення
+                    'carrier_id' => $request->courier_agency,
+                    'courier_agency' => $request->courier_agency,
+                    'tracking_number' => $request->tracking_id,
+                    'tracking_id' => $request->tracking_id,
+                    'url' => $request->url ?? null,
+                    'status' => 'pending',
+                    'date' => now(),
+                    'aftership_tracking_id' => $trackingInfo->id, // Використовуємо властивість id
+                    'aftership_data' => json_encode($trackingInfo), // Зберігаємо весь об’єкт
                 ]
             );
 
@@ -116,16 +117,24 @@ class AfterShipApiController extends Controller
 
             return response()->json([
                 'message' => 'Tracking created successfully',
-                'tracking' => $data['data']['tracking'],
+                'tracking' => (array) $trackingInfo, // Перетворюємо об’єкт у масив для JSON
                 'error' => false
             ], 201);
-        } else {
-            $errorData = $response->json();
-            \Log::error('AfterShip API error: ' . json_encode($errorData));
+        } catch (AfterShipError $e) {
+            \Log::error('AfterShip API error: ' . $e->getMessage() . ' (Code: ' . $e->getCode() . ')');
             return response()->json([
                 'error' => 'Failed to create tracking in AfterShip',
-                'details' => $errorData,
-            ], $response->status());
+                'details' => [
+                    'code' => $e->getCode(),
+                    'message' => $e->getMessage(),
+                ],
+            ], $e->getCode() === 4007 ? 400 : 500);
+        } catch (\Exception $e) {
+            \Log::error('Unexpected error in createTracking: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Unexpected error occurred',
+                'details' => $e->getMessage(),
+            ], 500);
         }
     }
 
@@ -139,65 +148,92 @@ class AfterShipApiController extends Controller
     {
         // Валідація вхідних даних
         $request->validate([
-            'aftership_tracking_id' => 'required|string|max:255', // Унікальний ID трекінгу від AfterShip
+            'aftership_tracking_id' => 'required|string|max:255',
         ]);
 
-        // Шлях до файлу кешу для конкретного трекінгу
         $cacheFile = storage_path('app/aftership_tracking_' . $request->aftership_tracking_id . '_cache.json');
-        $cacheTTL = 3600; // 1 година в секундах (можна налаштувати)
+        $cacheTTL = 3600;
 
-        // Перевіряємо, чи існує кеш і чи він ще актуальний
         if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTTL) {
             $cachedData = json_decode(file_get_contents($cacheFile), true);
             \Log::info('Return tracking data from cache for ID: ' . $request->aftership_tracking_id);
             return response()->json($cachedData);
         }
 
-        // Виконуємо GET-запит до AfterShip API
-        $response = Http::withHeaders([
-            'as-api-key' => $this->as_api_key,
-            'Content-Type' => 'application/json',
-        ])->get($this->api_url . $this->api_version . '/trackings/' . $request->aftership_tracking_id);
+        try {
+            $trackingResponse = $this->client->tracking->getTrackingById($request->aftership_tracking_id);
+            $trackingData = (array) $trackingResponse;
 
-        // Перевіряємо успішність запиту
-        if ($response->successful()) {
-            $data = $response->json();
-
-            // Оновлюємо локальний запис у базі (опціонально)
             $orderTracking = OrderTracking::where('aftership_tracking_id', $request->aftership_tracking_id)->first();
             if ($orderTracking) {
+                $afterShipStatus = $trackingData['tag'] ?? $orderTracking->status;
+                $mappedStatus = $this->mapAfterShipStatus($afterShipStatus);
+                $timestamp = now()->format('Y-m-d h:i:sa');
+
                 $orderTracking->update([
-                    'status' => $data['data']['tracking']['tag'] ?? $orderTracking->status, // Оновлюємо статус
-                    'aftership_data' => json_encode($data['data']['tracking']),             // Оновлюємо повну відповідь
-                    'tracking_number' => $data['data']['tracking']['tracking_number'] ?? $orderTracking->tracking_number,
-                    'carrier_id' => $data['data']['tracking']['slug'] ?? $orderTracking->carrier_id,
+                    'status' => $mappedStatus,
+                    'aftership_data' => json_encode($trackingData),
+                    'tracking_number' => $trackingData['tracking_number'] ?? $orderTracking->tracking_number,
+                    'carrier_id' => $trackingData['slug'] ?? $orderTracking->carrier_id,
                 ]);
-                // синхронізуємо статус у таблиці order_items
-                \App\Models\OrderItems::where('order_id', $orderTracking->order_id)
-                    ->update(['active_status' => $data['data']['tracking']['tag'] ?? $orderTracking->status]);
+
+                $parcels = Parcel::where('order_id', $orderTracking->order_id)
+                    ->where('id', $orderTracking->parcel_id)
+                    ->get();
+
+                foreach ($parcels as $parcel) {
+                    $parcel->active_status = $mappedStatus;
+                    $currentStatusHistory = $parcel->status ? json_decode($parcel->status, true) : [];
+                    $currentStatusHistory[] = [$mappedStatus, $timestamp];
+                    $parcel->status = json_encode($currentStatusHistory);
+                    $parcel->save();
+
+                    // Отримуємо order_item_ids із ParcelItem для цього parcel_id
+                    $parcelItemIds = ParcelItem::where('parcel_id', $parcel->id)
+                        ->pluck('order_item_id')
+                        ->toArray();
+
+                    // Оновлюємо лише ті OrderItems, які пов’язані з ParcelItem
+                    $orderItems = OrderItems::where('order_id', $orderTracking->order_id)
+                        ->whereIn('id', $parcelItemIds)
+                        ->get();
+
+                    foreach ($orderItems as $item) {
+                        $item->active_status = $mappedStatus;
+                        $currentItemStatusHistory = $item->status ? json_decode($item->status, true) : [];
+                        $currentItemStatusHistory[] = [$mappedStatus, $timestamp];
+                        $item->status = json_encode($currentItemStatusHistory);
+                        $item->save();
+                    }
+                }
             }
-            // Зберігаємо дані в кеш
-            $cacheData = [
+
+            $responseData = [
                 'message' => 'Tracking retrieved successfully',
-                'tracking' => $data['data']['tracking'],
+                'tracking' => $trackingData,
                 'error' => false,
-                'cached_at' => now()->toDateTimeString(), // Додаємо час кешування для дебагу
+                'cached_at' => now()->toDateTimeString(),
             ];
-            file_put_contents($cacheFile, json_encode($cacheData));
+
+            file_put_contents($cacheFile, json_encode($responseData));
             \Log::info('Tracking data cached for ID: ' . $request->aftership_tracking_id);
 
-            return response()->json([
-                'message' => 'Tracking retrieved successfully',
-                'tracking' => $data['data']['tracking'],
-                'error' => false
-            ], 200);
-        } else {
-            $errorData = $response->json();
-            \Log::error('AfterShip API error on getTrackingById: ' . json_encode($errorData));
+            return response()->json($responseData, 200);
+        } catch (AfterShipError $e) {
+            \Log::error('AfterShip API error on getTrackingById: ' . $e->getMessage() . ' (Code: ' . $e->getCode() . ')');
             return response()->json([
                 'error' => 'Failed to retrieve tracking from AfterShip',
-                'details' => $errorData,
-            ], $response->status());
+                'details' => [
+                    'code' => $e->getCode(),
+                    'message' => $e->getMessage(),
+                ],
+            ], $e->getCode() === 4007 ? 400 : 500);
+        } catch (\Exception $e) {
+            \Log::error('Unexpected error in getTrackingById: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Unexpected error occurred',
+                'details' => $e->getMessage(),
+            ], 500);
         }
     }
 
@@ -212,7 +248,28 @@ class AfterShipApiController extends Controller
         return response()->json(['message' => 'No cache found'], 404);
     }
 
-    // ... інші методи (getCouriersList, createTracking, getTrackingById) залишаються без змін ...
+    /**
+     * Мапінг статусів AfterShip на внутрішні статуси системи
+     *
+     * @param string $afterShipStatus
+     * @return string
+     */
+    protected function mapAfterShipStatus(string $afterShipStatus): string
+    {
+        $statusMap = [
+            'Pending' => 'shipped',
+            'InfoReceived' => 'shipped',
+            'InTransit' => 'shipped',
+            'Delivered' => 'delivered',
+            // Додаткові статуси можна додати тут у майбутньому
+            // 'OutForDelivery' => 'shipped',
+            // 'Exception' => 'returned',
+            // 'FailedAttempt' => 'shipped',
+        ];
+
+        // Повертаємо зіставлений статус або зберігаємо оригінальний, якщо мапінг відсутній
+        return $statusMap[$afterShipStatus] ?? $afterShipStatus;
+    }
 
     /**
      * Обробка вебхука від AfterShip для оновлення статусу трекінгу
@@ -222,7 +279,6 @@ class AfterShipApiController extends Controller
      */
     public function handleWebhook(Request $request)
     {
-        // Отримуємо секретний ключ із налаштувань
         $shippingSettings = json_decode(getSettings('shipping_method', true), true);
         $secretKey = $shippingSettings['aftership_secret'] ?? null;
 
@@ -231,7 +287,6 @@ class AfterShipApiController extends Controller
             return response()->json(['error' => 'Secret key not configured'], 403);
         }
 
-        // Перевіряємо підпис вебхука (HMAC SHA256)
         $signature = $request->header('aftership-hmac-sha256');
         $rawBody = $request->getContent();
         $computedSignature = base64_encode(hash_hmac('sha256', $rawBody, $secretKey, true));
@@ -241,47 +296,82 @@ class AfterShipApiController extends Controller
             return response()->json(['error' => 'Invalid signature'], 401);
         }
 
-        // Отримуємо дані з вебхука
         $payload = $request->json()->all();
-        $trackingId = $payload['tracking']['id'] ?? null; // aftership_tracking_id
-        $status = $payload['tracking']['tag'] ?? null;     // Статус (наприклад, "InTransit", "Delivered")
+        $trackingData = $payload['msg'] ?? null;
+        $trackingId = $trackingData['id'] ?? null;
 
-        if (!$trackingId || !$status) {
-            \Log::error('AfterShip webhook failed: Missing tracking ID or status.', ['payload' => $payload]);
-            return response()->json(['error' => 'Missing tracking ID or status'], 400);
+        if (!$trackingId || !$trackingData) {
+            \Log::error('AfterShip webhook failed: Missing tracking ID or data.', ['payload' => $payload]);
+            return response()->json(['error' => 'Missing tracking ID or data'], 400);
         }
 
-        // Оновлюємо запис у базі
         $orderTracking = OrderTracking::where('aftership_tracking_id', $trackingId)->first();
         if ($orderTracking) {
             try {
+                $afterShipStatus = $trackingData['tag'] ?? $orderTracking->status;
+                $mappedStatus = $this->mapAfterShipStatus($afterShipStatus);
+                $timestamp = now()->format('Y-m-d h:i:sa');
+
                 $orderTracking->update([
-                    'status' => $status,
-                    'aftership_data' => json_encode($payload['tracking']), // Оновлюємо повні дані
-                    'tracking_number' => $payload['tracking']['tracking_number'] ?? $orderTracking->tracking_number,
-                    'carrier_id' => $payload['tracking']['slug'] ?? $orderTracking->carrier_id,
+                    'status' => $mappedStatus,
+                    'aftership_data' => json_encode($trackingData),
+                    'tracking_number' => $trackingData['tracking_number'] ?? $orderTracking->tracking_number,
+                    'carrier_id' => $trackingData['slug'] ?? $orderTracking->carrier_id,
                 ]);
+
+                $parcels = Parcel::where('order_id', $orderTracking->order_id)
+                    ->where('id', $orderTracking->parcel_id)
+                    ->get();
+
+                if ($parcels->isEmpty()) {
+                    \Log::warning('No parcels found for order_id: ' . $orderTracking->order_id);
+                }
+
+                foreach ($parcels as $parcel) {
+                    $parcel->active_status = $mappedStatus;
+                    $currentStatusHistory = $parcel->status ? json_decode($parcel->status, true) : [];
+                    $currentStatusHistory[] = [$mappedStatus, $timestamp];
+                    $parcel->status = json_encode($currentStatusHistory);
+                    $parcel->save();
+
+                    // Отримуємо order_item_ids із ParcelItem для цього parcel_id
+                    $parcelItemIds = ParcelItem::where('parcel_id', $parcel->id)
+                        ->pluck('order_item_id')
+                        ->toArray();
+
+                    // Оновлюємо лише ті OrderItems, які пов’язані з ParcelItem
+                    $orderItems = OrderItems::where('order_id', $orderTracking->order_id)
+                        ->whereIn('id', $parcelItemIds)
+                        ->get();
+
+                    foreach ($orderItems as $item) {
+                        $item->active_status = $mappedStatus;
+                        $currentItemStatusHistory = $item->status ? json_decode($item->status, true) : [];
+                        $currentItemStatusHistory[] = [$mappedStatus, $timestamp];
+                        $item->status = json_encode($currentItemStatusHistory);
+                        $item->save();
+                    }
+                }
+
+                $cacheFile = storage_path('app/aftership_tracking_' . $trackingId . '_cache.json');
+                if (file_exists($cacheFile)) {
+                    unlink($cacheFile);
+                    \Log::info('Cache cleared for tracking ID: ' . $trackingId);
+                }
+
+                \Log::info('AfterShip webhook processed successfully.', [
+                    'tracking_id' => $trackingId,
+                    'aftership_status' => $afterShipStatus,
+                    'mapped_status' => $mappedStatus,
+                    'order_id' => $orderTracking->order_id,
+                    'parcel_id' => $orderTracking->parcel_id,
+                ]);
+
+                return response()->json(['message' => 'Webhook processed successfully'], 200);
             } catch (\Exception $e) {
                 \Log::error('Failed to update tracking: ' . $e->getMessage());
                 return response()->json(['error' => 'Database update failed'], 500);
             }
-
-            // Оновлюємо статус у order_items (опціонально)
-            \App\Models\OrderItems::where('order_id', $orderTracking->order_id)
-                ->update(['active_status' => $status]);
-
-            \Log::info('AfterShip webhook processed successfully.', [
-                'tracking_id' => $trackingId,
-                'status' => $status,
-            ]);
-            // Очищаємо кеш для даного трекінгу
-            $cacheFile = storage_path('app/aftership_tracking_' . $trackingId . '_cache.json');
-            if (file_exists($cacheFile)) {
-                unlink($cacheFile);
-                \Log::info('Cache cleared for tracking ID: ' . $trackingId);
-            }
-
-            return response()->json(['message' => 'Webhook processed successfully'], 200);
         }
 
         \Log::warning('AfterShip webhook: Tracking not found in database.', ['tracking_id' => $trackingId]);

@@ -480,39 +480,8 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-md-12">
-                                <form class="form-horizontal " id="order_tracking_form"
-                                    action="{{ route('seller.orders.update_order_tracking') }}" method="POST"
-                                    enctype="multipart/form-data">
-                                    @method('POST')
-                                    @csrf
-                                    <input type="hidden" name="parcel_id">
-                                    <div class="card-body pad">
-                                        <div class="form-group ">
-                                            <label
-                                                for="courier_agency">{{ labels('admin_labels.courier_agency', 'Courier Agency') }}</label>
-                                            <input type="text" class="form-control" name="courier_agency"
-                                                id="courier_agency" placeholder="Courier Agency" />
-                                        </div>
-                                        <div class="form-group ">
-                                            <label
-                                                for="tracking_id">{{ labels('admin_labels.tracking_id', 'Tracking Id') }}</label>
-                                            <input type="text" class="form-control" name="tracking_id"
-                                                id="tracking_id" placeholder="Tracking Id" />
-                                        </div>
-                                        <div class="form-group ">
-                                            <label for="url">{{ labels('admin_labels.url', 'Url') }}</label>
-                                            <input type="text" class="form-control" name="url" id="url"
-                                                placeholder="URL" />
-                                        </div>
-                                        <div class="d-flex justify-content-end">
-                                            <button type="reset"
-                                                class="btn mx-2 reset_button">{{ labels('admin_labels.reset', 'Reset') }}</button>
-                                            <button type="submit" class="btn btn-primary"
-                                                id="submit_btn">{{ labels('admin_labels.save', 'Save') }}</button>
-                                        </div>
-                                    </div>
-                                </form>
+                            <div class="col-md-12" id="order_tracking_details">
+                                {{-- Схема чекпойнтів --}}
                             </div>
                         </div>
                         </form>
@@ -998,7 +967,7 @@
                                                             ($shiprocket_order['data']['status_code'] != 4 ||
                                                                 $shiprocket_order['data']['status'] !=
                                                                     'PICKUP
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    SCHEDULED') &&
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        SCHEDULED') &&
                                                             $shiprocket_order['data']['status'] != 'CANCELED' &&
                                                             $shiprocket_order['data']['status'] != 'CANCELLATION REQUESTED')
                                                         <button type="button" title="Send Pickup Request"
@@ -1092,6 +1061,9 @@
                             <div class="tab-pane fade show active" id="pills-aftership" role="tabpanel"
                                 aria-labelledby="pills-aftership-tab">
                                 <div class="card card-info aftersip_couriers_box">
+                                    <div class="alert alert-warning d-none" role="alert" id="aftership_courier_alert">
+                                        Your shipment is not registered in the tracking system. Please try again later.
+                                    </div>
                                     <!-- form start -->
                                     <form id="courier-selection-form" method="POST"
                                         action="{{ route('seller.orders.update_order_tracking') }}">
@@ -1102,8 +1074,8 @@
                                                 <select class="form-control select2" id="courier_select"
                                                     name="courier_agency" style="width: 100%;" required>
                                                     <option value="">-- Select Courier --</option>
-                                                    @if (!empty($couriersList) && $couriersList->getData()->meta->code == 200)
-                                                        @foreach ($couriersList->getData()->data->couriers as $courier)
+                                                    @if (!empty($couriersList))
+                                                        @foreach ($couriersList->getData()->couriers as $courier)
                                                             <option value="{{ $courier->slug }}">{{ $courier->name }}
                                                             </option>
                                                         @endforeach
@@ -1126,8 +1098,7 @@
                                             </div>
 
                                             <input type="hidden" class="parcel_id" name="parcel_id" id="parcel_id">
-                                            <input type="hidden" name="order_id"
-                                                value="{{ $order_tracking[0]->order_id }}">
+                                            <input type="hidden" name="order_id" value="{{ $order_detls[0]->id }}">
                                         </div>
                                         <!-- /.card-body -->
 

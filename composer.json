@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "aftership/tracking-sdk": "^10.2",
         "aws/aws-sdk-php": "^3.301",
         "barryvdh/laravel-debugbar": "^3.10",
         "google/apiclient": "^2.18",

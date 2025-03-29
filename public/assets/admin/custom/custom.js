@@ -5594,36 +5594,245 @@ $("#system-update").on("submit", function (e) {
     });
 });
 
+// $(document).on("click", ".edit_order_tracking", function (e, rows) {
+//     e.preventDefault();
+
+//     var order_item_id = $(this).data("order_item_id");
+//     var parcel_id = $(this).data("id");
+//     var order_id = $(this).data("order_id");
+
+//     if ($('input[type=radio][name="seller_id"]:checked').val() != undefined) {
+//         var seller_id = $('input[type=radio][name="seller_id"]:checked').val();
+//     } else {
+//         var seller_id = $(this).data("seller_id");
+//     }
+//     var order_item_id = $(this).data("order_item_id");
+//     var courier_agency = $(this).data("courier_agency");
+//     var tracking_id = $(this).data("tracking_id");
+//     var url = $(this).data("url");
+
+//     $("#order_item_id").val(order_item_id);
+//     $('input[name="order_id"]').val(order_id);
+//     $('input[name="parcel_id"]').val(parcel_id);
+//     $('input[name="order_item_id"]').val(order_item_id);
+//     $('input[type=hidden][name="seller_id"]').val(seller_id);
+//     $("#order_id").val(order_id);
+//     $("#order_item_id").val(order_item_id);
+//     $("#courier_agency").val(courier_agency);
+//     $("#tracking_id").val(tracking_id);
+//     $("#url").val(url);
+//     $("#admin_order_tracking_table").bootstrapTable("refresh");
+//     $("#order_item_table").bootstrapTable("refresh");
+//     $(".modal").modal("hide");
+// });
+
 $(document).on("click", ".edit_order_tracking", function (e, rows) {
     e.preventDefault();
+    const orderTrackingDetails = document.getElementById("order_tracking_details");
+    const parcel_id = $(this).data("id");
+    const order_id = $(this).data("order-id");
+    const trackingData = $(this).data("tracking-data");
 
-    var order_item_id = $(this).data("order_item_id");
-    var parcel_id = $(this).data("id");
-    var order_id = $(this).data("order_id");
+    // Очищаємо контейнер перед додаванням нового вмісту
+    orderTrackingDetails.innerHTML = '';
 
-    if ($('input[type=radio][name="seller_id"]:checked').val() != undefined) {
-        var seller_id = $('input[type=radio][name="seller_id"]:checked').val();
-    } else {
-        var seller_id = $(this).data("seller_id");
+    // Перевіряємо, чи є дані для відображення
+    if (!trackingData || trackingData.length === 0) {
+        orderTrackingDetails.innerHTML = `
+            <div class="alert alert-warning" role="alert">
+                No tracking information available for this parcel.
+            </div>`;
+        return;
     }
-    var order_item_id = $(this).data("order_item_id");
-    var courier_agency = $(this).data("courier_agency");
-    var tracking_id = $(this).data("tracking_id");
-    var url = $(this).data("url");
 
-    $("#order_item_id").val(order_item_id);
-    $('input[name="order_id"]').val(order_id);
-    $('input[name="parcel_id"]').val(parcel_id);
-    $('input[name="order_item_id"]').val(order_item_id);
-    $('input[type=hidden][name="seller_id"]').val(seller_id);
-    $("#order_id").val(order_id);
-    $("#order_item_id").val(order_item_id);
-    $("#courier_agency").val(courier_agency);
-    $("#tracking_id").val(tracking_id);
-    $("#url").val(url);
-    $("#admin_order_tracking_table").bootstrapTable("refresh");
-    $("#order_item_table").bootstrapTable("refresh");
-    $(".modal").modal("hide");
+    // Отримуємо перший елемент масиву
+    const tracking = trackingData[0];
+    const aftershipData = tracking.aftership_data ? JSON.parse(tracking.aftership_data) : {};
+
+    // Функція для форматування дати в локальний час
+    const formatLocalDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleString();
+    };
+
+    // Створюємо HTML структуру з використанням Bootstrap
+    let html = `
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Tracking Details (Parcel ID: ${parcel_id}, Order ID: ${order_id})</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="border-bottom pb-2">General Information</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Courier Agency:</span>
+                                <span class="fw-bold">${tracking.courier_agency || 'N/A'}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Tracking ID:</span>
+                                <span class="fw-bold">${tracking.tracking_id || 'N/A'}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Tracking URL:</span>
+                                <span>
+                                    ${tracking.url
+            ? `<a href="${tracking.url}" target="_blank" class="text-primary">View Tracking</a>`
+            : 'N/A'
+        }
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Status:</span>
+                                <span class="badge bg-${aftershipData.tag === 'Delivered' ? 'success' :
+            aftershipData.tag === 'InTransit' ? 'warning' : 'info'
+        }">${aftershipData.tag || 'Unknown'}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="border-bottom pb-2">Delivery Information</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Origin:</span>
+                                <span>${aftershipData.origin_city || 'N/A'}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Destination:</span>
+                                <span>${aftershipData.destination_city || 'N/A'}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Shipment Pickup:</span>
+                                <span>${formatLocalDate(aftershipData.shipment_pickup_date)}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Delivery Date:</span>
+                                <span>${formatLocalDate(aftershipData.shipment_delivery_date)}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Checkpoints -->
+                <h6 class="mt-4 border-bottom pb-2">Tracking Checkpoints</h6>
+    `;
+
+    // Обробка чекпойнтів
+    if (aftershipData.checkpoints && aftershipData.checkpoints.length > 0) {
+        // Реверсуємо порядок чекпойнтів
+        const checkpoints = [...aftershipData.checkpoints].reverse();
+        let deliveredCheckpoint = null;
+        let infoReceivedCheckpoint = null;
+        const inTransitCheckpoints = [];
+
+        // Розділяємо чекпойнти за типами
+        checkpoints.forEach(checkpoint => {
+            if (checkpoint.tag === 'Delivered') {
+                deliveredCheckpoint = checkpoint;
+            } else if (checkpoint.tag === 'InfoReceived') {
+                infoReceivedCheckpoint = checkpoint;
+            } else if (checkpoint.tag === 'InTransit') {
+                inTransitCheckpoints.push(checkpoint);
+            }
+        });
+
+        // Відображення Delivered (якщо є) - завжди видимий
+        if (deliveredCheckpoint) {
+            html += `
+                    <div class="mb-3 mt-3">
+                        <h6 class="text-success">${formatLocalDate(deliveredCheckpoint.checkpoint_time)} - ${deliveredCheckpoint.tag}</h6>
+                        <div class="fs-6"><strong>Message:</strong> ${deliveredCheckpoint.message}</div>
+                        <div class="fs-6"><strong>Location:</strong> ${deliveredCheckpoint.location || 'N/A'}</div>
+                        <div class="fs-6"><strong>Subtag:</strong> ${deliveredCheckpoint.subtag_message || 'N/A'}</div>
+                    </div>
+            `;
+        }
+
+        // Відображення InTransit - спочатку один чекпойнт із можливістю розгортання
+        if (inTransitCheckpoints.length > 0) {
+            const latestInTransit = inTransitCheckpoints[0]; // Останній InTransit у зворотному порядку
+            html += `
+
+                    <div class="mb-3">
+                        <div class="mb-1">
+                            <h6 class="text-warning">${formatLocalDate(latestInTransit.checkpoint_time)} - ${latestInTransit.tag}</h6>
+                            <div class="fs-6"><strong>Message:</strong> ${latestInTransit.message}</div>
+                            <div class="fs-6"><strong>Location:</strong> ${latestInTransit.location || 'N/A'}</div>
+                            <div class="fs-6"><strong>Subtag:</strong> ${latestInTransit.subtag_message || 'N/A'}</div>
+                        </div>
+                        ${inTransitCheckpoints.length > 1
+                    ? `
+                                <div class="collapse" id="allInTransit">
+                                            ${inTransitCheckpoints.slice(1).map(checkpoint => `
+                                                <div class="mb-1">
+                                                    <h6 class="text-warning">${formatLocalDate(checkpoint.checkpoint_time)} - ${checkpoint.tag}</h6>
+                                                    <div class="fs-6"><strong>Message:</strong> ${checkpoint.message}</div>
+                                                    <div class="fs-6"><strong>Location:</strong> ${checkpoint.location || 'N/A'}</div>
+                                                    <div class="fs-6"><strong>Subtag:</strong> ${checkpoint.subtag_message || 'N/A'}</div>
+                                                </div>
+                                            `).join('')}
+                                </div>
+                                <p class="mb-0">
+                                    <a href="#" class="text-primary fs-5" data-bs-toggle="collapse" data-bs-target="#allInTransit"
+                                        aria-expanded="false" aria-controls="allInTransit" id="toggleInTransit">
+                                        Show all updates
+                                    </a>
+                                </p>
+                            `
+                    : ''
+                }
+                    </div>
+
+            `;
+        }
+
+        // Відображення InfoReceived (якщо є) - завжди видимий
+        if (infoReceivedCheckpoint) {
+            html += `
+                <div class="mb-3">
+                        <h6 class="text-info">${formatLocalDate(infoReceivedCheckpoint.checkpoint_time)} - ${infoReceivedCheckpoint.tag}</h6>
+                        <div class="fs-6"><strong>Message:</strong> ${infoReceivedCheckpoint.message}</div>
+                        <div class="fs-6"><strong>Location:</strong> ${infoReceivedCheckpoint.location || 'N/A'}</div>
+                        <div class="fs-6"><strong>Subtag:</strong> ${infoReceivedCheckpoint.subtag_message || 'N/A'}</div>
+                </div>
+            `;
+        }
+
+        // Якщо немає жодного з ключових чекпойнтів
+        if (!deliveredCheckpoint && !inTransitCheckpoints.length && !infoReceivedCheckpoint) {
+            html += `
+                <div class="alert alert-info mt-3" role="alert">
+                    No key checkpoints (Delivered, InTransit, InfoReceived) available.
+                </div>
+            `;
+        }
+    } else {
+        html += `
+            <div class="alert alert-info mt-3" role="alert">
+                No checkpoints available for this tracking.
+            </div>
+        `;
+    }
+
+    html += `
+            </div>
+        </div>
+    `;
+
+    // Вставляємо сформований HTML у контейнер
+    orderTrackingDetails.innerHTML = html;
+
+    // Додаємо обробник для зміни тексту посилання
+    const toggleLink = document.getElementById('toggleInTransit');
+    if (toggleLink) {
+        toggleLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            this.textContent = isExpanded ? 'Hide all updates' : 'Show all updates';
+        });
+    }
 });
 
 $("#admin_return_request_table").on(
@@ -9686,18 +9895,22 @@ $(document).on("show.bs.modal", "#parcel_status_modal", function (event) {
 
     // Нова логіка: Заповнення форми #courier-selection-form
     const $form = $(this).find("#courier-selection-form"); // Отримуємо форму в межах модального вікна
+    $form.find("[name='parcel_id']").val(parcel_id);
     if (tracking_data && tracking_data.length > 0) {
         let latestTracking = tracking_data[0]; // Беремо перший запис трекінгу
-
-
         // Заповнення полів форми
         $form.find("[name='courier_agency']").val(latestTracking.courier_agency).trigger("change"); // Для Select2
         $form.find("[name='tracking_id']").val(latestTracking.tracking_id);
         $form.find("[name='url']").val(latestTracking.url);
-        $form.find("[name='parcel_id']").val(parcel_id);
+        const aftership_courier_alert = document.getElementById("aftership_courier_alert");
+        if (aftership_courier_alert && !latestTracking.aftership_courier_alert) {
+            aftership_courier_alert.classList.add('d-none');
+        } else {
+            aftership_courier_alert.classList.remove('d-none');
+        }
     } else {
         // Скидаємо форму
-        $form[0].reset();
+        // $form.reset();
         $form.find("[name='courier_agency']").val("").trigger("change"); // Очищаємо Select2
     }
 });

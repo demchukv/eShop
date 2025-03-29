@@ -1067,13 +1067,12 @@ class OrderController extends Controller
         $validator = Validator::make($request->all(), [
             'courier_agency' => 'required|string',
             'tracking_id' => 'required',
-            'url' => 'nullable|url',
+            'url' => 'sometimes|string|url|nullable',
             'parcel_id' => 'required',
 
         ], [
             'required' => 'The :attribute field is required.',
             'numeric' => 'The :attribute field must be a number.',
-
         ]);
 
         if ($validator->fails()) {
@@ -1089,13 +1088,12 @@ class OrderController extends Controller
         $offset = $request->input('offset') ?? 0;
 
         $order = $request->input('order') ?? 'DESC';
-        $order_item_id = $request->input('order_item_id');
         $sellerId = Auth::id();
         $seller_id = Seller::where('user_id', $sellerId)->value('id');
         $courier_agency = $request->input('courier_agency');
         $tracking_id = $request->input('tracking_id');
         $parcel_id = $request->input('parcel_id');
-        $url = $request->input('url');
+        $url = $request->input('url') ?? '';
 
         $store_id = fetchDetails('parcels', ['id' => $parcel_id], 'store_id');
         $store_id = isset($store_id) && !empty($store_id) ? $store_id[0]->store_id : "";
@@ -1116,6 +1114,7 @@ class OrderController extends Controller
             return response()->json($response);
         }
         $order_id = $parcel_details['order_id'];
+
         $data = array(
             'parcel_id' => $parcel_id,
             'order_id' => $order_id,
@@ -1129,7 +1128,7 @@ class OrderController extends Controller
 
         // Перевіряємо, чи існує запис у таблиці order_trackings
         $existingTracking = OrderTracking::where('parcel_id', $parcel_id)->where('shipment_id', 0)->first();
-
+        \Log::info('Existing tracking: ' . json_encode($request->all()));
         if ($existingTracking) {
             // Якщо запис існує, оновлюємо його
             if (updateDetails($data, ['parcel_id' => $parcel_id, 'shipment_id' => 0], 'order_trackings') == TRUE) {
@@ -1897,7 +1896,7 @@ class OrderController extends Controller
                 $item->image = getMediaImageUrl($item->image);
             }
             // $order_tracking_data = fetchDetails('order_trackings', ['parcel_id' => $parcel->id, 'shipment_id' => 0], ['courier_agency', 'tracking_id', 'url']);
-            $order_tracking_data = fetchDetails('order_trackings', ['parcel_id' => $parcel->id, 'shipment_id' => 0], ['courier_agency', 'tracking_id', 'url', 'carrier_id', 'tracking_number']);
+            $order_tracking_data = fetchDetails('order_trackings', ['parcel_id' => $parcel->id, 'shipment_id' => 0], ['courier_agency', 'tracking_id', 'url', 'aftership_tracking_id', 'aftership_data']);
 
             $action = '<div class="d-flex action-icons">
                         <a href="javascript:void(0)" class="me-2 btn btn-primary view_parcel_items"
@@ -1923,6 +1922,7 @@ class OrderController extends Controller
                             <i class="bx bx-trash text-white"></i>
                         </a>
                         <a href="javascript:void(0)" class="edit_order_tracking me-2 btn btn-info" data-id="' . $parcel->id . '"
+                        data-order-id="' . $parcel->order_id . '"
                             data-tracking-data=\'' . htmlspecialchars(json_encode($order_tracking_data), ENT_QUOTES, 'UTF-8') . '\'
                             data-bs-toggle="modal" data-bs-target="#order_tracking_modal">
                             <i class="bx bx-map text-white"></i>
