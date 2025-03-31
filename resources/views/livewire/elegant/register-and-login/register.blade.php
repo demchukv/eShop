@@ -12,13 +12,13 @@
                             {{ labels('front_messages.register', 'Register') }}
                         </h2>
 
-                        {{-- @if(session('referral_code'))
-                        <p>Your Referrer in session: {{ session('referral_code') }}</p>
+                        @if (session('referral_code'))
+                            <p>Your Referrer in session: {{ session('referral_code') }}</p>
                         @elseif(Cookie::get('referral_code'))
-                        <p>Your Referrer in cookies: {{ Cookie::get('referral_code') }}</p>
+                            <p>Your Referrer in cookies: {{ Cookie::get('referral_code') }}</p>
                         @else
-                        <p>Referrer not found</p>
-                        @endif --}}
+                            <p>Referrer not found</p>
+                        @endif
 
 
                         @if ($authentication_method == 'firebase')

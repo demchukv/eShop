@@ -68,12 +68,14 @@
                                                             $user_order['order_payment_currency_code'],
                                                             true,
                                                         );
-                                                        $amount = isset($currency_details) && !empty($currency_details) ?
-                                                            ((float) $user_order['final_total'] *
-                                                            number_format(
-                                                                (float) $currency_details[0]->exchange_rate,
-                                                                2,
-                                                            )) : '';
+                                                        $amount =
+                                                            isset($currency_details) && !empty($currency_details)
+                                                                ? (float) $user_order['final_total'] *
+                                                                    number_format(
+                                                                        (float) $currency_details[0]->exchange_rate,
+                                                                        2,
+                                                                    )
+                                                                : '';
                                                     @endphp
                                                     <td>
                                                         <span
@@ -127,4 +129,3 @@
         </div>
     </div>
 </div>
-

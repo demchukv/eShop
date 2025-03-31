@@ -50,19 +50,21 @@
                                             <h4>{{ labels('front_messages.referral_code', 'Referral Code') }}</h4>
                                         </div>
                                         <div class="mb-2 mt-2 d-flex gap-2">
-                                            <span>{{ config('app.url') }}/register?referral_code={{ $user_info->referral_code }}</span>
-                                            <livewire:components.copy-button text="{{ config('app.url') }}/register?referral_code={{ $user_info->referral_code }}" />
+                                            <span>{{ config('app.url') }}register?referral_code={{ $user_info->referral_code }}</span>
+                                            <livewire:components.copy-button
+                                                text="{{ config('app.url') }}register?referral_code={{ $user_info->referral_code }}" />
                                         </div>
                                     </div>
-                                    @if($user_info->role_id == 8)
-                                    <div class="box-info mb-4">
-                                        <div class="box-title d-flex-center">
-                                            <h4>{{labels('front_messages.generate_seller_invite_link', 'Generate seller invite link')}}</h4>
+                                    @if ($user_info->role_id == 8)
+                                        <div class="box-info mb-4">
+                                            <div class="box-title d-flex-center">
+                                                <h4>{{ labels('front_messages.generate_seller_invite_link', 'Generate seller invite link') }}
+                                                </h4>
+                                            </div>
+                                            <div class="mb-2 mt-2 d-flex gap-2">
+                                                <livewire:my-account.seller-invites />
+                                            </div>
                                         </div>
-                                        <div class="mb-2 mt-2 d-flex gap-2">
-                                            <livewire:my-account.seller-invites />
-                                        </div>
-                                    </div>
                                     @endif
                                     <div class="box-info mb-4">
                                         <div class="box-title d-flex-center">
@@ -105,4 +107,3 @@
     </div>
     <!-- End Body Container -->
 </div>
-

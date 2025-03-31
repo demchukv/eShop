@@ -21,7 +21,9 @@ class Details extends Component
         if (count($user_orders['order_data']) < 1) {
             abort(404);
         }
+
         $user_orders_transaction_data = json_decode(json_encode($user_orders['order_data']), true);
+
         foreach ($user_orders_transaction_data as &$user_order) {
             foreach ($user_order['order_items'] as &$user_order_item) {
                 $order_item_id = $user_order_item['id'];

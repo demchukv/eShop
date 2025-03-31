@@ -64,19 +64,23 @@ class Register extends Component
                 return $response;
             }
 
+
+
+
+            // отримуємо referral_code з сесії або cookies
+            $friends_code = $request->session()->get('referral_code') ?? Cookie::get('referral_code');
+
             // Перевірка friends_code
-            if ($request->filled('friends_code')) {
-                $friend = User::where('referral_code', $request->friends_code)->first();
+            if ($friends_code) {
+                $friend = User::where('referral_code', $friends_code)->first();
                 if (!$friend) {
+                    $friends_code = null;
                     return [
                         'error' => true,
                         'message' => 'Invalid friend code! Please enter the correct referrer referral code'
                     ];
                 }
             }
-
-            // отримуємо referral_code з сесії або cookies
-            $friends_code = $request->session()->get('referral_code') ?? Cookie::get('referral_code');
 
             // генерація referral_code
             $referral_code = $this->generateUniqueReferralCode();

@@ -486,7 +486,6 @@ class OrderController extends Controller
         $seller_id = Seller::where('user_id', $sellerId)->value('id');
         $res = getOrderDetails(['o.id' => $id, 'oi.seller_id' => $seller_id], '', '', $store_id);
         $seller_store = DB::table('seller_store')->where('user_id', $sellerId)->where('store_id', $store_id)->select('city', 'zipcode', 'permissions')->get();
-
         $seller_city = isset($seller_store) ? $seller_store[0]->city : "";
         $seller_zipcode = isset($seller_store) ? $seller_store[0]->zipcode : "";
 
@@ -498,7 +497,6 @@ class OrderController extends Controller
         $seller_permissions = !empty($permissions) ? json_decode($permissions, true) : [];
 
         $is_customer_privacy_permission = (isset($seller_permissions['customer_privacy']) && $seller_permissions['customer_privacy'] == 1) ? 1 : 0;
-
 
         if ($res == null || empty($res)) {
             return view('admin.pages.views.no_data_found');
@@ -516,6 +514,8 @@ class OrderController extends Controller
                             ->orWhere('z.serviceable_zipcode_ids', 'LIKE', "%,$seller_zipcode,%");
                     }
                 })->get()->toArray();
+
+
             if ($res[0]->payment_method == "bank_transfer") {
                 $bank_transfer = fetchDetails('order_bank_transfers', ['order_id' => $res[0]->order_id]);
             }
@@ -523,9 +523,9 @@ class OrderController extends Controller
             $items = $seller = [];
 
             foreach ($res as $row) {
-
                 $multipleWhere = ['seller_id' => $row->seller_id, 'order_id' => $row->id];
                 $orderChargeData = DB::table('order_charges')->where($multipleWhere)->get();
+
                 $updated_username = isset($row->updated_by) && !empty($row->updated_by) && $row->updated_by != 0 ? fetchDetails('users', ['id' => $row->updated_by], 'username') : '';
                 $updated_username = isset($updated_username) && !empty($updated_username) ? $updated_username[0]->username : '';
                 $deliver_by = isset($row->delivery_boy_id) && !empty($row->delivery_boy_id) && $row->delivery_boy_id != 0 ? fetchDetails('users', ['id' => $row->delivery_boy_id], 'username')[0]->username : '';
@@ -558,8 +558,8 @@ class OrderController extends Controller
                     'product_variants' => getVariantsValuesById($row->product_variant_id),
                     'pickup_location' => $row->pickup_location,
                     'seller_otp' => $orderChargeData ?? $orderChargeData[0]->otp,
-                    'seller_delivery_charge' => $orderChargeData[0]->delivery_charge,
-                    'seller_promo_discount' => $orderChargeData[0]->promo_discount,
+                    'seller_delivery_charge' => $orderChargeData[0]->delivery_charge ?? 0,
+                    'seller_promo_discount' => $orderChargeData[0]->promo_discount ?? 0,
                     'is_sent' => $row->is_sent,
                     'seller_id' => $row->seller_id,
                     'download_allowed' => $row->download_allowed,

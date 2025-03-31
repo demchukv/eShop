@@ -1,5 +1,5 @@
 {{-- @dd($order_transaction); --}}
-{{-- @dd($order_transaction); --}}
+
 <div id="page-content">
     <x-utility.breadcrumbs.breadcrumbTwo />
     <div class="container-fluid h-100">
@@ -102,6 +102,7 @@
                                         $cancellable_index = array_search($cancelable_till, $status);
                                         $active_index = array_search($active_status, $status);
                                     @endphp
+
                                     @php
                                         $max_days_to_return_item = $system_settings['max_days_to_return_item'] ?? 0;
 
@@ -109,24 +110,34 @@
                                         $is_return_time_is_over = false;
 
                                         if ($user_order_item['active_status'] == 'delivered') {
-                                            // foreach ($user_order_item['status'] as $status) {
-
-                                            //}
-                                            if ($user_order_item['status'][3][0] == 'delivered') {
-                                                $deliveredTime = $user_order_item['status'][3][1];
+                                            foreach ($user_order_item['status'] as $status) {
+                                                if ($status[0] == 'delivered') {
+                                                    $deliveredTime = $status[1];
+                                                }
                                             }
+                                            // dd($user_order_item['status']);
+                                            // if ($user_order_item['status'][3][0] == 'delivered') {
+                                            //     $deliveredTime = $user_order_item['status'][3][1];
+                                            // }
+                                            // Перевірка, чи є $deliveredTime валідним
+                                            if ($deliveredTime) {
+                                                $deliveredDateTime = DateTime::createFromFormat(
+                                                    'Y-m-d h:i:sa',
+                                                    $deliveredTime,
+                                                );
 
-                                            $deliveredDateTime = DateTime::createFromFormat(
-                                                'd-m-Y h:i:sa',
-                                                $deliveredTime,
-                                            );
-
-                                            $returnDeadline = $deliveredDateTime->modify(
-                                                '+' . $max_days_to_return_item . ' days',
-                                            );
-                                            $currentDateTime = new DateTime();
-                                            if ($currentDateTime < $returnDeadline) {
-                                                $is_return_time_is_over = true;
+                                                // Перевірка, чи успішно створено об’єкт DateTime
+                                                if ($deliveredDateTime !== false) {
+                                                    $returnDeadline = $deliveredDateTime->modify(
+                                                        '+' . $max_days_to_return_item . ' days',
+                                                    );
+                                                    $currentDateTime = new DateTime();
+                                                    if ($currentDateTime < $returnDeadline) {
+                                                        $is_return_time_is_over = true;
+                                                    }
+                                                } else {
+                                                    $is_return_time_is_over = false; // Якщо парсинг не вдався
+                                                }
                                             }
                                         }
                                     @endphp
@@ -139,7 +150,6 @@
                                                 data-status="cancelled"
                                                 data-item-id="{{ $user_order_item['id'] }}">{{ labels('front_messages.cancle', 'Cancle') }}</button>
                                         @endif
-
                                         @if (
                                             $user_order_item['is_returnable'] == 1 &&
                                                 $user_order_item['return_request_submitted'] != 1 &&

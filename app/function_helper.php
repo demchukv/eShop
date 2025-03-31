@@ -5445,6 +5445,7 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
 
     // Convert the sorted and sliced collection back to array
     $orderDetails = $searchRes->values()->all();
+
     for ($i = 0; $i < count($orderDetails); $i++) {
         $prCondition = ($user_id != NULL && !empty(trim($user_id)) && is_numeric($user_id))
             ? " pr.user_id = $user_id "
@@ -5526,7 +5527,7 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
             })
             ->groupBy('oi.id')
             ->get();
-        // dD($regularOrderItemData->toSql());
+        // dd($regularOrderItemData->toSql());
 
         $comboOrderItemData = DB::table('order_items AS oi')
             ->select(
@@ -5765,16 +5766,22 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
                     $orderItemData[$k]->download_allowed = 1;
                 }
                 $orderItemData[$k]->email = (isset($orderItemData[$k]->email) && !empty($orderItemData[$k]->email) ? $orderItemData[$k]->email : '');
-
                 $returnable_count += $orderItemData[$k]->is_returnable;
                 $cancelable_count += $orderItemData[$k]->is_cancelable;
                 $already_returned_count += $orderItemData[$k]->is_already_returned;
                 $already_cancelled_count += $orderItemData[$k]->is_already_cancelled;
 
-                $delivery_date = isset($orderItemData[$k]->status[3][1]) ? $orderItemData[$k]->status[3][1] : '';
+                // $delivery_date = isset($orderItemData[$k]->status[3][1]) ? $orderItemData[$k]->status[3][1] : '';
+                $delivery_date = '';
+                foreach ($orderItemData[$k]->status as $status) {
+                    if ($status[0] == 'delivered') {
+                        $delivery_date = $status[1];
+                    }
+                }
                 $settings = getSettings('system_settings', true, true);
                 $settings = json_decode($settings, true);
                 $timestemp = strtotime($delivery_date);
+
                 $today = date('Y-m-d');
                 $return_till = date('Y-m-d', strtotime($delivery_date . ' + ' . $settings['max_days_to_return_item'] . ' days'));
 
