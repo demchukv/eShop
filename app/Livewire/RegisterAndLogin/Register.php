@@ -75,10 +75,10 @@ class Register extends Component
                 $friend = User::where('referral_code', $friends_code)->first();
                 if (!$friend) {
                     $friends_code = null;
-                    return [
-                        'error' => true,
-                        'message' => 'Invalid friend code! Please enter the correct referrer referral code'
-                    ];
+                    // return [
+                    //     'error' => true,
+                    //     'message' => 'Invalid friend code! Please enter the correct referrer referral code'
+                    // ];
                 }
             }
 
