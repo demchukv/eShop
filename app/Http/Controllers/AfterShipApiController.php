@@ -168,7 +168,7 @@ class AfterShipApiController extends Controller
             if ($orderTracking) {
                 $afterShipStatus = $trackingData['tag'] ?? $orderTracking->status;
                 $mappedStatus = $this->mapAfterShipStatus($afterShipStatus);
-                $timestamp = now()->format('Y-m-d h:i:sa');
+                $timestamp = now()->format('d-m-Y h:i:sa');
 
                 $orderTracking->update([
                     'status' => $mappedStatus,
@@ -310,7 +310,7 @@ class AfterShipApiController extends Controller
             try {
                 $afterShipStatus = $trackingData['tag'] ?? $orderTracking->status;
                 $mappedStatus = $this->mapAfterShipStatus($afterShipStatus);
-                $timestamp = now()->format('Y-m-d h:i:sa');
+                $timestamp = now()->format('d-m-Y h:i:sa');
 
                 $orderTracking->update([
                     'status' => $mappedStatus,

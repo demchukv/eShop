@@ -349,7 +349,8 @@ class CartController extends Controller
         $user_id = auth()->id() ?? 0;
         $store_id = session('store_id');
         $settings = getSettings('system_settings');
-        $settings = json_decode($settings);
+        $settings_obj = json_decode($settings);
+
         $cart_count = getCartCount($user_id, $store_id);
         $pv_ids = implode(",", $request['product_variant_id']);
         $product_types = implode(",", $request['product_type']);
@@ -363,9 +364,9 @@ class CartController extends Controller
         foreach ($request['product_variant_id'] as $key => $variant_id) {
             $is_variant_available_in_cart = isVariantAvailableInCart($variant_id, $user_id);
             if (!$is_variant_available_in_cart) {
-                if ($cart_count >= $settings->maximum_item_allowed_in_cart) {
+                if ($cart_count >= $settings_obj->maximum_item_allowed_in_cart) {
                     $response['error'] = true;
-                    $response['message'] = 'Maximum ' . $settings->maximum_item_allowed_in_cart . ' Item(s) Can Be Added Only!';
+                    $response['message'] = 'Maximum ' . $settings_obj->maximum_item_allowed_in_cart . ' Item(s) Can Be Added Only!';
                     print_r(json_encode($response));
                     return;
                 }

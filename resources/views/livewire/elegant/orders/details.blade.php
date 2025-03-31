@@ -122,7 +122,7 @@
                                             // Перевірка, чи є $deliveredTime валідним
                                             if ($deliveredTime) {
                                                 $deliveredDateTime = DateTime::createFromFormat(
-                                                    'Y-m-d h:i:sa',
+                                                    'd-m-Y h:i:sa',
                                                     $deliveredTime,
                                                 );
 

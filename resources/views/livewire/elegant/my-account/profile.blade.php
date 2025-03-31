@@ -215,6 +215,7 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.profile', 'Profil
                                             {{ labels('front_messages.mobile_number', 'Phone number') }}</h6>
                                     </div>
                                     <div class="right">
+
                                         <p>+({{ $user_info->country_code }}) &nbsp;{{ $user_info->mobile }}</p>
                                     </div>
                                 </div>
