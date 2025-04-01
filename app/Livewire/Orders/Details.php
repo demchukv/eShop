@@ -26,9 +26,13 @@ class Details extends Component
 
         // Завантажуємо список перевізників із файлу
         $couriersFilePath = storage_path('app/aftership_couriers_cache.json');
-        $couriersData = file_exists($couriersFilePath) ? json_decode(file_get_contents($couriersFilePath), true) : ['couriers' => []];
 
-        $couriersMap = collect($couriersData['couriers'])->pluck('name', 'slug')->all();
+        $couriersMap = \Cache::remember('aftership_couriers', 60 * 60 * 24, function () use ($couriersFilePath) {
+            $couriersData = file_exists($couriersFilePath) ? json_decode(file_get_contents($couriersFilePath), true) : ['couriers' => []];
+            return collect($couriersData['couriers'])->pluck('name', 'slug')->all();
+        });
+        // $couriersData = file_exists($couriersFilePath) ? json_decode(file_get_contents($couriersFilePath), true) : ['couriers' => []];
+        // $couriersMap = collect($couriersData['couriers'])->pluck('name', 'slug')->all();
 
         foreach ($user_orders_transaction_data as &$user_order) {
             foreach ($user_order['order_items'] as &$user_order_item) {

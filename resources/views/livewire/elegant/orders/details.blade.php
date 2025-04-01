@@ -394,8 +394,6 @@
             const $modal = $('#trackOrderModal');
             $modal.modal('show');
 
-            console.log("Raw trackingData:", trackingData);
-
             try {
                 aftershipData = typeof trackingData === 'string' ? JSON.parse(trackingData) : trackingData;
             } catch (error) {
@@ -457,16 +455,16 @@
                     </div>
                     <div class="collapse mb-0" id="allInTransit">
                         ${group.slice(0, -1).reverse().map(cp => `
-                                                    <div class="mb-3">
-                                                        <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
-                                                        <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
-                                                        <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
-                                                        <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
-                                                    </div>
-                                                `).join('')}
+                                    <div class="mb-3">
+                                        <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
+                                        <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
+                                        <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
+                                        <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
+                                    </div>
+                                `).join('')}
                     </div>
-                    <p class="mb-1 mt-0">
-                        <a href="#" class="text-primary fs-6" data-bs-toggle="collapse" data-bs-target="#allInTransit"
+                    <p class="mb-3 mt-0">
+                        <a href="#" class="text-primary fs-6" data-bs-target="#allInTransit"
                             aria-expanded="false" aria-controls="allInTransit" id="toggleInTransit">
                             Show all updates
                         </a>
@@ -552,13 +550,33 @@
 
             orderTrackingDetails.innerHTML = html;
 
+            // Оновлений обробник для #toggleInTransit
             const toggleLink = document.getElementById('toggleInTransit');
             if (toggleLink) {
-                toggleLink.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
-                    this.textContent = isExpanded ? 'Hide all updates' : 'Show all updates';
+                const collapseElement = document.getElementById('allInTransit');
+
+                // Переконуємося, що блок спочатку згорнутий
+                collapseElement.classList.remove('show');
+
+                // Ініціалізація Bootstrap Collapse
+                const collapseInstance = new bootstrap.Collapse(collapseElement, {
+                    toggle: false // Не перемикаємо автоматично при ініціалізації
                 });
+
+                // Видаляємо попередні обробники, якщо вони є
+                toggleLink.removeEventListener('click', toggleLink._clickHandler);
+                toggleLink._clickHandler = (e) => {
+                    e.preventDefault();
+                    if (collapseElement.classList.contains('show')) {
+                        collapseInstance.hide();
+                        toggleLink.textContent = 'Show all updates';
+                    } else {
+                        collapseInstance.show();
+                        toggleLink.textContent = 'Hide all updates';
+                    }
+                };
+                toggleLink.addEventListener('click', toggleLink._clickHandler);
+
             }
         });
     </script>
