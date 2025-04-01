@@ -47,7 +47,7 @@ class Details extends Component
             $currency = fetchDetails('currencies', ['id' => $currency_id]);
             $currency_symbol = $currency[0]->symbol;
         }
-        // dd($user_orders_transaction_data);
+        // dd($user_orders);
         return view('livewire.' . config('constants.theme') . '.orders.details', [
             'user_orders' => $user_orders,
             'order_transaction' => $user_orders_transaction_data,

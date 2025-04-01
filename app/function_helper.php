@@ -5479,6 +5479,8 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
                 'ot.tracking_id',
                 'ot.awb_code',
                 'ot.url',
+                'ot.aftership_tracking_id',
+                'ot.aftership_data',
                 DB::raw('(SELECT username FROM users WHERE id = ' . $orderDetails[$i]->main_seller_id . ') AS seller_name'),
                 'p.is_returnable',
                 'pv.special_price',
@@ -5528,6 +5530,7 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
             ->groupBy('oi.id')
             ->get();
         // dd($regularOrderItemData->toSql());
+        // dd($regularOrderItemData);
 
         $comboOrderItemData = DB::table('order_items AS oi')
             ->select(
@@ -5554,6 +5557,8 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
                 'ot.tracking_id',
                 'ot.awb_code',
                 'ot.url',
+                'ot.aftership_tracking_id',
+                'ot.aftership_data',
                 DB::raw('(SELECT username FROM users WHERE id = ' . $orderDetails[$i]->main_seller_id . ') AS seller_name'),
                 'cp.is_returnable',
                 'cp.special_price',
@@ -7073,6 +7078,8 @@ function getOrderDetails($where = null, $status = false, $sellerId = null, $stor
             'ot.courier_agency',
             'ot.tracking_id',
             'ot.url',
+            'ot.aftership_tracking_id',
+            'ot.aftership_data',
             'oi.otp as item_otp',
             'a.name as user_name',
             'oi.id as order_item_id',
@@ -7148,6 +7155,8 @@ function getOrderDetails($where = null, $status = false, $sellerId = null, $stor
             'ot.courier_agency',
             'ot.tracking_id',
             'ot.url',
+            'ot.aftership_tracking_id',
+            'ot.aftership_data',
             'oi.otp as item_otp',
             'a.name as user_name',
             'oi.id as order_item_id',
@@ -10349,6 +10358,7 @@ function viewAllParcels($order_id = '', $parcel_id = '', $seller_id = '', $offse
             'o.is_shiprocket_order',
             'o.final_total',
             'o.total',
+            'o.is_custom_courier',
         ])
         ->leftJoin('products as prod', function ($join) {
             $join->on('prod.id', '=', 'pi.product_variant_id')
@@ -10512,6 +10522,7 @@ function viewAllParcels($order_id = '', $parcel_id = '', $seller_id = '', $offse
             'delivery_time' => $row->delivery_time ?? "",
             'is_cod_collected' => $row->is_cod_collected,
             'is_shiprocket_order' => $row->is_shiprocket_order ?? 0,
+            'is_custom_courier' => $row->is_custom_courier ?? 0,
             'active_status' => $row->active_status,
             'status' => json_decode($row->status),
             'tracking_details' => $tracking_details,
@@ -10799,6 +10810,8 @@ function getReturnOrderItemsList($deliveryBoyId = null, $search = "", $offset = 
             'ot.courier_agency',
             'ot.tracking_id',
             'ot.url',
+            'ot.aftership_tracking_id',
+            'ot.aftership_data',
             't.status as transaction_status',
             'u.username as delivery_boy',
             'un.username as username',

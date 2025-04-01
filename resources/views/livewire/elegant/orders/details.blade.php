@@ -228,7 +228,9 @@
                             </div>
                         @endforeach
                     @endforeach
+
                     @if ($user_order['type'] != 'digital_product')
+
                         <div class="mb-2">
                             <div class="top-sec d-flex-justify-center justify-content-between mb-4">
                                 <h2 class="mb-0">{{ labels('front_messages.address_details', 'Address Details') }}

@@ -138,6 +138,39 @@ class AfterShipApiController extends Controller
         }
     }
 
+
+    /**
+     * Оновлює історію статусів, уникаючи дублювання статусу "shipped"
+     *
+     * @param mixed $model Модель (Parcel або OrderItems)
+     * @param string $newStatus Новий статус
+     * @param string $timestamp Часова мітка
+     * @return void
+     */
+    protected function updateStatusHistory($model, string $newStatus, string $timestamp): void
+    {
+        $currentStatusHistory = $model->status ? json_decode($model->status, true) : [];
+
+        // Перевіряємо, чи потрібно додавати новий статус
+        if ($newStatus === 'shipped') {
+            $hasShipped = false;
+            foreach ($currentStatusHistory as $history) {
+                if ($history[0] === 'shipped') {
+                    $hasShipped = true;
+                    break;
+                }
+            }
+            // Якщо "shipped" уже є, не додаємо його знову
+            if ($hasShipped) {
+                return;
+            }
+        }
+
+        // Додаємо новий статус до історії
+        $currentStatusHistory[] = [$newStatus, $timestamp];
+        $model->status = json_encode($currentStatusHistory);
+    }
+
     /**
      * Отримати інформацію про трекінг за aftership_tracking_id
      *
@@ -146,7 +179,6 @@ class AfterShipApiController extends Controller
      */
     public function getTrackingById(Request $request)
     {
-        // Валідація вхідних даних
         $request->validate([
             'aftership_tracking_id' => 'required|string|max:255',
         ]);
@@ -183,26 +215,20 @@ class AfterShipApiController extends Controller
 
                 foreach ($parcels as $parcel) {
                     $parcel->active_status = $mappedStatus;
-                    $currentStatusHistory = $parcel->status ? json_decode($parcel->status, true) : [];
-                    $currentStatusHistory[] = [$mappedStatus, $timestamp];
-                    $parcel->status = json_encode($currentStatusHistory);
+                    $this->updateStatusHistory($parcel, $mappedStatus, $timestamp); // Використовуємо новий метод
                     $parcel->save();
 
-                    // Отримуємо order_item_ids із ParcelItem для цього parcel_id
                     $parcelItemIds = ParcelItem::where('parcel_id', $parcel->id)
                         ->pluck('order_item_id')
                         ->toArray();
 
-                    // Оновлюємо лише ті OrderItems, які пов’язані з ParcelItem
                     $orderItems = OrderItems::where('order_id', $orderTracking->order_id)
                         ->whereIn('id', $parcelItemIds)
                         ->get();
 
                     foreach ($orderItems as $item) {
                         $item->active_status = $mappedStatus;
-                        $currentItemStatusHistory = $item->status ? json_decode($item->status, true) : [];
-                        $currentItemStatusHistory[] = [$mappedStatus, $timestamp];
-                        $item->status = json_encode($currentItemStatusHistory);
+                        $this->updateStatusHistory($item, $mappedStatus, $timestamp); // Використовуємо новий метод
                         $item->save();
                     }
                 }
@@ -329,26 +355,20 @@ class AfterShipApiController extends Controller
 
                 foreach ($parcels as $parcel) {
                     $parcel->active_status = $mappedStatus;
-                    $currentStatusHistory = $parcel->status ? json_decode($parcel->status, true) : [];
-                    $currentStatusHistory[] = [$mappedStatus, $timestamp];
-                    $parcel->status = json_encode($currentStatusHistory);
+                    $this->updateStatusHistory($parcel, $mappedStatus, $timestamp); // Використовуємо новий метод
                     $parcel->save();
 
-                    // Отримуємо order_item_ids із ParcelItem для цього parcel_id
                     $parcelItemIds = ParcelItem::where('parcel_id', $parcel->id)
                         ->pluck('order_item_id')
                         ->toArray();
 
-                    // Оновлюємо лише ті OrderItems, які пов’язані з ParcelItem
                     $orderItems = OrderItems::where('order_id', $orderTracking->order_id)
                         ->whereIn('id', $parcelItemIds)
                         ->get();
 
                     foreach ($orderItems as $item) {
                         $item->active_status = $mappedStatus;
-                        $currentItemStatusHistory = $item->status ? json_decode($item->status, true) : [];
-                        $currentItemStatusHistory[] = [$mappedStatus, $timestamp];
-                        $item->status = json_encode($currentItemStatusHistory);
+                        $this->updateStatusHistory($item, $mappedStatus, $timestamp); // Використовуємо новий метод
                         $item->save();
                     }
                 }
