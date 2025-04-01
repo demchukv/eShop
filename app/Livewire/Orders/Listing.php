@@ -10,6 +10,11 @@ class Listing extends Component
 {
     public $orderStatus = "";
 
+    public function mount()
+    {
+        $this->orderStatus = "";
+    }
+
     public function render()
     {
         $store_id = session('store_id');
@@ -18,8 +23,10 @@ class Listing extends Component
         if ($user != null) {
 
             $user_orders = $this->getOrders($user->id, $store_id);
+
             $orders = collect($user_orders['order_data']);
             $page = request()->get('page', 1);
+
             if (isset($page)) {
                 $perPage = 8;
                 $paginator = new LengthAwarePaginator(

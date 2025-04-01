@@ -5118,6 +5118,7 @@ function getSellerPermission($seller_id, $store_id, $permit = NULL)
 
 function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $delivery_boy_id = NULL, $limit = NULL, $offset = NULL, $sort = 'o.id', $order = 'DESC', $download_invoice = false, $start_date = null, $end_date = null, $search = null, $city_id = null, $area_id = null, $seller_id = null, $order_type = '', $from_seller = false, $store_id = null)
 {
+    $originalStatus = $status;
 
     $total_query = DB::table('orders as o')
         ->select(DB::raw('COUNT(DISTINCT o.id) as total'), 'oi.order_type')
@@ -5176,10 +5177,9 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
                 ->orWhere('cp.product_type', '!=', 'digital_product');
         });
     }
-    if (isset($status) && !empty($status) && $status != '' && is_array($status) && count($status) > 0) {
-        $status = array_map('trim', $status);
-
-        $total_query->whereIn('oi.active_status', $status);
+    if (isset($originalStatus) && !empty($originalStatus) && $originalStatus != '' && is_array($originalStatus) && count($originalStatus) > 0) {
+        $originalStatus = array_map('trim', $originalStatus);
+        $total_query->whereIn('oi.active_status', $originalStatus);
     }
 
     if (isset($start_date) && $start_date !== null && isset($end_date) && $end_date !== null && !empty($end_date) && !empty($start_date)) {
@@ -5248,7 +5248,6 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
     $orderCount = $total_query->get()->toArray();
     $total = "0";
     foreach ($orderCount as $row) {
-
         $total = $row->total;
     }
     if (empty($sort)) {
@@ -5327,9 +5326,9 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
         $regularOrderSearchRes->where('p.type', '!=', 'digital_product');
     }
 
-    if (isset($status) && !empty($status) && $status != '' && is_array($status) && count($status) > 0) {
-        $status = array_map('trim', $status);
-        $regularOrderSearchRes->whereIn('oi.active_status', $status);
+    if (isset($originalStatus) && !empty($originalStatus) && $originalStatus != '' && is_array($originalStatus) && count($originalStatus) > 0) {
+        $originalStatus = array_map('trim', $originalStatus);
+        $regularOrderSearchRes->whereIn('oi.active_status', $originalStatus);
     }
 
     if (isset($filters) && !empty($filters)) {
@@ -5343,6 +5342,7 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
     $regularOrderSearchRes->groupBy('o.id');
     $regularOrderSearchRes->orderBy($sort, $order);
     $regularOrderSearchRes = $regularOrderSearchRes->get();
+
     $comboOrderSearchRes = DB::table('orders AS o')
         ->select(
             'o.*',
@@ -5415,9 +5415,9 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
         $comboOrderSearchRes->where('cp.product_type', '!=', 'digital_product');
     }
 
-    if (isset($status) && !empty($status) && $status != '' && is_array($status) && count($status) > 0) {
-        $status = array_map('trim', $status);
-        $comboOrderSearchRes->whereIn('oi.active_status', $status);
+    if (isset($originalStatus) && !empty($originalStatus) && $originalStatus != '' && is_array($originalStatus) && count($originalStatus) > 0) {
+        $originalStatus = array_map('trim', $originalStatus);
+        $comboOrderSearchRes->whereIn('oi.active_status', $originalStatus);
     }
 
     if (isset($combo_filters) && !empty($combo_filters)) {
@@ -5522,8 +5522,8 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
             ->when(isset($delivery_boy_id) && $delivery_boy_id != null, function ($query) use ($delivery_boy_id) {
                 $query->where('oi.delivery_boy_id', '=', $delivery_boy_id);
             })
-            ->when(isset($status) && !empty($status) && is_array($status) && count($status) > 0, function ($query) use ($status) {
-                $query->whereIn('oi.active_status', array_map('trim', $status));
+            ->when(isset($originalStatus) && !empty($originalStatus) && $originalStatus != '' && is_array($originalStatus) && count($originalStatus) > 0, function ($query) use ($originalStatus) {
+                $query->whereIn('oi.active_status', array_map('trim', $originalStatus));
             })
             ->groupBy('oi.id')
             ->get();
@@ -5597,9 +5597,9 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
             ->when(isset($delivery_boy_id) && $delivery_boy_id != null, function ($query) use ($delivery_boy_id) {
                 $query->where('oi.delivery_boy_id', '=', $delivery_boy_id);
             })
-            ->when(isset($status) && !empty($status) && $status != '' && is_array($status) && count($status) > 0, function ($query) use ($status) {
-                $status = array_map('trim', $status);
-                $query->whereIn('oi.active_status', $status);
+            ->when(isset($originalStatus) && !empty($originalStatus) && $originalStatus != '' && is_array($originalStatus) && count($originalStatus) > 0, function ($query) use ($originalStatus) {
+                $originalStatus = array_map('trim', $originalStatus);
+                $query->whereIn('oi.active_status', $originalStatus);
             })
             ->groupBy('oi.id')
             ->get();

@@ -49,10 +49,9 @@
                                             @foreach ($user_orders['order_data'] as $user_order)
                                                 @php
                                                     $user_order = json_decode(json_encode($user_order), true);
-                                                    $order_image = dynamic_image(
-                                                        $user_order['order_items'][0]['image_sm'],
-                                                        50,
-                                                    );
+                                                    $order_image = !empty($user_order['order_items'])
+                                                        ? dynamic_image($user_order['order_items'][0]['image_sm'], 50)
+                                                        : dynamic_image('', 50);
                                                 @endphp
                                                 <tr>
                                                     <td><img class="blur-up lazyload" data-src="{{ $order_image }}"
@@ -60,8 +59,12 @@
                                                             title="product" /></td>
                                                     <td><span class="id">#{{ $user_order['id'] }}</span>
                                                     </td>
-                                                    <td><span
-                                                            class="name">{{ $user_order['order_items'][0]['product_name'] . (count($user_order['order_items']) > 1 ? ' & ' . count($user_order['order_items']) - 1 . ' more items' : '') }}</span>
+                                                    <td>
+                                                        <span
+                                                            class="name">{{ !empty($user_order['order_items'])
+                                                                ? $user_order['order_items'][0]['product_name'] .
+                                                                    (count($user_order['order_items']) > 1 ? ' & ' . count($user_order['order_items']) - 1 . ' more items' : '')
+                                                                : 'No items' }}</span>
                                                     </td>
                                                     @php
                                                         $currency_details = getCurrencyCodeSettings(
@@ -84,21 +87,24 @@
                                                     </td>
                                                     <td><span
                                                             class="badge rounded-pill
-                                                        {{ $user_order['order_items'][0]['active_status'] == 'awaiting'
-                                                            ? 'bg-warning'
-                                                            : ($user_order['order_items'][0]['active_status'] == 'delivered'
-                                                                ? 'bg-success'
-                                                                : ($user_order['order_items'][0]['active_status'] == 'shipped'
-                                                                    ? 'bg-secondary'
-                                                                    : ($user_order['order_items'][0]['active_status'] == 'received'
-                                                                        ? 'bg-primary'
-                                                                        : ($user_order['order_items'][0]['active_status'] == 'processed'
-                                                                            ? 'bg-dark'
-                                                                            : ($user_order['order_items'][0]['active_status'] == 'cancelled'
-                                                                                ? 'bg-danger'
-                                                                                : ''))))) }}
-                                                        custom-badge">{{ str_replace('_', ' ', $user_order['order_items'][0]['active_status']) }}
+                {{ !empty($user_order['order_items'])
+                    ? ($user_order['order_items'][0]['active_status'] == 'awaiting'
+                        ? 'bg-warning'
+                        : ($user_order['order_items'][0]['active_status'] == 'delivered'
+                            ? 'bg-success'
+                            : ($user_order['order_items'][0]['active_status'] == 'shipped'
+                                ? 'bg-secondary'
+                                : ($user_order['order_items'][0]['active_status'] == 'received'
+                                    ? 'bg-primary'
+                                    : ($user_order['order_items'][0]['active_status'] == 'processed'
+                                        ? 'bg-dark'
+                                        : ($user_order['order_items'][0]['active_status'] == 'cancelled'
+                                            ? 'bg-danger'
+                                            : ''))))))
+                    : '' }} custom-badge">
+                                                            {{ !empty($user_order['order_items']) ? str_replace('_', ' ', $user_order['order_items'][0]['active_status']) : 'N/A' }}
                                                         </span>
+
                                                     </td>
                                                     <td>
                                                         <a href="{{ customUrl('orders/' . $user_order['id']) }}"
