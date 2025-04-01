@@ -21,8 +21,14 @@ class Details extends Component
         if (count($user_orders['order_data']) < 1) {
             abort(404);
         }
-
+        // dd($user_orders);
         $user_orders_transaction_data = json_decode(json_encode($user_orders['order_data']), true);
+
+        // Завантажуємо список перевізників із файлу
+        $couriersFilePath = storage_path('app/aftership_couriers_cache.json');
+        $couriersData = file_exists($couriersFilePath) ? json_decode(file_get_contents($couriersFilePath), true) : ['couriers' => []];
+
+        $couriersMap = collect($couriersData['couriers'])->pluck('name', 'slug')->all();
 
         foreach ($user_orders_transaction_data as &$user_order) {
             foreach ($user_order['order_items'] as &$user_order_item) {
@@ -38,6 +44,12 @@ class Details extends Component
                     // If no transaction is found, you can set a default value or handle it as needed
                     $user_order_item['transaction'] = null;
                 }
+
+                // Додаємо назву перевізника за кодом (slug)
+                $courierSlug = $user_order_item['courier_agency'] ?? null;
+                $user_order_item['courier_agency_name'] = $courierSlug && isset($couriersMap[$courierSlug])
+                    ? $couriersMap[$courierSlug]
+                    : 'Unknown Courier';
             }
         }
 

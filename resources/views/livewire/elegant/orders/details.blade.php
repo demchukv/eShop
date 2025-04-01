@@ -213,6 +213,7 @@
                                         <tr>
                                             <th scope="col">{{ labels('front_messages.status', 'Status') }}</th>
                                             <th scope="col">{{ labels('front_messages.time', 'Time') }}</th>
+                                            <th scope="col"></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -221,6 +222,21 @@
                                                 <td class="text-capitalize">{{ str_replace('_', ' ', $status[0]) }}
                                                 </td>
                                                 <td>{{ $status[1] }}</td>
+                                                <td>
+                                                    @if ($status[0] == 'shipped')
+                                                        @php
+                                                            $aftershipData = $user_order_item['aftership_data'];
+                                                            $isValidJson = json_decode($aftershipData) !== null;
+                                                        @endphp
+                                                        <button class="btn btn-primary btn-sm" id="track_order"
+                                                            data-item-id="{{ $user_order_item['id'] }}"
+                                                            data-courier-agency-name="{{ $user_order_item['courier_agency_name'] }}"
+                                                            data-order-id="{{ $user_order_item['order_id'] }}"
+                                                            data-aftership-data="{{ $isValidJson ? $aftershipData : json_encode($aftershipData) }}">
+                                                            {{ labels('front_messages.track_order', 'Track Order') }}
+                                                        </button>
+                                                    @endif
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -341,4 +357,209 @@
             </div>
         </div>
     </div>
+
+    <!-- Track Order Modal -->
+    <div class="modal fade" id="trackOrderModal" tabindex="-1" aria-labelledby="trackOrderModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="trackOrderModalLabel">Order Tracking Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="orderTrackingDetails">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+@push('scripts')
+    <script>
+        $(document).on("click", "#track_order", function(e) {
+            e.preventDefault();
+
+            const orderTrackingDetails = document.getElementById("orderTrackingDetails");
+            const orderId = $(this).data("order-id");
+            const courierAgencyName = $(this).data("courier-agency-name");
+            const trackingData = $(this).data("aftership-data");
+            let aftershipData;
+
+            orderTrackingDetails.innerHTML = '';
+            const $modal = $('#trackOrderModal');
+            $modal.modal('show');
+
+            console.log("Raw trackingData:", trackingData);
+
+            try {
+                aftershipData = typeof trackingData === 'string' ? JSON.parse(trackingData) : trackingData;
+            } catch (error) {
+                orderTrackingDetails.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                Parsing error: ${error.message}<br>
+                Raw data: ${trackingData}
+            </div>`;
+                console.error("Invalid JSON:", trackingData);
+                return;
+            }
+
+            if (!aftershipData || Object.keys(aftershipData).length === 0) {
+                orderTrackingDetails.innerHTML = `
+            <div class="alert alert-warning" role="alert">
+                No tracking information available.
+            </div>`;
+                return;
+            }
+
+            const formatLocalDate = (dateString) => {
+                if (!dateString) return 'N/A';
+                const date = new Date(dateString);
+                return isNaN(date) ? 'Invalid date' : date.toLocaleString('en-US');
+            };
+
+            const renderCheckpoints = (checkpoints) => {
+                if (!checkpoints || !Array.isArray(checkpoints) || checkpoints.length === 0) {
+                    return '<div class="alert alert-info mt-3" role="alert">No checkpoints available.</div>';
+                }
+
+                const checkpointGroups = {
+                    Delivered: [],
+                    InTransit: [],
+                    InfoReceived: [],
+                    Other: []
+                };
+
+                checkpoints.forEach(cp => {
+                    if (checkpointGroups[cp.tag]) checkpointGroups[cp.tag].push(cp);
+                    else checkpointGroups.Other.push(cp);
+                });
+
+                let html = '';
+                const checkpointTypes = ['Delivered', 'InTransit', 'InfoReceived', 'Other'];
+
+                checkpointTypes.forEach(type => {
+                    const group = checkpointGroups[type];
+                    if (group.length === 0) return;
+
+                    if (type === 'InTransit' && group.length > 1) {
+                        const latest = group[group.length - 1];
+                        html += `
+                    <div class="mb-3">
+                        <h6 class="text-warning mb-1">${formatLocalDate(latest.checkpoint_time)} - ${latest.tag}</h6>
+                        <div class="fs-6"><strong>Message:</strong> ${latest.message || 'N/A'}</div>
+                        <div class="fs-6"><strong>Location:</strong> ${latest.location || 'N/A'}</div>
+                        <div class="fs-6"><strong>Subtag:</strong> ${latest.subtag_message || 'N/A'}</div>
+                    </div>
+                    <div class="collapse mb-0" id="allInTransit">
+                        ${group.slice(0, -1).reverse().map(cp => `
+                                                    <div class="mb-3">
+                                                        <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
+                                                        <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
+                                                        <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
+                                                        <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
+                                                    </div>
+                                                `).join('')}
+                    </div>
+                    <p class="mb-1 mt-0">
+                        <a href="#" class="text-primary fs-6" data-bs-toggle="collapse" data-bs-target="#allInTransit"
+                            aria-expanded="false" aria-controls="allInTransit" id="toggleInTransit">
+                            Show all updates
+                        </a>
+                    </p>`;
+                    } else {
+                        html += group.reverse().map(cp => `
+                    <div class="mb-3">
+                        <h6 class="text-${type === 'Delivered' ? 'success' : type === 'InfoReceived' ? 'info' : 'warning'} mb-1">
+                            ${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}
+                        </h6>
+                        <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
+                        <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
+                        <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
+                    </div>
+                `).join('');
+                    }
+                });
+
+                return html;
+            };
+
+            const html = `
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Tracking Details (Order ID: ${orderId})</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="border-bottom pb-2">General Information</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Courier Service:</span>
+                                <span class="fw-bold">${courierAgencyName || 'N/A'}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Tracking ID:</span>
+                                <span class="fw-bold">${aftershipData.tracking_number || 'N/A'}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Tracking Link:</span>
+                                <span>
+                                    ${aftershipData.courier_tracking_link
+                                        ? `<a href="${aftershipData.courier_tracking_link}" target="_blank" class="text-primary">View</a>`
+                                        : 'N/A'}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Status:</span>
+                                <span class="badge bg-${aftershipData.tag === 'Delivered' ? 'success' : aftershipData.tag === 'InTransit' ? 'warning' : 'info'}">
+                                    ${aftershipData.tag || 'Unknown'}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="border-bottom pb-2">Delivery Information</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Origin:</span>
+                                <span>${aftershipData.origin_city || 'N/A'}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Destination:</span>
+                                <span>${aftershipData.destination_city || 'N/A'}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Shipment Date:</span>
+                                <span>${formatLocalDate(aftershipData.shipment_pickup_date)}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Delivery Date:</span>
+                                <span>${formatLocalDate(aftershipData.shipment_delivery_date)}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <h6 class="mt-4 border-bottom pb-2">Tracking Checkpoints</h6>
+                ${renderCheckpoints(aftershipData.checkpoints)}
+            </div>
+        </div>
+    `;
+
+            orderTrackingDetails.innerHTML = html;
+
+            const toggleLink = document.getElementById('toggleInTransit');
+            if (toggleLink) {
+                toggleLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                    this.textContent = isExpanded ? 'Hide all updates' : 'Show all updates';
+                });
+            }
+        });
+    </script>
+@endpush

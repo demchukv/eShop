@@ -290,7 +290,11 @@ class OrderController extends Controller
             ->leftJoin('users as u', 'u.id', '=', 'oi.delivery_boy_id')
             ->leftJoin('seller_data as sd', 'sd.id', '=', 'oi.seller_id')
             ->leftJoin('users as us', 'us.id', '=', 'sd.user_id')
-            ->leftJoin('order_trackings as ot', 'ot.order_item_id', '=', 'oi.id')
+            // ->leftJoin('order_trackings as ot', 'ot.order_item_id', '=', 'oi.id')
+            ->leftJoin('order_trackings as ot', function ($join) {
+                $join->whereRaw("FIND_IN_SET(oi.id, ot.order_item_id)")
+                    ->where('ot.order_id', '=', DB::raw('oi.id'));
+            })
             ->leftJoin('orders as o', 'o.id', '=', 'oi.order_id')
             ->leftJoin('product_variants as v', 'oi.product_variant_id', '=', 'v.id')
             ->leftJoin('products as p', 'v.product_id', '=', 'p.id')
@@ -472,6 +476,7 @@ class OrderController extends Controller
             $rows[] = $tempRow;
             $count++;
         }
+
         return response()->json([
             "rows" => $rows,
             "total" => $productCount,
@@ -1115,9 +1120,17 @@ class OrderController extends Controller
         }
         $order_id = $parcel_details['order_id'];
 
+        // Отримуємо всі order_item_id із parcel_items для цього parcel_id
+        $parcel_items = DB::table('parcel_items')
+            ->where('parcel_id', $parcel_id)
+            ->pluck('order_item_id')
+            ->toArray();
+        $order_item_ids = implode(',', $parcel_items); // Перетворюємо масив у рядок, наприклад "1,2,3"
+
         $data = array(
             'parcel_id' => $parcel_id,
             'order_id' => $order_id,
+            'order_item_id' => $order_item_ids, // Додаємо order_item_id
             'courier_agency' => $courier_agency,
             'tracking_id' => $tracking_id,
             'url' => $url,
@@ -1129,6 +1142,7 @@ class OrderController extends Controller
         // Перевіряємо, чи існує запис у таблиці order_trackings
         $existingTracking = OrderTracking::where('parcel_id', $parcel_id)->where('shipment_id', 0)->first();
         \Log::info('Existing tracking: ' . json_encode($request->all()));
+
         if ($existingTracking) {
             // Якщо запис існує, оновлюємо його
             if (updateDetails($data, ['parcel_id' => $parcel_id, 'shipment_id' => 0], 'order_trackings') == TRUE) {
