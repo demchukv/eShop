@@ -54,7 +54,7 @@
                                 @endforeach
                             </select>
                             <select id="year_filter" class="form-control me-2" style="max-width: 100px;">
-                                @for ($i = \Carbon\Carbon::now()->year - 5; $i <= \Carbon\Carbon::now()->year + 5; $i++)
+                                @for ($i = $minYear; $i <= $maxYear; $i++)
                                     <option value="{{ $i }}" {{ $i == $defaultYear ? 'selected' : '' }}>
                                         {{ $i }}</option>
                                 @endfor

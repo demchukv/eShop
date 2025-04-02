@@ -27,13 +27,27 @@ class BalanceController extends Controller
         $defaultMonth = Carbon::now()->month;
         $defaultYear = Carbon::now()->year;
 
+        // Fetch min and max years from the database
+        $minMaxYears = CommissionDistribution::selectRaw('MIN(YEAR(created_at)) as min_year, MAX(YEAR(created_at)) as max_year')
+            ->first();
+        $minYear = $minMaxYears->min_year ?? $defaultYear; // Fallback to current year if no data
+        $maxYear = $minMaxYears->max_year ?? $defaultYear; // Fallback to current year if no data
+
         // Підготовка списку місяців
         $months = [];
         for ($i = 1; $i <= 12; $i++) {
             $months[$i] = Carbon::create()->month($i)->format('F');
         }
 
-        return view('admin.pages.tables.balance', compact('userIdSubOptions', 'statusOptions', 'defaultMonth', 'defaultYear', 'months'));
+        return view('admin.pages.tables.balance', compact(
+            'userIdSubOptions',
+            'statusOptions',
+            'defaultMonth',
+            'defaultYear',
+            'months',
+            'minYear',
+            'maxYear'
+        ));
     }
 
     public function list()
