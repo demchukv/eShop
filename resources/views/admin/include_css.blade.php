@@ -6,6 +6,7 @@
     <title>@yield('title') | {{ $system_settings['app_name'] }}</title>
     <!--     Fonts and icons     -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+    <script src="{{ asset('/assets/admin/js/jquery.min.js') }}"></script>
 
     <!-- filepond Css -->
     <link href="/assets/filepond/dist/filepond.css" rel="stylesheet" type="text/css" />

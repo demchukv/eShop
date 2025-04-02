@@ -1445,11 +1445,20 @@ class CartController extends Controller
                 if ($manager && $manager->role->name === 'manager') {
                     $manager_amount = $dealer_price * 0.01 * $quantity;
                     $this->createCommissionRecord($order_id, $manager->id, $manager_amount, "1% commission from dealer_price for manager");
-                    $company_amount = $dealer_price * 0.04 * $quantity;
-                    $this->createCommissionRecord($order_id, 1, $company_amount, "4% commission from dealer_price for company");
+
+                    $shareholders_amount = $dealer_price * 0.01 * $quantity;
+                    $this->createCommissionRecord($order_id, 1, $shareholders_amount, "1% commission from dealer_price for shareholders", CommissionDistribution::USER_ID_SUB_SHAREHOLDERS);
+                    $company_one_amount = $dealer_price * 0.02 * $quantity;
+                    $this->createCommissionRecord($order_id, 1, $company_one_amount, "2% commission from dealer_price for base company account", CommissionDistribution::USER_ID_SUB_COMPANY_ONE);
+                    $company_two_amount = $dealer_price * 0.01 * $quantity;
+                    $this->createCommissionRecord($order_id, 1, $company_two_amount, "1% commission from dealer_price for hidden company account", CommissionDistribution::USER_ID_SUB_COMPANY_TWO);
                 } else {
-                    $company_amount = $dealer_price * 0.05 * $quantity;
-                    $this->createCommissionRecord($order_id, 1, $company_amount, "5% commission from dealer_price for company");
+                    $shareholders_amount = $dealer_price * 0.01 * $quantity;
+                    $this->createCommissionRecord($order_id, 1, $shareholders_amount, "1% commission from dealer_price for shareholders", CommissionDistribution::USER_ID_SUB_SHAREHOLDERS);
+                    $company_one_amount = $dealer_price * 0.03 * $quantity;
+                    $this->createCommissionRecord($order_id, 1, $company_one_amount, "3% commission from dealer_price for base company account", CommissionDistribution::USER_ID_SUB_COMPANY_ONE);
+                    $company_two_amount = $dealer_price * 0.01 * $quantity;
+                    $this->createCommissionRecord($order_id, 1, $company_two_amount, "1% commission from dealer_price for hidden company account", CommissionDistribution::USER_ID_SUB_COMPANY_TWO);
                 }
             } else {
                 // якщо продавця не запросив менеджер, то нараховуємо 5% від dealer_price компанії
@@ -1507,11 +1516,12 @@ class CartController extends Controller
     }
 
     // Допоміжна функція для створення запису в commission_distributions
-    private function createCommissionRecord($order_id, $user_id, $amount, $message)
+    private function createCommissionRecord($order_id, $user_id, $amount, $message, $user_id_sub = null)
     {
         CommissionDistribution::create([
             'order_id' => $order_id,
             'user_id' => $user_id,
+            'user_id_sub' => $user_id_sub,
             'amount' => $amount,
             'message' => $message,
             'status' => CommissionDistribution::STATUS_PENDING,

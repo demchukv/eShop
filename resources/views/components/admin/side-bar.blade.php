@@ -47,6 +47,14 @@
                      <span class="nav-link-text ms-1">{{ labels('admin_labels.dashboard', 'Dashboard') }}</span>
                  </a>
              </li>
+             @if ($user_role == 'super_admin' || $user->hasPermissionTo('view balance'))
+                 <li class="nav-item ms-3">
+                     <a class="nav-link {{ Request::is('admin/balance') || Request::is('admin/balance/*') ? 'active' : '' }}"
+                         href="{{ route('admin.balance.index') }}">
+                         <span class="nav-link-text ms-1">{{ labels('admin_labels.balance', 'Balance') }}</span>
+                     </a>
+                 </li>
+             @endif
 
              <li class="sidebar-title ms-3"><i class='bx bx-store-alt'></i>
                  {{ labels('admin_labels.stores', 'Stores') }}
@@ -400,22 +408,24 @@
                      </a>
                  </li>
              @endif
-            @if ($user_role == 'super_admin' || $logged_in_user->hasPermissionTo('view user_status'))
-            <li class="sidebar-title ms-3"><i class='bx bx-revision'></i>{{ labels('admin_labels.user_status', 'User Status') }}
-            </li>
-            <li class="nav-item ms-3">
-                <a class="nav-link {{ Request::is('admin/user_status') || Request::is('admin/user_status/*') ? 'active' : '' }}"
-                    href="{{ route('admin.user_status.index') }}">
-                    <span class="nav-link-text ms-1">{{ labels('admin_labels.user_status', 'User Status') }}</span>
-                    @php
-                        $pendingCount = \App\Models\UserStatus::where('status', 'pending')->count();
-                    @endphp
-                    @if($pendingCount > 0)
-                        <span class="badge bg-danger rounded-pill ms-2">{{ $pendingCount }}</span>
-                    @endif
-                </a>
-            </li>
-            @endif
+             @if ($user_role == 'super_admin' || $logged_in_user->hasPermissionTo('view user_status'))
+                 <li class="sidebar-title ms-3"><i
+                         class='bx bx-revision'></i>{{ labels('admin_labels.user_status', 'User Status') }}
+                 </li>
+                 <li class="nav-item ms-3">
+                     <a class="nav-link {{ Request::is('admin/user_status') || Request::is('admin/user_status/*') ? 'active' : '' }}"
+                         href="{{ route('admin.user_status.index') }}">
+                         <span
+                             class="nav-link-text ms-1">{{ labels('admin_labels.user_status', 'User Status') }}</span>
+                         @php
+                             $pendingCount = \App\Models\UserStatus::where('status', 'pending')->count();
+                         @endphp
+                         @if ($pendingCount > 0)
+                             <span class="badge bg-danger rounded-pill ms-2">{{ $pendingCount }}</span>
+                         @endif
+                     </a>
+                 </li>
+             @endif
              <li class="sidebar-title ms-3"><i class='bx bx-chat'></i>
                  {{ labels('admin_labels.chat_manage', 'Chat Manage') }}
              </li>
@@ -496,7 +506,7 @@
                      </a>
                  </li>
              @endif
-            <li class="sidebar-title ms-3"><i class='bx bx-cycling'></i>
+             <li class="sidebar-title ms-3"><i class='bx bx-cycling'></i>
                  {{ labels('admin_labels.delivery_boys', 'Delivery Boys') }}
              </li>
              <li class="nav-item ms-3">

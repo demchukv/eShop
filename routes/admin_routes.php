@@ -52,6 +52,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Artisan;
 use PHPUnit\Event\Telemetry\System;
 use App\Http\Controllers\Admin\UserStatusController;
+use App\Http\Controllers\Admin\BalanceController;
 
 Route::group(
     ['middleware' => ['auth', 'role:super_admin,admin,editor', 'CheckPurchaseCode', 'CheckStoreNotEmpty']],
@@ -1093,6 +1094,9 @@ Route::group(
         Route::get('admin/zones/edit/{id}', [ZoneController::class, 'edit'])->name('admin.zones.edit');
 
         Route::get('/admin/products/comments/{productId}', [App\Http\Controllers\Admin\ProductController::class, 'getComments'])->name('admin.products.comments');
+
+        Route::get('/admin/balance', [BalanceController::class, 'index'])->name('admin.balance.index');
+        Route::get('/admin/balance/list', [BalanceController::class, 'list'])->name('admin.balance.list');
     }
 
 );
