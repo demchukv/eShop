@@ -11,6 +11,7 @@ class CommissionDistribution extends Model
     protected $fillable = [
         'order_id',
         'user_id',
+        'user_id_sub',
         'amount',
         'message',
         'status',
@@ -20,6 +21,11 @@ class CommissionDistribution extends Model
     const STATUS_PENDING = 'pending';
     const STATUS_COMPLETED = 'completed';
     const STATUS_CANCELED = 'canceled';
+
+    // Доступні значення для user_id_sub
+    const USER_ID_SUB_SHAREHOLDERS = 'shareholders';
+    const USER_ID_SUB_COMPANY_ONE = 'company_one';
+    const USER_ID_SUB_COMPANY_TWO = 'company_two';
 
     protected $attributes = [
         'status' => self::STATUS_PENDING, // Значення за замовчуванням
