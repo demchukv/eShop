@@ -19,6 +19,7 @@ class TransactionController extends Controller
             'type' => strtolower($request['type']),
             'txn_id' => $request['txn_id'],
             'amount' => $request['amount'],
+            'fee' => $request['fee'] ?? 0,
             'status' => $request['status'],
             'message' => $request['message'],
         ];

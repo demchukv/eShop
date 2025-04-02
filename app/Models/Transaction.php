@@ -19,12 +19,17 @@ class Transaction extends Model
         'txn_id',
         'payu_txn_id',
         'amount',
+        'fee',
         'status',
         'currency_code',
         'payer_email',
         'message',
         'transaction_date',
         'is_refund',
+    ];
+
+    protected $attributes = [
+        'fee' => 0,
     ];
 
     public function user()
