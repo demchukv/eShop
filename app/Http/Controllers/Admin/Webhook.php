@@ -558,6 +558,8 @@ class Webhook extends Controller
     }
     public function stripe_webhook(Request $request)
     {
+        return;
+        sleep(5);
         $system_settings = getsettings('system_settings', true);
         $system_settings = json_decode($system_settings, true);
         $stripe = new Stripe;
@@ -572,6 +574,7 @@ class Webhook extends Controller
 
         if (!empty($event->data->object)) {
             $txn_id = $event->data->object->payment_intent ?? '';
+            Log::alert('Stripe txn_id --> ' . $txn_id);
             if (!empty($txn_id)) {
                 $transaction = fetchDetails('transactions', ['txn_id' => $txn_id], '*');
                 Log::alert('transaction --> ' . var_export($transaction, true));
@@ -649,7 +652,7 @@ class Webhook extends Controller
                                 'order_id' => $order_id,
                                 'type' => 'stripe',
                                 'txn_id' => $txn_id,
-                                'amount' => $amount / 100,
+                                'amount' => ($amount - $fee) / 100,
                                 'fee' => $fee,
                                 'status' => 'success',
                                 'message' => 'Payment Successfully',
@@ -670,7 +673,7 @@ class Webhook extends Controller
                             'order_id' => $order_id,
                             'type' => 'stripe',
                             'txn_id' => $txn_id,
-                            'amount' => $amount / 100,
+                            'amount' => ($amount - $fee) / 100,
                             'fee' => $fee,
                             'status' => 'success',
                             'message' => 'Payment received, but order ID not provided',

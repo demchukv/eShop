@@ -1104,6 +1104,7 @@ class CartController extends Controller
         $system_settings = getSettings('system_settings', true);
         $system_settings = json_decode($system_settings, true);
 
+
         $currency = isset($system_settings['currency']) && !empty($system_settings['currency']) ? $system_settings['currency'] : '';
         $total = $request['final_total'] + $request['wallet_balance_used'];
         if (isset($system_settings['minimum_cart_amount']) && !empty($system_settings['minimum_cart_amount'])) {
@@ -1250,11 +1251,33 @@ class CartController extends Controller
                             $transaction_id = $request['stripe_payment_id'];
                             $status = 'success';
                             $message = 'Payment Successfully';
+
+                            $stripe_credentials = getsettings('payment_method', true);
+                            $stripe_credentials = json_decode($stripe_credentials, true);
+
+
+                            // Додаємо запит до Stripe для отримання деталей платежу
+                            $fee = $request['fee'] ?? 0;
+                            if ($fee == 0) {
+                                try {
+                                    \Stripe\Stripe::setApiKey($stripe_credentials['stripe_secret_key']);
+                                    $paymentIntent = \Stripe\PaymentIntent::retrieve($transaction_id);
+                                    if ($paymentIntent->status === 'succeeded') {
+                                        // Отримуємо пов’язаний Charge для отримання комісії
+                                        $charge = \Stripe\Charge::retrieve($paymentIntent->latest_charge);
+                                        $balanceTransaction = \Stripe\BalanceTransaction::retrieve($charge->balance_transaction);
+                                        $fee = $balanceTransaction->fee / 100; // Комісія в доларах (переводимо з центів)
+                                    }
+                                } catch (\Exception $e) {
+                                    Log::error('Stripe payment retrieval failed: ' . $e->getMessage());
+                                }
+                            }
                         } elseif ($data['payment_method'] == 'razorpay') {
                             $transaction_id = $request['razorpay_payment_id'];
                             $status = 'success';
                             $message = 'Payment Successfully';
                         }
+
                         $data = new Request([
                             'status' => $status ?? "awaiting",
                             'txn_id' => $transaction_id ?? null,
@@ -1263,7 +1286,9 @@ class CartController extends Controller
                             'user_id' => $user_id,
                             'type' => $data['payment_method'],
                             'amount' => $total,
+                            'fee' => round($fee, 2) ?? 0,
                         ]);
+                        Log::alert('Transaction data before store: ' . json_encode($data->all()));
                         $transactionController->store($data);
                     }
                 }
@@ -1360,6 +1385,26 @@ class CartController extends Controller
                         $transaction_id = $request['stripe_payment_id'];
                         $status = 'success';
                         $message = 'Payment Successfully';
+
+                        $stripe_credentials = getsettings('payment_method', true);
+                        $stripe_credentials = json_decode($stripe_credentials, true);
+
+                        // Додаємо запит до Stripe для отримання деталей платежу
+                        $fee = $request['fee'] ?? 0;
+                        if ($fee == 0) {
+                            try {
+                                \Stripe\Stripe::setApiKey($stripe_credentials['stripe_secret_key']);
+                                $paymentIntent = \Stripe\PaymentIntent::retrieve($transaction_id);
+                                if ($paymentIntent->status === 'succeeded') {
+                                    // Отримуємо пов’язаний Charge для отримання комісії
+                                    $charge = \Stripe\Charge::retrieve($paymentIntent->latest_charge);
+                                    $balanceTransaction = \Stripe\BalanceTransaction::retrieve($charge->balance_transaction);
+                                    $fee = $balanceTransaction->fee / 100; // Комісія в доларах (переводимо з центів)
+                                }
+                            } catch (\Exception $e) {
+                                Log::error('Stripe payment retrieval failed: ' . $e->getMessage());
+                            }
+                        }
                     } elseif ($data['payment_method'] == 'stripe') {
                         $transaction_id = $request['razorpay_payment_id'];
                         $status = 'success';
@@ -1375,8 +1420,9 @@ class CartController extends Controller
                         'user_id' => $user_id,
                         'type' => $data['payment_method'],
                         'amount' => $total,
+                        'fee' => round($fee, 2) ?? 0,
                     ]);
-
+                    Log::alert('Transaction data before store: ' . json_encode($data->all()));
                     $transactionController->store($data);
                 }
             }

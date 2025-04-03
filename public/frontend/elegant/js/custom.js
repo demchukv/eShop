@@ -2544,46 +2544,95 @@ document.addEventListener("livewire:navigated", () => {
         let order_item_id = $(this).data("item-id");
         let confirm_title = "";
         let confirm_btn = "";
-        if (order_status == "cancelled") {
-            confirm_title =
-                "Are you sure you want to cancel this ordered item?";
+
+        if (order_status === "cancelled") {
+            confirm_title = "Are you sure you want to cancel this ordered item?";
             confirm_btn = "Yes Remove";
-        } else if (order_status == "returned") {
+
+            // Show refund option modal instead of direct Swal confirmation
+            $('#refundOptionModal').modal('show');
+
+            // Handle confirm refund button click
+            $('#confirmRefund').off('click').on('click', function () {
+                const refundMethod = $('input[name="refundMethod"]:checked').val();
+
+                Swal.fire({
+                    title: confirm_title,
+                    showCancelButton: true,
+                    confirmButtonText: confirm_btn,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "POST",
+                            url: appUrl + "orders/update-order-item-status",
+                            data: {
+                                order_status,
+                                order_item_id,
+                                refund_method: refundMethod // Add refund method to the request
+                            },
+                            dataType: "json",
+                            success: function (response) {
+                                if (response.error == false) {
+                                    iziToast.success({
+                                        message: response.message,
+                                        position: "topRight",
+                                    });
+                                    Livewire.dispatch("refreshComponent");
+                                    $('#refundOptionModal').modal('hide');
+                                } else {
+                                    iziToast.error({
+                                        message: response.message,
+                                        position: "topRight",
+                                    });
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                iziToast.error({
+                                    message: "An error occurred while processing your request",
+                                    position: "topRight",
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        } else if (order_status === "returned") {
+            // Keep existing return logic
             confirm_title = "Are you sure you want to return the ordered item?";
             confirm_btn = "Yes Return";
+
+            Swal.fire({
+                title: confirm_title,
+                showCancelButton: true,
+                confirmButtonText: confirm_btn,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "POST",
+                        url: appUrl + "orders/update-order-item-status",
+                        data: {
+                            order_status,
+                            order_item_id,
+                        },
+                        dataType: "json",
+                        success: function (response) {
+                            if (response.error == false) {
+                                iziToast.success({
+                                    message: response.message,
+                                    position: "topRight",
+                                });
+                                Livewire.dispatch("refreshComponent");
+                            } else {
+                                iziToast.error({
+                                    message: response.message,
+                                    position: "topRight",
+                                });
+                            }
+                        },
+                    });
+                }
+            });
         }
-        Swal.fire({
-            title: confirm_title,
-            showCancelButton: true,
-            confirmButtonText: confirm_btn,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    type: "POST",
-                    url: appUrl + "orders/update-order-item-status",
-                    data: {
-                        order_status,
-                        order_item_id,
-                    },
-                    dataType: "json",
-                    success: function (response) {
-                        if (response.error == false) {
-                            iziToast.success({
-                                message: response.message,
-                                position: "topRight",
-                            });
-                            Livewire.dispatch("refreshComponent");
-                            return false;
-                        } else {
-                            iziToast.error({
-                                message: response.message,
-                                position: "topRight",
-                            });
-                        }
-                    },
-                });
-            }
-        });
     });
 
     $(".chat-btn-popup").on("click", function () {

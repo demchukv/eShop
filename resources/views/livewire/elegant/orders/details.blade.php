@@ -313,6 +313,16 @@
                                         <span>+{{ isset($currency_details) && !empty($currency_details) ? $currency_symbol . number_format((float) $user_order['delivery_charge'] * $currency_details[0]->exchange_rate, 2) : '' }}</span>
                                     </div>
                                 </li>
+                                @if (isset($transaction['fee']) && $transaction['fee'] != 0)
+                                    <li>
+                                        <div class="left">
+                                            <span>{{ labels('front_messages.transaction_fee', 'Transaction Fee') }}</span>
+                                        </div>
+                                        <div class="right">
+                                            <span>+{{ isset($currency_details) && !empty($currency_details) ? $currency_symbol . number_format((float) $transaction['fee'] * $currency_details[0]->exchange_rate, 2) : '' }}</span>
+                                        </div>
+                                    </li>
+                                @endif
                                 <li class="{{ $user_order['promo_discount'] == 0 ? 'd-none' : '' }}">
                                     <div class="left">
                                         <span>{{ labels('front_messages.promo_discount', 'Coupon Discount') }}</span>
@@ -336,7 +346,14 @@
                                         <span>{{ labels('front_messages.final_total', 'Final Total') }}</span>
                                     </div>
                                     <div class="right text-black">
-                                        <b>{{ isset($currency_details) && !empty($currency_details) ? $currency_symbol . number_format((float) $user_order['final_total'] * $currency_details[0]->exchange_rate, 2) : '' }}</b>
+                                        @php
+                                            if (isset($transaction['fee']) && $transaction['fee'] != 0) {
+                                                $final_total = $user_order['final_total'] + $transaction['fee'];
+                                            } else {
+                                                $final_total = $user_order['final_total'];
+                                            }
+                                        @endphp
+                                        <b>{{ isset($currency_details) && !empty($currency_details) ? $currency_symbol . number_format((float) $final_total * $currency_details[0]->exchange_rate, 2) : '' }}</b>
                                     </div>
                                 </li>
                                 {{-- <li>
@@ -372,6 +389,43 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Refund Option Modal -->
+    <div class="modal fade" id="refundOptionModal" tabindex="-1" aria-labelledby="refundOptionModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="refundOptionModalLabel">Choose Refund Method</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="refundOptionForm">
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="refundMethod" id="refundWallet"
+                                    value="wallet" checked>
+                                <label class="form-check-label" for="refundWallet">
+                                    Refund to Wallet
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="refundMethod" id="refundCard"
+                                    value="card">
+                                <label class="form-check-label" for="refundCard">
+                                    Refund to Card (via Stripe)
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmRefund">Confirm Refund</button>
                 </div>
             </div>
         </div>
@@ -455,13 +509,13 @@
                     </div>
                     <div class="collapse mb-0" id="allInTransit">
                         ${group.slice(0, -1).reverse().map(cp => `
-                                    <div class="mb-3">
-                                        <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
-                                        <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
-                                        <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
-                                        <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
-                                    </div>
-                                `).join('')}
+                                                        <div class="mb-3">
+                                                            <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
+                                                            <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
+                                                            <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
+                                                            <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
+                                                        </div>
+                                                    `).join('')}
                     </div>
                     <p class="mb-3 mt-0">
                         <a href="#" class="text-primary fs-6" data-bs-target="#allInTransit"

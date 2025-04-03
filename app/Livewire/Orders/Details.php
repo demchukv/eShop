@@ -27,6 +27,9 @@ class Details extends Component
         // Завантажуємо список перевізників із файлу
         $couriersFilePath = storage_path('app/aftership_couriers_cache.json');
 
+        $main_transaction = Transaction::where('order_id', $order_id)->first();
+        // dump($main_transaction->toArray());
+
         $couriersMap = \Cache::remember('aftership_couriers', 60 * 60 * 24, function () use ($couriersFilePath) {
             $couriersData = file_exists($couriersFilePath) ? json_decode(file_get_contents($couriersFilePath), true) : ['couriers' => []];
             return collect($couriersData['couriers'])->pluck('name', 'slug')->all();
@@ -63,11 +66,13 @@ class Details extends Component
             $currency = fetchDetails('currencies', ['id' => $currency_id]);
             $currency_symbol = $currency[0]->symbol;
         }
-        // dd($user_orders);
+        // dd($user_orders['order_data'][0]);
+
         return view('livewire.' . config('constants.theme') . '.orders.details', [
             'user_orders' => $user_orders,
             'order_transaction' => $user_orders_transaction_data,
             'currency_symbol' => $currency_symbol,
+            'transaction' => $main_transaction
         ])->title("Orders Detail |");
     }
 
@@ -77,6 +82,7 @@ class Details extends Component
         $validator = Validator::make($request->all(), [
             'order_status' => 'required',
             'order_item_id' => 'required',
+            'refund_method' => 'sometimes|in:wallet,card'
         ]);
         if ($validator->fails()) {
             $response = [
@@ -87,11 +93,21 @@ class Details extends Component
             return response()->json($response);
         }
         $order_item = OrderItems::find($request['order_item_id']);
+        $refund_method = $request['refund_method'] ?? 'wallet';
+
         if ($request['order_status'] == 'cancelled') {
             update_order_item($order_item['id'], $request['order_status'], 1);
 
             updateStock($order_item['product_variant_id'], $order_item['quantity'], 'plus');
-            process_refund($order_item['id'], $request['order_status']);
+
+            if ($refund_method === 'wallet') {
+                // Existing wallet refund logic
+                process_refund($order_item['id'], $request['order_status']);
+            } elseif ($refund_method === 'card') {
+                // New Stripe refund logic
+                $this->processStripeRefund($order_item);
+            }
+
             $response = [
                 'error' => false,
                 'message' => 'Order Item Status Updated Successfully',
@@ -117,6 +133,39 @@ class Details extends Component
                 ];
                 return response()->json($response);
             }
+        }
+    }
+
+    private function processStripeRefund($order_item)
+    {
+        $system_settings = getsettings('system_settings', true);
+        $system_settings = json_decode($system_settings, true);
+        $credentials = getsettings('payment_method', true);
+        $credentials = json_decode($credentials, true);
+
+        try {
+            // Get the transaction details
+            $transaction = Transaction::where('order_item_id', $order_item['id'])->first();
+
+            if (!$transaction || !$transaction->payment_intent_id) {
+                throw new \Exception('No valid payment intent found for this order');
+            }
+
+            \Stripe\Stripe::setApiKey($credentials['stripe_secret_key']);
+
+            $refund = \Stripe\Refund::create([
+                'payment_intent' => $transaction->payment_intent_id,
+                'amount' => (int)($order_item['sub_total'] * 100), // Amount in cents
+            ]);
+
+            // Update transaction with refund details
+            $transaction->update([
+                'refund_id' => $refund->id,
+                'refund_status' => $refund->status,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Stripe Refund Error: ' . $e->getMessage());
+            throw new \Exception('Failed to process refund: ' . $e->getMessage());
         }
     }
 }

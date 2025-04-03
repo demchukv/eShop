@@ -92,14 +92,39 @@ class PaymentsController extends Controller
     public function stripe_response(Request $request)
     {
         if (null !== $request->query("session_id")) {
+            $system_settings = getSettings('system_settings', true);
+            $system_settings = json_decode($system_settings, true);
+            $stripe_credentials = getsettings('payment_method', true);
+            $stripe_credentials = json_decode($stripe_credentials, true);
+
             $session_id = $request->query("session_id");
             $res = $this->stripe->stripe_response($session_id);
             $res = json_decode($res, true);
             Log::info('Stripe response $res = ', $res);
+
             if ($res['status'] == "complete") {
                 $newRequest = new Request();
+                $payment_intent_id = $res['data']['payment_intent'];
                 $res['data']['metadata']['stripe_payment_id'] = $res['data']['payment_intent'];
                 $res['data']['metadata']['payment_method'] = 'stripe';
+
+                // Отримуємо деталі платежу і комісію
+                $fee = 0;
+                try {
+                    \Stripe\Stripe::setApiKey($stripe_credentials['stripe_secret_key']);
+                    $paymentIntent = \Stripe\PaymentIntent::retrieve($payment_intent_id);
+                    if ($paymentIntent->status === 'succeeded') {
+                        $charge = \Stripe\Charge::retrieve($paymentIntent->latest_charge);
+                        $balanceTransaction = \Stripe\BalanceTransaction::retrieve($charge->balance_transaction);
+                        $fee = $balanceTransaction->fee / 100; // Переводимо з центів у долари
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Stripe payment retrieval failed in stripe_response: ' . $e->getMessage());
+                }
+
+                // Додаємо fee до метаданих
+                $res['data']['metadata']['fee'] = $fee;
+
                 $newRequest->replace([
                     'res' => $res['data']['metadata']
                 ]);
