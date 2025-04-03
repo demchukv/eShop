@@ -26,6 +26,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
 
+    @livewireScripts
+
+    @if (request()->is('cart/checkout') || request()->is('my-account/wallet'))
+        <script src="https://js.stripe.com/v3/"></script>
+    @endif
+
     <!-- CSS files -->
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/plugins.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/vendor/photoswipe.min.css') }}">
@@ -55,7 +61,7 @@
     <script src="{{ asset('frontend/elegant/js/bootstrap-table-export.min.js') }}" defer></script>
     <script src="{{ asset('frontend/elegant/js/main.js') }}" defer></script>
     <script src="{{ asset('frontend/elegant/js/daterangepicker.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/ionicons.js') }}" defer></script>
+    {{-- <script src="{{ asset('frontend/elegant/js/ionicons.js') }}" defer></script> --}}
     <script src="{{ asset('frontend/elegant/js/star-rating.js') }}" defer></script>
     <script src="{{ asset('frontend/elegant/js/intlTelInput.js') }}" defer></script>
     <script src="{{ asset('frontend/elegant/js/iziToast.min.js') }}" defer></script>
@@ -109,7 +115,6 @@
     <x-include-modal.modals />
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/lightbox.css') }}">
     @filepondScripts
-    @livewireScripts
     @stack('scripts')
 </body>
 

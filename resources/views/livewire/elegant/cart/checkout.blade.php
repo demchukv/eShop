@@ -567,6 +567,7 @@
         @endif
     </div>
 </div>
+
 @if ($payment_method->razorpay_method == 1)
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 @endif
@@ -575,14 +576,12 @@
         src="https://www.paypal.com/sdk/js?client-id={{ $payment_method->paypal_client_id }}&currency={{ $payment_method->currency_code }}">
     </script>
 @endif
-@if ($payment_method->stripe_method == 1)
-    <script src="https://js.stripe.com/v3/"></script>
-@endif
 @if ($payment_method->paystack_method == 1)
     <script src="https://js.paystack.co/v1/inline.js"></script>
 @endif
 
 @push('scripts')
+    {{-- <script src="{{ asset('frontend/elegant/js/checkout.js') }}" defer></script> --}}
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('checkout', () => ({
