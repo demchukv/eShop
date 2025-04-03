@@ -62,35 +62,6 @@ class PaymentsController extends Controller
                 'type' => $request['type'] ?? "",
             ];
         } else {
-            // Створюємо замовлення
-            $order_data = [
-                'product_variant_id' => $request['product_variant_id'] ?? "",
-                'cart_product_type' => $request['product_type'] ?? "",
-                'quantity' => $request['quantity'] ?? "",
-                'store_id' => $request['store_id'] ?? "",
-                'delivery_charge' => $request['delivery_charge'] ?? "",
-                'discount' => $request['discount'] ?? "",
-                'promo_code_id' => $request['promo_code_id'] ?? "",
-                'promo_code' => $request['promo_code'] ?? "",
-                'user_id' => Auth::user()->id ?? "",
-                'is_wallet_used' => $request['is_wallet_used'] ?? "",
-                'wallet_balance_used' => $request['wallet_balance_used'] ?? "",
-                'mobile' => $request['address-mobile'] ?? "",
-                'email' => $request['email'] ?? "",
-                'address_id' => $request['selected_address_id'] ?? "",
-                'delivery_time' => $request['delivery_time'] ?? "",
-                'delivery_date' => $request['delivery_date'] ?? "",
-                'longitude' => $request['longitude'] ?? "",
-                'latitude' => $request['latitude'] ?? "",
-                'order_note' => $request['order_note'] ?? "",
-                'payment_method' => $request['payment_method'] ?? "",
-                'product_type' => $request['product_type'] ?? "",
-                'order_payment_currency_code' => $request['currency_code'] ?? "",
-            ];
-
-            $res = placeOrder($order_data, 1);
-            $order_id = $res['order_id'] ?? "";
-
             $data = [
                 'amount' => $request['amount'] ?? "",
                 'product_name' => $request['product_name'] ?? "",
@@ -110,7 +81,6 @@ class PaymentsController extends Controller
                 'currency_code' => $request['currency_code'] ?? "",
                 'promo_code' => $request['promo_code'] ?? "",
                 'email' => $request['email'] ?? "",
-                'order_id' => $order_id,
             ];
         }
         $data['user_id'] = Auth::user()->id ?? 0;

@@ -365,6 +365,8 @@ document.addEventListener('livewire:navigated', () => {
         let final_total = $("#final_total").val();
         let btn_html = $('#place_order_btn').html();
 
+
+
         $('#place_order_btn').attr('disabled', true).html('Please Wait...');
         if (($('#is_time_slots_enabled').val() == 1 && ($('input[name="delivery_time"]').is(':checked') == false || $('input[type=hidden][id="start_date"]').val() == "") && product_type != 'digital_product')) {
             iziToast.error({
