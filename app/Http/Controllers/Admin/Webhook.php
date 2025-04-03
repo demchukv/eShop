@@ -252,7 +252,6 @@ class Webhook extends Controller
                         Log::alert('Paystack Webhook | wallet recharge failure --> ' . var_export($event, true));
                     }
                     return response()->json($response);
-
                 } else {
 
                     /* process the order and mark it as received */
@@ -320,7 +319,6 @@ class Webhook extends Controller
             $response['message'] = "Transaction successfully done";
             Log::alert('Paystack Transaction Successfully --> ' . var_export($event, true));
             return response()->json($response);
-
         } else if ($event['event'] == 'charge.dispute.create') {
             if (!empty($order_id) && is_numeric($order_id)) {
                 $order = fetchOrders($order_id, '', '', '', '', '', 'o.id', 'DESC');
@@ -353,8 +351,6 @@ class Webhook extends Controller
             Log::alert('Paystack Webhook | Transaction could not be detected --> ' . var_export($event, true));
             return response()->json($response);
         }
-
-
     }
     public function razorpay_webhook(Request $request)
     {
@@ -401,7 +397,6 @@ class Webhook extends Controller
             if ($request['event'] == 'payment.authorized') {
                 $currency = (isset($request['payload']['payment']['entity']['currency'])) ? $request['payload']['payment']['entity']['currency'] : "INR";
                 $response = $razorpay->capture_payment($amount * 100, $txn_id, $currency);
-
             }
             if ($request['event'] == 'payment.captured' || $request['event'] == 'order.paid') {
                 if ($request['event'] == 'order.paid') {
@@ -513,7 +508,6 @@ class Webhook extends Controller
                 $response['transaction_status'] = $request['event'];
                 $response['message'] = "Transaction successfully done";
                 return response()->json($response);
-
             } elseif ($request['event'] == 'payment.failed') {
 
                 if (!empty($order_id)) {
@@ -529,7 +523,6 @@ class Webhook extends Controller
                 $response['message'] = "Transaction is failed. ";
                 Log::alert('Razorpay Webhook | Transaction is failed --> ' . var_export($request['event'], true));
                 return response()->json($response);
-
             } elseif ($request['event'] == 'payment.authorized') {
                 if (!empty($order_id)) {
                     updateDetails(['active_status' => 'awaiting'], ['order_id' => $order_id], 'order_items');
@@ -538,7 +531,6 @@ class Webhook extends Controller
                 //Refund Successfully
                 $transaction = fetchdetails('transactions', ['txn_id' => $request['payload']['refund']['entity']['payment_id']]);
                 if (empty($transaction)) {
-
                 }
                 process_refund($transaction[0]['id'], $transaction[0]['status']);
                 $response['error'] = false;
@@ -546,21 +538,18 @@ class Webhook extends Controller
                 $response['message'] = "Refund successfully done. ";
                 Log::alert('Razorpay Webhook | Transaction is failed --> ' . var_export($request['event'], true));
                 return response()->json($response);
-
             } elseif ($request['event'] == "refund.failed") {
                 $response['error'] = true;
                 $response['transaction_status'] = $request['event'];
                 $response['message'] = "Refund is failed. ";
                 Log::alert('Razorpay Webhook | Payment refund failed --> ' . var_export($request['event'], true));
                 return response()->json($response);
-
             } else {
                 $response['error'] = true;
                 $response['transaction_status'] = $request['event'];
                 $response['message'] = "Transaction could not be detected.";
                 Log::alert('Razorpay Webhook | Transaction could not be detected --> ' . var_export($request['event'], true));
                 return response()->json($response);
-
             }
         } else {
             Log::alert('razorpay Webhook | Invalid Server Signature  --> ' . var_export($request['event'], true));
@@ -582,7 +571,7 @@ class Webhook extends Controller
         Log::alert("stripe webhook=>" . $request);
 
         if (!empty($event->data->object)) {
-            $txn_id = (isset($event->data->object->payment_intent)) ? $event->data->object->payment_intent : "";
+            $txn_id = $event->data->object->payment_intent ?? '';
             if (!empty($txn_id)) {
                 $transaction = fetchDetails('transactions', ['txn_id' => $txn_id], '*');
                 Log::alert('transaction --> ' . var_export($transaction, true));
@@ -590,16 +579,20 @@ class Webhook extends Controller
                     $order_id = $transaction[0]->order_id;
                     $user_id = $transaction[0]->user_id;
                 } else {
-                    $order_id = $event->data->object->metadata->order_id;
-                    if (is_numeric($order_id)) {
+                    $order_id = isset($event->data->object->metadata) && property_exists($event->data->object->metadata, 'order_id')
+                        ? $event->data->object->metadata->order_id
+                        : 0;
+                    if (is_numeric($order_id) && $order_id > 0) {
                         $order_data = fetchOrders($order_id, '', '', '', '', '', 'o.id', 'DESC');
                         $user_id = $order_data['order_data'][0]->user_id;
+                    } else {
+                        $user_id = 0;
                     }
                 }
             }
-            $amount = $event->data->object->amount;
-            $currency = $event->data->object->currency;
-            $balance_transaction = $event->data->object->balance_transaction;
+            $amount = $event->data->object->amount ?? 0;
+            $currency = $event->data->object->currency ?? '';
+            $balance_transaction = $event->data->object->balance_transaction ?? '';
         } else {
             $order_id = 0;
             $amount = 0;
@@ -607,8 +600,8 @@ class Webhook extends Controller
             $balance_transaction = 0;
         }
         /* Wallet refill has unique format for order ID - wallet-refill-user-{user_id}-{system_time}-{3 random_number}  */
-        if (empty($order_id)) {
-            $order_id = (!empty($event->data->object->metadata->order_id) && isset($event->data->object->metadata->order_id)) ? $event->data->object->metadata->order_id : 0;
+        if (empty($order_id) && !empty($event->data->object->metadata) && property_exists($event->data->object->metadata, 'order_id')) {
+            $order_id = $event->data->object->metadata->order_id;
         }
 
         if (!is_numeric($order_id) && strpos($order_id, "wallet-refill-user") !== false) {
@@ -628,86 +621,67 @@ class Webhook extends Controller
 
         if ($result == "Matched") {
             if ($event->type == 'charge.succeeded') {
+                // Отримуємо fee через Stripe API
+                $fee = 0;
+                if (!empty($balance_transaction)) {
+                    try {
+                        $stripeClient = new \Stripe\StripeClient($credentials['stripe_secret_key']);
+                        $balance_txn = $stripeClient->balanceTransactions->retrieve($balance_transaction);
+                        $fee = $balance_txn->fee / 100; // Комісія в доларах
+                        Log::alert("Stripe Fee retrieved: " . $fee);
+                    } catch (\Exception $e) {
+                        Log::alert('Stripe Webhook | Failed to retrieve balance transaction: ' . $e->getMessage());
+                    }
+                }
+
                 if (!empty($order_id)) {
-                    /* To do the wallet recharge if the order id is set in the above mentioned pattern */
-                    if (strpos($order_id, "wallet-refill-user") !== false) {
-                        $data['transaction_type'] = "wallet";
-                        $data['user_id'] = $user_id;
-                        $data['order_id'] = $order_id;
-                        $data['type'] = "credit";
-                        $data['txn_id'] = $txn_id;
-                        $data['amount'] = $amount / 100;
-                        $data['status'] = "success";
-                        $data['message'] = "Wallet refill successful";
-                        Log::alert('Stripe order id --> ' . var_export($data, true));
-
-                        Transaction::create($data);
-
-                        if (updateBalance($amount / 100, $user_id, 'add')) {
-                            $response['error'] = false;
-                            $response['transaction_status'] = $event->type;
-                            $response['message'] = "Wallet recharged successfully!";
+                    $order = fetchOrders($order_id, '', '', '', '', '', 'o.id', 'DESC');
+                    if (isset($order['order_data'][0]->user_id)) {
+                        $user_id = $order['order_data'][0]->user_id;
+                        if (!empty($transaction)) {
+                            // Оновлюємо існуючу транзакцію
+                            updateDetails(['status' => 'success', 'fee' => $fee], ['txn_id' => $txn_id], 'transactions');
                         } else {
-                            $response['error'] = true;
-                            $response['transaction_status'] = $event->type;
-                            $response['message'] = "Wallet could not be recharged!";
-                            Log::alert('Stripe Webhook | wallet recharge failure --> ' . var_export($event, true));
+                            // Створюємо нову транзакцію
+                            $data = [
+                                'transaction_type' => 'transaction',
+                                'user_id' => $user_id,
+                                'order_id' => $order_id,
+                                'type' => 'stripe',
+                                'txn_id' => $txn_id,
+                                'amount' => $amount / 100,
+                                'fee' => $fee,
+                                'status' => 'success',
+                                'message' => 'Payment Successfully',
+                            ];
+                            Transaction::create($data);
                         }
-                        return response()->json($response);
-                    } else {
-                        /* process the order and mark it as received */
-                        $order = fetchOrders($order_id, '', '', '', '', '', 'o.id', 'DESC');
-                        if (isset($order['order_data'][0]->user_id)) {
-                            $user = fetchDetails('users', ['id' => $order['order_data'][0]->user_id]);
-                            $overall_total = array(
-                                'total_amount' => $order['order_data'][0]->total,
-                                'delivery_charge' => $order['order_data'][0]->delivery_charge,
-                                'tax_amount' => $order['order_data'][0]->total_tax_amount,
-                                'tax_percentage' => $order['order_data'][0]->total_tax_percent,
-                                'discount' => $order['order_data'][0]->promo_discount,
-                                'wallet' => $order['order_data'][0]->wallet_balance,
-                                'final_total' => $order['order_data'][0]->final_total,
-                                'otp' => $order['order_data'][0]->otp,
-                                'address' => $order['order_data'][0]->address,
-                                'payment_method' => $order['order_data'][0]->payment_method
-                            );
-
-                            /* No need to add because the transaction is already added just update the transaction status */
-                            if (!empty($transaction)) {
-                                $transaction_id = $transaction[0]->id;
-                                updateDetails(['status' => 'success'], ['txn_id' => $txn_id], 'transactions');
-                            } else {
-                                /* add transaction of the payment */
-                                $amount = ($event->data->object->amount / 100);
-                                $data = [
-                                    'transaction_type' => 'transaction',
-                                    'user_id' => $user_id,
-                                    'order_id' => $order_id,
-                                    'type' => 'stripe',
-                                    'txn_id' => $txn_id,
-                                    'amount' => $amount,
-                                    'status' => 'success',
-                                    'message' => 'order placed successfully',
-                                ];
-                                Transaction::create($data);
-                                ;
-                            }
-                            updateDetails(['active_status' => 'received'], ['order_id' => $order_id], 'order_items');
-
-                            $status = json_encode(array(array('received', date("d-m-Y h:i:sa"))));
-                            updateDetails(['status' => $status], ['order_id' => $order_id], 'order_items');
-                            sendCustomNotificationOnPaymentSuccess($order_id, $user_id);
-                        }
+                        updateDetails(['active_status' => 'received'], ['order_id' => $order_id], 'order_items');
+                        $status = json_encode([['received', date("d-m-Y h:i:sa")]]);
+                        updateDetails(['status' => $status], ['order_id' => $order_id], 'order_items');
+                        sendCustomNotificationOnPaymentSuccess($order_id, $user_id);
                     }
                 } else {
-                    /* No order ID found / sending 304 error to payment gateway so it retries wenhook after sometime*/
                     Log::alert('Stripe Webhook | Order id not found --> ' . var_export($event, true));
+                    if (!empty($txn_id) && empty($transaction)) {
+                        $data = [
+                            'transaction_type' => 'transaction',
+                            'user_id' => $user_id,
+                            'order_id' => $order_id,
+                            'type' => 'stripe',
+                            'txn_id' => $txn_id,
+                            'amount' => $amount / 100,
+                            'fee' => $fee,
+                            'status' => 'success',
+                            'message' => 'Payment received, but order ID not provided',
+                        ];
+                        Transaction::create($data);
+                    }
                 }
                 $response['error'] = false;
                 $response['transaction_status'] = $event->type;
-                $response['message'] = "Transaction successfully done";
+                $response['message'] = "Transaction successfully done. Fee: $fee";
                 return response()->json($response);
-
             } elseif ($event->type == 'charge.failed') {
                 $order = fetchOrders($order_id, '', '', '', '', '', 'o.id', 'DESC');
                 if (!empty($order_id)) {
@@ -723,14 +697,12 @@ class Webhook extends Controller
                 $response['message'] = "Transaction is failed. ";
                 Log::alert('Stripe Webhook | Transaction is failed --> ' . var_export($event, true));
                 return response()->json($response);
-
             } elseif ($event->type == 'charge.pending') {
                 $response['error'] = false;
                 $response['transaction_status'] = $event->type;
                 $response['message'] = "Waiting for customer to finish transaction ";
                 Log::alert('Stripe Webhook | Waiting customer to finish transaction --> ' . var_export($event, true));
                 return response()->json($response);
-
             } elseif ($event->type == 'charge.expired') {
                 if (!empty($order_id)) {
                     updateDetails(['active_status' => 'cancelled'], ['order_id' => $order_id], 'order_items');
@@ -745,7 +717,6 @@ class Webhook extends Controller
                 $response['message'] = "Transaction is expired.";
                 Log::alert('Stripe Webhook | Transaction is expired --> ' . var_export($event, true));
                 return response()->json($response);
-
             } elseif ($event->type == 'charge.refunded') {
                 if (!empty($order_id)) {
                     updateDetails(['active_status' => 'cancelled'], ['order_id' => $order_id], 'order_items');
@@ -760,21 +731,16 @@ class Webhook extends Controller
                 $response['message'] = "Transaction is refunded.";
                 Log::alert('Stripe Webhook | Transaction is refunded --> ' . var_export($event, true));
                 return response()->json($response);
-
             } else {
                 $response['error'] = true;
                 $response['transaction_status'] = $event->type;
                 $response['message'] = "Transaction could not be detected.";
                 Log::alert('Stripe Webhook | Transaction could not be detected --> ' . var_export($event, true));
                 return response()->json($response);
-
             }
         } else {
             Log::alert('Stripe Webhook | Invalid Server Signature  --> ' . var_export($result, true));
             Log::alert('Stripe Webhook | Order id  --> ' . var_export($order_id, true));
-
         }
-
     }
-
 }

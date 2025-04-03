@@ -9936,6 +9936,10 @@ function sendCustomNotificationOnPaymentSuccess($order_id, $user_id)
 {
     // Fetch custom notification template
     $custom_notification = fetchdetails('custom_messages', ['type' => 'place_order'], '*');
+    if (empty($custom_notification)) {
+        Log::alert("Custom notification not found for user_id: $user_id in sendCustomNotificationOnPaymentSuccess");
+        return;
+    }
 
     // Replace placeholders in title
     $hashtag_order_id = '< order_id >';
