@@ -368,6 +368,7 @@
 
 
             $('#place_order_btn').attr('disabled', true).html('Please Wait...');
+
             if (($('#is_time_slots_enabled').val() == 1 && ($('input[name="delivery_time"]').is(':checked') == false || $('input[type=hidden][id="start_date"]').val() == "") && product_type != 'digital_product')) {
                 iziToast.error({
                     message: "Please select Delivery Date & Time.",
@@ -384,6 +385,7 @@
                 $('#place_order_btn').attr('disabled', false).html(btn_html);
                 return false;
             }
+
             let payment_methods = $("input[name='payment_method']:checked").val();
             if (payment_methods == undefined && final_total != 0) {
                 iziToast.error({
@@ -628,4 +630,5 @@
             }
         })
     })
+
 })();

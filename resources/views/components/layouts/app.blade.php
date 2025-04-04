@@ -90,6 +90,7 @@
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/lightbox.css') }}">
 
     @livewireScripts
+
     <!-- JavaScript files -->
     <script src="{{ asset('frontend/elegant/js/plugins.js') }}" defer></script>
     <script src="{{ asset('frontend/elegant/js/firebase-app.js') }}" defer></script>
@@ -117,8 +118,15 @@
     {{-- <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" defer></script> --}}
     <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" defer></script>
 
+
     @filepondScripts
+
     @stack('scripts')
+
+    @if (request()->is('cart/checkout'))
+        <script src="{{ asset('frontend/elegant/js/checkout-alpine.js') }}" defer></script>
+    @endif
+
 </body>
 
 

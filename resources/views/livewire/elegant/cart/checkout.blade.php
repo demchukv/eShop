@@ -6,7 +6,7 @@
     <div class="container-fluid">
         <!--Checkout Content-->
         @if (count($cart_data) >= 1)
-            <form action="{{ Route('cart.place_order') }}" method="POST" id="place_order_form" x-data="checkout">
+            <form action="{{ Route('cart.place_order') }}" method="POST" id="place_order_form">
                 @csrf
                 <div class="row">
                     <div class="col-lg-6 col-md-6 col-sm-12">
@@ -186,7 +186,7 @@
                                     @if ($payment_method->cod_method == 1)
                                         <div class="form-check mb-2 d-flex align-items-center">
                                             <input class="form-check-input" type="radio" name="payment_method"
-                                                id="cod" value="cod" x-model="payment_method">
+                                                id="cod" value="cod">
                                             <label class="form-check-label d-flex align-items-center ps-2"
                                                 for="cod" title="COD">
                                                 <div class="image payment-image">
@@ -201,7 +201,7 @@
                                     @if ($payment_method->phonepe_method == 1)
                                         <div class="form-check mb-2 d-flex align-items-center">
                                             <input class="form-check-input" type="radio" name="payment_method"
-                                                id="phonepe" value="phonepe" x-model="payment_method">
+                                                id="phonepe" value="phonepe">
                                             <label class="form-check-label d-flex align-items-center ps-2"
                                                 for="phonepe" value="phonepe" title="Phonepe">
                                                 <div class="image payment-image">
@@ -216,7 +216,7 @@
                                     @if ($payment_method->paypal_method == 1)
                                         <div class="form-check mb-2 d-flex align-items-center">
                                             <input class="form-check-input" type="radio" name="payment_method"
-                                                id="paypal-payment" value="paypal" x-model="payment_method">
+                                                id="paypal-payment" value="paypal">
                                             <label class="form-check-label d-flex align-items-center ps-2"
                                                 for="paypal-payment" value="paypal" title="Paypal">
                                                 <div class="image payment-image">
@@ -231,7 +231,7 @@
                                     @if ($payment_method->paystack_method == 1)
                                         <div class="form-check mb-2 d-flex align-items-center">
                                             <input class="form-check-input" type="radio" name="payment_method"
-                                                id="paystack-payment" value="paystack" x-model="payment_method">
+                                                id="paystack-payment" value="paystack">
                                             <label class="form-check-label d-flex align-items-center ps-2"
                                                 for="paystack-payment" value="paystack" title="Paystack">
                                                 <div class="image payment-image">
@@ -248,7 +248,7 @@
                                     @if ($payment_method->stripe_method == 1)
                                         <div class="form-check mb-2 d-flex align-items-center">
                                             <input class="form-check-input" type="radio" name="payment_method"
-                                                id="stripe-payment" value="stripe" x-model="payment_method">
+                                                id="stripe-payment" value="stripe">
                                             <label class="form-check-label d-flex align-items-center ps-2"
                                                 for="stripe-payment" value="stripe" title="stripe">
                                                 <div class="image payment-image">
@@ -263,7 +263,7 @@
                                     @if ($payment_method->razorpay_method == 1)
                                         <div class="form-check mb-2 d-flex align-items-center">
                                             <input class="form-check-input" type="radio" name="payment_method"
-                                                id="razorpay-payment" value="razorpay" x-model="payment_method">
+                                                id="razorpay-payment" value="razorpay">
                                             <label class="form-check-label d-flex align-items-center ps-2"
                                                 for="razorpay-payment" value="razorpay" title="razorpay">
                                                 <div class="image payment-image">
@@ -582,142 +582,10 @@
 
 @push('scripts')
     <script>
-        // Передаємо значення з PHP у глобальні змінні
         window.baseTotal = {{ $final_total }};
         window.finalTotal = {{ $final_total }};
         window.walletUsed = {{ $is_wallet_use ? $wallet_used_balance : 0 }};
         window.isWalletUsed = {{ $is_wallet_use ? 'true' : 'false' }};
     </script>
-    <script src="{{ asset('frontend/elegant/js/checkout-alpine.js') }}" defer></script>
+    {{-- <script src="{{ asset('frontend/elegant/js/checkout-alpine.js') }}"></script> --}}
 @endpush
-
-{{--
-@push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Перевіряємо, чи Alpine доступний
-            if (typeof Alpine === 'undefined') {
-                console.error('Alpine.js is not loaded!');
-            } else {
-                console.log('Alpine.js is loaded');
-            }
-
-            document.addEventListener('alpine:init', () => {
-                console.log('Alpine init triggered');
-                Alpine.data('checkout', () => ({
-                    payment_method: '',
-                    baseTotal: {{ $final_total }},
-                    finalTotal: {{ $final_total }},
-                    stripeFee: 0,
-                    walletUsed: {{ $is_wallet_use ? $wallet_used_balance : 0 }},
-                    isWalletUsed: {{ $is_wallet_use ? 'true' : 'false' }},
-
-                    init() {
-                        console.log('Checkout init');
-                        this.$watch('payment_method', (value) => this.handlePaymentMethodChange(
-                            value));
-                        this.$watch('isWalletUsed', (value) => this.handleWalletChange(value));
-
-                        const walletCheckbox = document.getElementById('wallet-pay');
-                        walletCheckbox.addEventListener('change', () => {
-                            this.isWalletUsed = walletCheckbox.checked;
-                        });
-                    },
-
-                    handlePaymentMethodChange(payment_method) {
-                        this.updateTotals();
-                    },
-
-                    handleWalletChange(isWalletUsed) {
-                        this.updateTotals();
-                    },
-
-                    updateTotals() {
-                        const walletBalance = parseFloat(document.getElementById('wallet-pay')
-                            .dataset
-                            .walletBalance) || 0;
-                        this.walletUsed = this.isWalletUsed ? Math.min(walletBalance, this
-                            .baseTotal) : 0;
-                        const amountToPay = this.baseTotal - this.walletUsed;
-
-                        if (this.payment_method === 'stripe') {
-                            const appUrl = document.getElementById("app_url")?.dataset.appUrl ||
-                                window
-                                .location.origin;
-                            const formData = new FormData();
-                            formData.append('amount', amountToPay);
-
-                            fetch(`${appUrl}/payments/stripe/calculate-fee`, {
-                                    method: 'POST',
-                                    body: formData,
-                                    headers: {
-                                        'X-CSRF-TOKEN': document.querySelector(
-                                            'meta[name="csrf-token"]').content,
-                                    },
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (!data.error && data.fee && data.total_with_fee) {
-                                        this.stripeFee = parseFloat(data.fee) || 0;
-                                        this.finalTotal = this.baseTotal - this.walletUsed +
-                                            this
-                                            .stripeFee;
-
-                                        document.querySelector('.stripe-fee-box').classList
-                                            .remove(
-                                                'd-none');
-                                        document.getElementById('stripe-fee').textContent =
-                                            this
-                                            .formatCurrency(this.stripeFee);
-                                        document.getElementById('show-final-total')
-                                            .textContent = this
-                                            .formatCurrency(this.finalTotal);
-                                        document.getElementById('final_total').value = this
-                                            .finalTotal;
-
-                                        document.getElementById('is_wallet_used').value =
-                                            this
-                                            .isWalletUsed ? 1 : 0;
-                                        document.getElementById('wallet_balance_used')
-                                            .value = this
-                                            .walletUsed;
-                                    } else {
-                                        this.resetStripeFee();
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Fetch error:', error);
-                                    this.resetStripeFee();
-                                });
-                        } else {
-                            this.finalTotal = this.baseTotal - this.walletUsed;
-                            this.resetStripeFee();
-
-                            document.getElementById('show-final-total').textContent = this
-                                .formatCurrency(
-                                    this.finalTotal);
-                            document.getElementById('final_total').value = this.finalTotal;
-
-                            document.getElementById('is_wallet_used').value = this
-                                .isWalletUsed ? 1 : 0;
-                            document.getElementById('wallet_balance_used').value = this
-                                .walletUsed;
-                        }
-                    },
-
-                    resetStripeFee() {
-                        this.stripeFee = 0;
-                        document.querySelector('.stripe-fee-box').classList.add('d-none');
-                        document.getElementById('stripe-fee').textContent = '';
-                    },
-
-                    formatCurrency(amount) {
-                        const currencySymbol = document.getElementById('currency_code').value ||
-                            '$';
-                        return `${currencySymbol}${parseFloat(amount).toFixed(2)}`;
-                    }
-                }));
-            });
-        });
-    </script>
-@endpush --}}

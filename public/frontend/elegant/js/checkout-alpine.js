@@ -1,90 +1,102 @@
-document.addEventListener('alpine:init', () => {
-    Alpine.data('checkout', () => ({
-        payment_method: '',
-        baseTotal: window.baseTotal || 0, // Передаємо через глобальну змінну
-        finalTotal: window.finalTotal || 0,
-        stripeFee: 0,
-        walletUsed: window.walletUsed || 0,
-        isWalletUsed: window.isWalletUsed || false,
+(function () {
+    let paymentMethod = '';
+    let baseTotal = window.baseTotal || 0;
+    let finalTotal = window.finalTotal || 0;
+    let stripeFee = 0;
+    let walletUsed = window.walletUsed || 0;
+    let isWalletUsed = window.isWalletUsed || false;
 
-        init() {
-            console.log('Checkout init');
-            this.$watch('payment_method', (value) => this.handlePaymentMethodChange(value));
-            this.$watch('isWalletUsed', (value) => this.handleWalletChange(value));
+    // Елементи DOM
+    const walletCheckbox = document.getElementById('wallet-pay');
+    const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
+    const stripeFeeBox = document.querySelector('.stripe-fee-box');
+    const stripeFeeElement = document.getElementById('stripe-fee');
+    const finalTotalElement = document.getElementById('show-final-total');
+    const finalTotalInput = document.getElementById('final_total');
+    const isWalletUsedInput = document.getElementById('is_wallet_used');
+    const walletBalanceUsedInput = document.getElementById('wallet_balance_used');
 
-            const walletCheckbox = document.getElementById('wallet-pay');
-            walletCheckbox.addEventListener('change', () => {
-                this.isWalletUsed = walletCheckbox.checked;
-            });
-        },
+    // Ініціалізація
+    console.log('Checkout init');
 
-        handlePaymentMethodChange(payment_method) {
-            this.updateTotals();
-        },
+    // Обробник зміни чекбокса гаманця
+    walletCheckbox.addEventListener('change', () => {
+        isWalletUsed = walletCheckbox.checked;
+        updateTotals();
+    });
 
-        handleWalletChange(isWalletUsed) {
-            this.updateTotals();
-        },
+    // Обробник зміни способу оплати
+    paymentRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            paymentMethod = radio.value;
+            updateTotals();
+        });
+    });
 
-        updateTotals() {
-            const walletBalance = parseFloat(document.getElementById('wallet-pay').dataset.walletBalance) || 0;
-            this.walletUsed = this.isWalletUsed ? Math.min(walletBalance, this.baseTotal) : 0;
-            const amountToPay = this.baseTotal - this.walletUsed;
+    // Функція для оновлення підсумків
+    function updateTotals() {
+        const walletBalance = parseFloat(walletCheckbox.dataset.walletBalance) || 0;
+        walletUsed = isWalletUsed ? Math.min(walletBalance, baseTotal) : 0;
+        const amountToPay = baseTotal - walletUsed;
+        console.log('Checked payment method = ', paymentMethod);
+        if (paymentMethod === 'stripe') {
+            const appUrl = document.getElementById('app_url')?.dataset.appUrl || window.location.origin;
+            const formData = new FormData();
+            formData.append('amount', amountToPay);
 
-            if (this.payment_method === 'stripe') {
-                const appUrl = document.getElementById("app_url")?.dataset.appUrl || window.location.origin;
-                const formData = new FormData();
-                formData.append('amount', amountToPay);
+            fetch(`${appUrl}/payments/stripe/calculate-fee`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.error && data.fee && data.total_with_fee) {
+                        stripeFee = parseFloat(data.fee) || 0;
+                        finalTotal = baseTotal - walletUsed + stripeFee;
 
-                fetch(`${appUrl}/payments/stripe/calculate-fee`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    },
+                        stripeFeeBox.classList.remove('d-none');
+                        stripeFeeElement.textContent = formatCurrency(stripeFee);
+                        finalTotalElement.textContent = formatCurrency(finalTotal);
+                        finalTotalInput.value = finalTotal;
+
+                        isWalletUsedInput.value = isWalletUsed ? 1 : 0;
+                        walletBalanceUsedInput.value = walletUsed;
+                    } else {
+                        resetStripeFee();
+                    }
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.error && data.fee && data.total_with_fee) {
-                            this.stripeFee = parseFloat(data.fee) || 0;
-                            this.finalTotal = this.baseTotal - this.walletUsed + this.stripeFee;
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    resetStripeFee();
+                });
+        } else {
+            finalTotal = baseTotal - walletUsed;
+            resetStripeFee();
 
-                            document.querySelector('.stripe-fee-box').classList.remove('d-none');
-                            document.getElementById('stripe-fee').textContent = this.formatCurrency(this.stripeFee);
-                            document.getElementById('show-final-total').textContent = this.formatCurrency(this.finalTotal);
-                            document.getElementById('final_total').value = this.finalTotal;
+            finalTotalElement.textContent = formatCurrency(finalTotal);
+            finalTotalInput.value = finalTotal;
 
-                            document.getElementById('is_wallet_used').value = this.isWalletUsed ? 1 : 0;
-                            document.getElementById('wallet_balance_used').value = this.walletUsed;
-                        } else {
-                            this.resetStripeFee();
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                        this.resetStripeFee();
-                    });
-            } else {
-                this.finalTotal = this.baseTotal - this.walletUsed;
-                this.resetStripeFee();
-
-                document.getElementById('show-final-total').textContent = this.formatCurrency(this.finalTotal);
-                document.getElementById('final_total').value = this.finalTotal;
-
-                document.getElementById('is_wallet_used').value = this.isWalletUsed ? 1 : 0;
-                document.getElementById('wallet_balance_used').value = this.walletUsed;
-            }
-        },
-
-        resetStripeFee() {
-            this.stripeFee = 0;
-            document.querySelector('.stripe-fee-box').classList.add('d-none');
-            document.getElementById('stripe-fee').textContent = '';
-        },
-
-        formatCurrency(amount) {
-            const currencySymbol = document.getElementById('currency_code').value || '$';
-            return `${currencySymbol}${parseFloat(amount).toFixed(2)}`;
+            isWalletUsedInput.value = isWalletUsed ? 1 : 0;
+            walletBalanceUsedInput.value = walletUsed;
         }
-    }));
-});
+    }
+
+    // Функція для скидання комісії Stripe
+    function resetStripeFee() {
+        stripeFee = 0;
+        stripeFeeBox.classList.add('d-none');
+        stripeFeeElement.textContent = '';
+    }
+
+    // Функція форматування валюти
+    function formatCurrency(amount) {
+        const currencySymbol = document.getElementById('currency_code').value || '$';
+        return `${currencySymbol}${parseFloat(amount).toFixed(2)}`;
+    }
+
+    // Початкове оновлення підсумків
+    updateTotals();
+})();

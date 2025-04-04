@@ -2623,6 +2623,10 @@
                                         });
                                         Livewire.dispatch("refreshComponent");
                                         $('#refundOptionModal').modal('hide');
+                                        const tm = setTimeout(() => {
+                                            location.reload();
+                                        }, 2000);
+
                                     } else {
                                         iziToast.error({
                                             message: response.message,
