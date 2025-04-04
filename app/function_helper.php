@@ -3754,12 +3754,14 @@ function placeOrder($data, $for_web = '')
 
         $total_payable = $final_total;
 
+        $wallet_txn_id = null;
         if ($data['is_wallet_used'] == '1' && $data['wallet_balance_used'] <= $final_total) {
 
             $wallet_balance = updateWalletBalance('debit', $data['user_id'], $data['wallet_balance_used'], "Used against Order Placement");
             if ($wallet_balance['error'] == false) {
                 $total_payable -= $data['wallet_balance_used'];
                 $Wallet_used = true;
+                $wallet_txn_id = $wallet_balance['data']['txn_id'];
             } else {
                 $response['error'] = true;
                 $response['message'] = $wallet_balance['error_message'];
@@ -3841,6 +3843,14 @@ function placeOrder($data, $for_web = '')
         $order = Order::forceCreate($order_data);
 
         $order_id = $order->id;
+
+        if ($wallet_txn_id) {
+            $transactionController = app(TransactionController::class);
+            $transactionController->update_transaction($wallet_txn_id, ['order_id' => $order_id]);
+            \Log::info("Updated wallet transaction txn_id {$wallet_txn_id} with order_id: {$order_id}");
+        }
+
+
 
 
 
@@ -4206,6 +4216,7 @@ function updateWalletBalance($operation, $user_id, $amount, $message = "Balance 
     }
 
     if ($user->balance >= 0) {
+        $txn_id = 'WALLET-' . time();
         $data = [
             'transaction_type' => $transaction_type,
             'user_id' => $user_id,
@@ -4214,6 +4225,7 @@ function updateWalletBalance($operation, $user_id, $amount, $message = "Balance 
             'message' => $message,
             'order_item_id' => $order_item_id,
             'is_refund' => $is_refund,
+            'txn_id' => $txn_id,
         ];
 
         $payment_data = Transaction::where('order_item_id', $order_item_id)->pluck('type')->first();
@@ -4227,7 +4239,6 @@ function updateWalletBalance($operation, $user_id, $amount, $message = "Balance 
             $data['message'] = $message ?? 'Balance Credited';
             $data['type'] = 'credit';
             $data['status'] = 'success';
-            $data['order_id'] = $order_item_id;
             if ($payment_data != 'razorpay') {
                 $user->balance += $amount;
             }
@@ -4235,7 +4246,6 @@ function updateWalletBalance($operation, $user_id, $amount, $message = "Balance 
             $data['message'] = $message ?: 'Balance refunded';
             $data['type'] = 'refund';
             $data['status'] = 'success';
-            $data['order_id'] = $order_item_id;
             if ($payment_data != 'razorpay') {
                 $user->balance += $amount;
             }
@@ -4246,10 +4256,13 @@ function updateWalletBalance($operation, $user_id, $amount, $message = "Balance 
         $request = new \Illuminate\Http\Request($data);
         $transactionController = app(TransactionController::class);
 
-        $transactionController->store($request);
+        $transaction_response = $transactionController->store($request);
+
         $response['error'] = false;
-        $response['message'] = "Balance Update Successfully";
-        $response['data'] = [];
+        $response['message'] = "Balance Updated Successfully";
+        $response['data'] = [
+            'txn_id' => $txn_id,
+        ];
     } else {
         $response['error'] = true;
         $response['error_message'] = ($user->balance != 0) ? "User's Wallet balance less than {$user->balance} can be used only" : "Doesn't have sufficient wallet balance to proceed further.";

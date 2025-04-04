@@ -26,7 +26,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
 
-    @livewireScripts
 
     @if (request()->is('cart/checkout') || request()->is('my-account/wallet'))
         <script src="https://js.stripe.com/v3/"></script>
@@ -52,32 +51,7 @@
     @livewireStyles
     @stack('styles')
 
-    <!-- JavaScript files -->
-    <script src="{{ asset('frontend/elegant/js/plugins.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/firebase-app.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/firebase-auth.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/firebase-firestore.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/bootstrap-table.min.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/bootstrap-table-export.min.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/main.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/daterangepicker.js') }}" defer></script>
-    {{-- <script src="{{ asset('frontend/elegant/js/ionicons.js') }}" defer></script> --}}
-    <script src="{{ asset('frontend/elegant/js/star-rating.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/intlTelInput.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/iziToast.min.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/star-rating.min.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/select2.min.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/checkout.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/wallet.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/custom.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/vendor/jquery.elevatezoom.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/moment.min.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/sweetalert2.all.min.js') }}" defer></script>
-    <script src="{{ asset('js/datepicker/js/bootstrap-datepicker.min.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/swiper-bundle.min.js') }}" defer></script>
-    <script src="{{ asset('frontend/elegant/js/shareon.iife.js') }}" data-navigate-track="reload" defer></script>
-    {{-- <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" defer></script> --}}
-    <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" defer></script>
+
 </head>
 @php
     $is_rtl = session('is_rtl') ?? 0;
@@ -114,6 +88,35 @@
     @endif
     <x-include-modal.modals />
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/lightbox.css') }}">
+
+    @livewireScripts
+    <!-- JavaScript files -->
+    <script src="{{ asset('frontend/elegant/js/plugins.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/firebase-app.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/firebase-auth.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/firebase-firestore.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/bootstrap-table.min.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/bootstrap-table-export.min.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/main.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/daterangepicker.js') }}" defer></script>
+    {{-- <script src="{{ asset('frontend/elegant/js/ionicons.js') }}" defer></script> --}}
+    <script src="{{ asset('frontend/elegant/js/star-rating.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/intlTelInput.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/iziToast.min.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/star-rating.min.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/select2.min.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/checkout.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/wallet.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/custom.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/vendor/jquery.elevatezoom.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/moment.min.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/sweetalert2.all.min.js') }}" defer></script>
+    <script src="{{ asset('js/datepicker/js/bootstrap-datepicker.min.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/swiper-bundle.min.js') }}" defer></script>
+    <script src="{{ asset('frontend/elegant/js/shareon.iife.js') }}" data-navigate-track="reload" defer></script>
+    {{-- <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" defer></script> --}}
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" defer></script>
+
     @filepondScripts
     @stack('scripts')
 </body>

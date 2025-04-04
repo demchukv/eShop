@@ -148,7 +148,7 @@
                                                 $cancellable_index >= $active_index)
                                             <button class="btn btn-primary btn-sm update_order_item_status"
                                                 data-status="cancelled"
-                                                data-item-id="{{ $user_order_item['id'] }}">{{ labels('front_messages.cancle', 'Cancle') }}</button>
+                                                data-item-id="{{ $user_order_item['id'] }}">{{ labels('front_messages.cancle', 'Cancel') }}</button>
                                         @endif
                                         @if (
                                             $user_order_item['is_returnable'] == 1 &&
@@ -418,7 +418,8 @@
                                 <input class="form-check-input" type="radio" name="refundMethod" id="refundCard"
                                     value="card" @if ($transaction['transaction_type'] !== 'transaction' || $transaction['type'] !== 'stripe') disabled @endif>
                                 <label class="form-check-label" for="refundCard">
-                                    Refund to Card (via Stripe)
+                                    Refund to Card (via Stripe)<br>
+                                    <small>Refunds take 5-10 days to appear on a customer's statement.</small>
                                 </label>
                             </div>
                         </div>
@@ -531,13 +532,13 @@
                     </div>
                     <div class="collapse mb-0" id="allInTransit">
                         ${group.slice(0, -1).reverse().map(cp => `
-                                                                                        <div class="mb-3">
-                                                                                            <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
-                                                                                            <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
-                                                                                            <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
-                                                                                            <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
-                                                                                        </div>
-                                                                                    `).join('')}
+                                                                                                                <div class="mb-3">
+                                                                                                                    <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
+                                                                                                                    <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
+                                                                                                                    <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
+                                                                                                                    <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
+                                                                                                                </div>
+                                                                                                            `).join('')}
                     </div>
                     <p class="mb-3 mt-0">
                         <a href="#" class="text-primary fs-6" data-bs-target="#allInTransit"

@@ -172,4 +172,16 @@ class TransactionController extends Controller
             ]); // HTTP status code 422 for Unprocessable Entity
         }
     }
+
+    public function update_transaction($txn_id, $data)
+    {
+        $transaction = Transaction::where('txn_id', $txn_id)->first();
+        if ($transaction) {
+            $transaction->update($data);
+            \Log::info('Transaction updated: ' . json_encode($transaction->toArray()));
+            return true;
+        }
+        \Log::warning('Transaction not found for txn_id: ' . $txn_id);
+        return false;
+    }
 }
