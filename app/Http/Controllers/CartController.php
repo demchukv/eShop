@@ -22,6 +22,7 @@ use App\Models\CommissionDistribution;
 use App\Models\OrderItems;
 use App\Models\SellerData;
 use App\Models\User;
+use App\Http\Controllers\CommissionController;
 
 class CartController extends Controller
 {
@@ -1236,7 +1237,8 @@ class CartController extends Controller
 
                     // Якщо замовлення створено, розподіляємо кошти по рахунках користувачів
                     $data['order_id'] = $res['order_id'];
-                    $this->splitCommissionsBetweenUsers($data);
+                    $commissionController = new CommissionController();
+                    $commissionController->splitCommissionsBetweenUsers($data);
 
                     if ($data['payment_method'] == "bank_transfer" || $data['payment_method'] == 'stripe' || $data['payment_method'] == 'phonepe' || $data['payment_method'] == 'paypal' || $data['payment_method'] == 'paystack' || $data['payment_method'] == 'razorpay') {
                         if ($data['payment_method'] == 'phonepe') {
@@ -1370,7 +1372,8 @@ class CartController extends Controller
             if (!empty($res)) {
                 // Якщо замовлення створено, розподіляємо кошти по рахунках користувачів
                 $data['order_id'] = $res['order_id'];
-                $this->splitCommissionsBetweenUsers($data);
+                $commissionController = new CommissionController();
+                $commissionController->splitCommissionsBetweenUsers($data);
 
                 if ($data['payment_method'] == "bank_transfer" || $data['payment_method'] == 'stripe' || $data['payment_method'] == 'phonepe' || $data['payment_method'] == 'paypal' || $data['payment_method'] == 'paystack' || $data['payment_method'] == 'razorpay') {
                     if ($data['payment_method'] == 'phonepe') {
@@ -1428,149 +1431,5 @@ class CartController extends Controller
             }
             return response()->json($res);
         }
-    }
-
-    public function splitCommissionsBetweenUsers($data)
-    {
-        $order_id = $data['order_id'] ?? null;
-        if (!$order_id) {
-            Log::error('No order_id provided for commission distribution', $data);
-            return;
-        }
-
-        // Отримуємо елементи замовлення з таблиці order_items
-        $order_items = OrderItems::where('order_id', $order_id)
-            ->select('id', 'product_variant_id', 'quantity', 'seller_id')
-            ->get();
-
-        if ($order_items->isEmpty()) {
-            Log::error('No order items found for order_id: ' . $order_id);
-            return;
-        }
-
-        foreach ($order_items as $item) {
-            // Отримуємо дані з Product_variants за product_variant_id
-            $variant = Product_variants::where('id', $item->product_variant_id)
-                ->select('price', 'special_price', 'dealer_price')
-                ->first();
-
-            if (!$variant) {
-                Log::warning('Product variant not found for product_variant_id: ' . $item->product_variant_id);
-                continue;
-            }
-
-            // Отримуємо user_id із seller_data за seller_id
-            $seller = SellerData::where('id', $item->seller_id)->select('id', 'user_id')->first();
-            if (!$seller || !$seller->user_id) {
-                Log::warning('Seller or user_id not found for seller_id: ' . $item->seller_id);
-                continue;
-            }
-
-            $user = Auth::user();
-            $seller_user = User::find($seller->user_id);
-
-            // Визначаємо ціну для розрахунків (special_price, якщо є і менше price, інакше price)
-            $price = $variant->special_price > 0 && $variant->special_price < $variant->price ? $variant->special_price : $variant->price;
-            $dealer_price = $variant->dealer_price ?? 0;
-            $quantity = $item->quantity;
-            $seller_id = $seller->user_id;
-
-            if ($dealer_price <= 0 || !$seller_id) {
-                Log::warning('Invalid dealer_price or seller_id for order_item_id: ' . $item->id);
-                continue;
-            }
-
-            // Розрахунок сум для продавця (95% від dealer_price)
-            $seller_amount = $dealer_price * 0.95 * $quantity;
-            $this->createCommissionRecord($order_id, $seller_id, $seller_amount, "95% from dealer_price for seller");
-
-            // Розрахунок суми для компанії (5% від dealer_price)
-            if ($seller_user->friends_code) {
-                // якщо продавця запросив менеджер, то нараховуємо 1% від dealer_price менеджеру і 4% від dealer_price компанії
-                $manager = User::where('referral_code', $seller_user->friends_code)->first();
-                if ($manager && $manager->role->name === 'manager') {
-                    $manager_amount = $dealer_price * 0.01 * $quantity;
-                    $this->createCommissionRecord($order_id, $manager->id, $manager_amount, "1% commission from dealer_price for manager");
-
-                    $shareholders_amount = $dealer_price * 0.01 * $quantity;
-                    $this->createCommissionRecord($order_id, 1, $shareholders_amount, "1% commission from dealer_price for shareholders", CommissionDistribution::USER_ID_SUB_SHAREHOLDERS);
-                    $company_one_amount = $dealer_price * 0.02 * $quantity;
-                    $this->createCommissionRecord($order_id, 1, $company_one_amount, "2% commission from dealer_price for base company account", CommissionDistribution::USER_ID_SUB_COMPANY_ONE);
-                    $company_two_amount = $dealer_price * 0.01 * $quantity;
-                    $this->createCommissionRecord($order_id, 1, $company_two_amount, "1% commission from dealer_price for hidden company account", CommissionDistribution::USER_ID_SUB_COMPANY_TWO);
-                } else {
-                    $shareholders_amount = $dealer_price * 0.01 * $quantity;
-                    $this->createCommissionRecord($order_id, 1, $shareholders_amount, "1% commission from dealer_price for shareholders", CommissionDistribution::USER_ID_SUB_SHAREHOLDERS);
-                    $company_one_amount = $dealer_price * 0.03 * $quantity;
-                    $this->createCommissionRecord($order_id, 1, $company_one_amount, "3% commission from dealer_price for base company account", CommissionDistribution::USER_ID_SUB_COMPANY_ONE);
-                    $company_two_amount = $dealer_price * 0.01 * $quantity;
-                    $this->createCommissionRecord($order_id, 1, $company_two_amount, "1% commission from dealer_price for hidden company account", CommissionDistribution::USER_ID_SUB_COMPANY_TWO);
-                }
-            } else {
-                // якщо продавця не запросив менеджер, то нараховуємо 5% від dealer_price компанії
-                $company_amount = $dealer_price * 0.05 * $quantity;
-                $this->createCommissionRecord($order_id, 1, $company_amount, "5% commission from dealer_price for company");
-            }
-
-
-            // Різниця між price та dealer_price (для рефералів)
-            $price_difference = ($price - $dealer_price) * $quantity;
-
-            // 10% від різниці між price та dealer_price для компанії
-            $company_amount = $price_difference * 0.1;
-            $this->createCommissionRecord($order_id, 1, $company_amount, "10% commission from price_difference for company");
-
-            // 90% від різниці між price та dealer_price для рефералів
-            $referral_amount = $price_difference * 0.9;
-            if ($referral_amount > 0) {
-                if (!$user->friends_code && $user->role->name === 'members') {
-                    // якщо користувач не є рефералом, то розподіляємо комісію на компанію
-                    $this->createCommissionRecord($order_id, 1, $referral_amount, "User don't have friends_code. Referral commission for company");
-                }
-                if (!$user->friends_code && $user->role->name === 'manager') {
-                    // якщо користувач не є рефералом, але це менеджер,то повертаємо комісію йому
-                    $this->createCommissionRecord($order_id, $user->id, $referral_amount, "User don't have friends_code and is manager. Referral commission for company");
-                }
-                if (!$user->friends_code && $user->role->name === 'dealer') {
-                    // якщо користувач не є рефералом, але це менеджер,то повертаємо комісію йому
-                    $this->createCommissionRecord($order_id, $user->id, $referral_amount, "User don't have friends_code and is dealer. Referral commission for company");
-                }
-                if ($user->friends_code) {
-                    $referral_user = User::where('referral_code', $user->friends_code)->first();
-                    if ($referral_user) {
-                        if ($referral_user->role->name === 'manager') {
-                            // якщо реферал є менеджером, то розподіляємо комісію на менеджера
-                            $this->createCommissionRecord($order_id, $referral_user->id, $referral_amount, "Referral commission for user");
-                        }
-                        if ($referral_user->role->name === 'dealer') {
-                            // якщо реферал є дилером, то розподіляємо комісію на дилера і його менеджера
-                            // TODO: розділити комісію між дилером і менеджером, якщо він є.
-                            if ($referral_user->friends_code) {
-                                $referral_manager = User::where('referral_code', $referral_user->friends_code)->first();
-                                $this->createCommissionRecord($order_id, $referral_manager->id, $referral_amount * 0.5, "Referral commission for user");
-                                $this->createCommissionRecord($order_id, $referral_user->id, $referral_amount * 0.5, "Referral commission for user");
-                            } else {
-                                $this->createCommissionRecord($order_id, $referral_user->id, $referral_amount, "Referral commission for user");
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        Log::info('Commissions distributed for order_id: ' . $order_id);
-    }
-
-    // Допоміжна функція для створення запису в commission_distributions
-    private function createCommissionRecord($order_id, $user_id, $amount, $message, $user_id_sub = null)
-    {
-        CommissionDistribution::create([
-            'order_id' => $order_id,
-            'user_id' => $user_id,
-            'user_id_sub' => $user_id_sub,
-            'amount' => $amount,
-            'message' => $message,
-            'status' => CommissionDistribution::STATUS_PENDING,
-        ]);
     }
 }

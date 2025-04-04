@@ -558,8 +558,6 @@ class Webhook extends Controller
     }
     public function stripe_webhook(Request $request)
     {
-        return;
-        sleep(5);
         $system_settings = getsettings('system_settings', true);
         $system_settings = json_decode($system_settings, true);
         $stripe = new Stripe;
@@ -567,11 +565,26 @@ class Webhook extends Controller
         $credentials = json_decode($credentials, true);
 
         $request_body = file_get_contents('php://input');
+        $event = json_decode($request_body, false);
 
-        $event = json_decode($request_body, FALSE);
+        Log::alert("stripe webhook=>" . $request_body);
 
-        Log::alert("stripe webhook=>" . $request);
+        // Отримуємо підпис із заголовка
+        $http_stripe_signature = isset($_SERVER['HTTP_STRIPE_SIGNATURE']) ? $_SERVER['HTTP_STRIPE_SIGNATURE'] : "";
 
+        // Верифікація вебхука з використанням секретного ключа
+        $webhook_secret = $credentials['stripe_webhook_secret_key'];
+        $result = $stripe->construct_event($request_body, $http_stripe_signature, $webhook_secret);
+
+        if ($result !== "Matched") {
+            Log::alert('Stripe Webhook | Invalid Server Signature --> ' . var_export($result, true));
+            return response()->json([
+                'error' => true,
+                'message' => 'Webhook signature verification failed',
+            ], 400);
+        }
+
+        // Обробка базової інформації про транзакцію
         if (!empty($event->data->object)) {
             $txn_id = $event->data->object->payment_intent ?? '';
             Log::alert('Stripe txn_id --> ' . $txn_id);
@@ -602,7 +615,8 @@ class Webhook extends Controller
             $currency = (isset($event->data->object->currency)) ? $event->data->object->currency : "";
             $balance_transaction = 0;
         }
-        /* Wallet refill has unique format for order ID - wallet-refill-user-{user_id}-{system_time}-{3 random_number}  */
+
+        // Обробка формату order_id для поповнення гаманця
         if (empty($order_id) && !empty($event->data->object->metadata) && property_exists($event->data->object->metadata, 'order_id')) {
             $order_id = $event->data->object->metadata->order_id;
         }
@@ -616,15 +630,10 @@ class Webhook extends Controller
             }
         }
 
-        $http_stripe_signature = isset($_SERVER['HTTP_STRIPE_SIGNATURE']) ? $_SERVER['HTTP_STRIPE_SIGNATURE'] : "";
-        $result = $stripe->construct_event($request_body, $http_stripe_signature, $credentials['stripe_webhook_secret_key']);
-        Log::alert('Stripe order id --> ' . var_export($result, true));
-        Log::alert('http_stripe_signature--> ' . var_export($http_stripe_signature, true));
-
-
-        if ($result == "Matched") {
-            if ($event->type == 'charge.succeeded') {
-                // Отримуємо fee через Stripe API
+        // Обробка подій
+        switch ($event->type) {
+            case 'charge.succeeded':
+                break;
                 $fee = 0;
                 if (!empty($balance_transaction)) {
                     try {
@@ -642,10 +651,8 @@ class Webhook extends Controller
                     if (isset($order['order_data'][0]->user_id)) {
                         $user_id = $order['order_data'][0]->user_id;
                         if (!empty($transaction)) {
-                            // Оновлюємо існуючу транзакцію
                             updateDetails(['status' => 'success', 'fee' => $fee], ['txn_id' => $txn_id], 'transactions');
                         } else {
-                            // Створюємо нову транзакцію
                             $data = [
                                 'transaction_type' => 'transaction',
                                 'user_id' => $user_id,
@@ -664,86 +671,117 @@ class Webhook extends Controller
                         updateDetails(['status' => $status], ['order_id' => $order_id], 'order_items');
                         sendCustomNotificationOnPaymentSuccess($order_id, $user_id);
                     }
-                } else {
-                    Log::alert('Stripe Webhook | Order id not found --> ' . var_export($event, true));
-                    if (!empty($txn_id) && empty($transaction)) {
-                        $data = [
-                            'transaction_type' => 'transaction',
-                            'user_id' => $user_id,
-                            'order_id' => $order_id,
-                            'type' => 'stripe',
-                            'txn_id' => $txn_id,
-                            'amount' => ($amount - $fee) / 100,
-                            'fee' => $fee,
-                            'status' => 'success',
-                            'message' => 'Payment received, but order ID not provided',
-                        ];
-                        Transaction::create($data);
-                    }
                 }
-                $response['error'] = false;
-                $response['transaction_status'] = $event->type;
-                $response['message'] = "Transaction successfully done. Fee: $fee";
-                return response()->json($response);
-            } elseif ($event->type == 'charge.failed') {
-                $order = fetchOrders($order_id, '', '', '', '', '', 'o.id', 'DESC');
+                return response()->json([
+                    'error' => false,
+                    'transaction_status' => $event->type,
+                    'message' => "Transaction successfully done. Fee: $fee",
+                ]);
+
+            case 'charge.failed':
                 if (!empty($order_id)) {
                     updateDetails(['active_status' => 'cancelled'], ['order_id' => $order_id], 'order_items');
                 }
-                /* No need to add because the transaction is already added just update the transaction status */
                 if (!empty($transaction)) {
                     $transaction_id = $transaction[0]['id'];
                     updateDetails(['status' => 'failed'], ['id' => $transaction_id], 'transactions');
                 }
-                $response['error'] = true;
-                $response['transaction_status'] = $event->type;
-                $response['message'] = "Transaction is failed. ";
-                Log::alert('Stripe Webhook | Transaction is failed --> ' . var_export($event, true));
-                return response()->json($response);
-            } elseif ($event->type == 'charge.pending') {
-                $response['error'] = false;
-                $response['transaction_status'] = $event->type;
-                $response['message'] = "Waiting for customer to finish transaction ";
-                Log::alert('Stripe Webhook | Waiting customer to finish transaction --> ' . var_export($event, true));
-                return response()->json($response);
-            } elseif ($event->type == 'charge.expired') {
+                return response()->json([
+                    'error' => true,
+                    'transaction_status' => $event->type,
+                    'message' => "Transaction is failed.",
+                ]);
+
+            case 'charge.pending':
+                return response()->json([
+                    'error' => false,
+                    'transaction_status' => $event->type,
+                    'message' => "Waiting for customer to finish transaction",
+                ]);
+
+            case 'charge.expired':
                 if (!empty($order_id)) {
                     updateDetails(['active_status' => 'cancelled'], ['order_id' => $order_id], 'order_items');
                 }
-                /* No need to add because the transaction is already added just update the transaction status */
                 if (!empty($transaction)) {
                     $transaction_id = $transaction[0]['id'];
                     updateDetails(['status' => 'expired'], ['id' => $transaction_id], 'transactions');
                 }
-                $response['error'] = true;
-                $response['transaction_status'] = $event->type;
-                $response['message'] = "Transaction is expired.";
-                Log::alert('Stripe Webhook | Transaction is expired --> ' . var_export($event, true));
-                return response()->json($response);
-            } elseif ($event->type == 'charge.refunded') {
-                if (!empty($order_id)) {
-                    updateDetails(['active_status' => 'cancelled'], ['order_id' => $order_id], 'order_items');
+                return response()->json([
+                    'error' => true,
+                    'transaction_status' => $event->type,
+                    'message' => "Transaction is expired.",
+                ]);
+
+            case 'refund.created':
+                $refundId = $event->data->object->id;
+                $transaction = Transaction::where('refund_id', $refundId)->first();
+                if ($transaction) {
+                    $transaction->update([
+                        'is_refund' => 1,
+                        'refund_status' => $event->data->object->status,
+                    ]);
+                    Log::alert("Refund created for transaction {$transaction->id}: status = {$event->data->object->status}");
+                } else {
+                    Log::alert("Refund created but no transaction found with refund_id: {$refundId}");
                 }
-                /* No need to add because the transaction is already added just update the transaction status */
-                if (!empty($transaction)) {
-                    $transaction_id = $transaction[0]['id'];
-                    updateDetails(['status' => 'refunded'], ['id' => $transaction_id], 'transactions');
+                return response()->json([
+                    'error' => false,
+                    'transaction_status' => $event->type,
+                    'message' => "Refund initiated successfully",
+                ]);
+
+            case 'refund.updated':
+                $refundId = $event->data->object->id;
+                $transaction = Transaction::where('refund_id', $refundId)->first();
+                if ($transaction) {
+                    $transaction->update([
+                        'refund_status' => $event->data->object->status,
+                    ]);
+                    Log::alert("Refund updated for transaction {$transaction->id}: status = {$event->data->object->status}");
+                } else {
+                    Log::alert("Refund updated but no transaction found with refund_id: {$refundId}");
                 }
-                $response['error'] = true;
-                $response['transaction_status'] = $event->type;
-                $response['message'] = "Transaction is refunded.";
-                Log::alert('Stripe Webhook | Transaction is refunded --> ' . var_export($event, true));
-                return response()->json($response);
-            } else {
-                $response['error'] = true;
-                $response['transaction_status'] = $event->type;
-                $response['message'] = "Transaction could not be detected.";
-                Log::alert('Stripe Webhook | Transaction could not be detected --> ' . var_export($event, true));
-                return response()->json($response);
-            }
-        } else {
-            Log::alert('Stripe Webhook | Invalid Server Signature  --> ' . var_export($result, true));
-            Log::alert('Stripe Webhook | Order id  --> ' . var_export($order_id, true));
+                return response()->json([
+                    'error' => false,
+                    'transaction_status' => $event->type,
+                    'message' => "Refund status updated",
+                ]);
+
+            case 'charge.refunded':
+                $paymentIntentId = $event->data->object->payment_intent; // Отримуємо Payment Intent ID
+                $transaction = Transaction::where('txn_id', $paymentIntentId)->first(); // Шукаємо за payment_intent
+
+                if ($transaction) {
+                    $refundAmount = $event->data->object->amount_refunded / 100; // Переводимо з центів у долари
+                    $transaction->update([
+                        'is_refund' => 1,
+                        'refund_amount' => $refundAmount,
+                        'refund_status' => 'succeeded', // Оновлюємо статус
+                    ]);
+
+                    // Оновлюємо статус замовлення, якщо є order_id
+                    if (!empty($transaction->order_id)) {
+                        updateDetails(['active_status' => 'cancelled'], ['order_id' => $transaction->order_id], 'order_items');
+                    }
+                    Log::alert("Charge refunded for transaction {$transaction->id}: amount = {$refundAmount}");
+                } else {
+                    Log::alert("Charge refunded but no transaction found with payment_intent: {$paymentIntentId}");
+                }
+
+                return response()->json([
+                    'error' => false,
+                    'transaction_status' => $event->type,
+                    'message' => "Transaction is refunded. Amount: " . ($refundAmount ?? 'unknown'),
+                ]);
+
+            default:
+                Log::alert('Stripe Webhook | Transaction could not be detected --> ' . var_export($event->type, true));
+                return response()->json([
+                    'error' => true,
+                    'transaction_status' => $event->type,
+                    'message' => "Transaction could not be detected.",
+                ]);
         }
     }
 }

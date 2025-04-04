@@ -7,6 +7,7 @@ use Illuminate\Console\View\Components\Error;
 use Illuminate\Support\Facades\Log;
 
 const DEFAULT_TOLERANCE = 300;
+
 class Stripe
 {
     private $secret_key;
@@ -24,6 +25,27 @@ class Stripe
         $this->secret_key = $payment_method_settings['stripe_secret_key'] ?? "";
         $this->public_key = $payment_method_settings['stripe_publishable_key'] ?? "";
         $this->currency_code = $payment_method_settings['stripe_currency_code'] ?? "";
+    }
+
+    /**
+     * Встановити секретний ключ Stripe
+     *
+     * @param string $secretKey Новий секретний ключ
+     * @return void
+     */
+    public function setSecretKey($secretKey)
+    {
+        $this->secret_key = $secretKey;
+    }
+
+    /**
+     * Отримати поточний секретний ключ
+     *
+     * @return string
+     */
+    public function getSecretKey()
+    {
+        return $this->secret_key;
     }
 
     /**
@@ -70,13 +92,11 @@ class Stripe
                             'product_data' => [
                                 'name' => "Paid for " . $data['product_name'],
                             ],
-                            // 'unit_amount' => number_format((float) $data['amount'], 2, ".", "") * 100,
                             'unit_amount' => $total_amount * 100, // Переводимо в центи
                         ],
                         'quantity' => 1,
                     ]
                 ],
-                // 'automatic_tax' => ['enabled' => true],
                 'mode' => 'payment',
                 "return_url" => url('payments/stripe-response?session_id={CHECKOUT_SESSION_ID}'),
                 "metadata" => $data,
@@ -135,7 +155,6 @@ class Stripe
 
     public function construct_event($request_body, $sigHeader, $secret, $tolerance = DEFAULT_TOLERANCE)
     {
-        // dd('here');
         $explode_header = explode(",", $sigHeader);
         for ($i = 0; $i < count($explode_header); $i++) {
             $data[] = explode("=", $explode_header[$i]);
@@ -150,26 +169,6 @@ class Stripe
 
         $signed_payload = "{$timestamp}.{$request_body}";
         $expectedSignature = hash_hmac('sha256', $signed_payload, $secret);
-        // dd($expectedSignature);
-        // if ($expectedSignature == $signs) {
-        //     if (($tolerance > 0) && (\abs(\time() - $timestamp) > $tolerance)) {
-        //         $response['error'] = true;
-        //         $response['message'] = "Timestamp outside the tolerance zone";
-        //         dd($response);
-        //         return $response;
-
-        //     } else {
-        //         return "Matched";
-        //     }
-        // } else {
-        //     $response['error'] = true;
-        //     $response['expectedSignature'] = $expectedSignature;
-        //     $response['signs'] = $signs;
-        //     $response['signed_payload'] = $signed_payload;
-        //     $response['message'] = "No signatures found matching the expected signature for payload";
-        //     // dd($response);
-        //     return $response;
-        // }
         return "Matched";
     }
 }

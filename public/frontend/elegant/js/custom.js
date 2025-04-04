@@ -249,9 +249,9 @@ function FirebaseAuth() {
                                 success: function (response) {
                                     if (
                                         response.allow_modification_error !=
-                                            undefined &&
+                                        undefined &&
                                         response.allow_modification_error ==
-                                            true
+                                        true
                                     ) {
                                         $("#send_otp")
                                             .attr("disabled", false)
@@ -314,7 +314,7 @@ function FirebaseAuth() {
                                 return;
                             });
                     })
-                    .catch((err) => {});
+                    .catch((err) => { });
             });
             $("#verify_otp").on("click", function () {
                 let code = $("#verificationCode").val();
@@ -665,7 +665,7 @@ function CustomSmsAuth() {
                     },
                 });
             })
-            .catch((err) => {});
+            .catch((err) => { });
         $("#verify_otp").on("click", function () {
             let code = $("#verificationCode").val();
             let number = $("#number").val();
@@ -1634,12 +1634,12 @@ document.addEventListener("livewire:navigated", () => {
                             const dealer_price = parseFloat(prices[0].dealer_price);
                             const dealer_price_box = document.getElementById("dealer_price");
                             const diff_price_box = document.getElementById("diff_price");
-                            if(dealer_price_box){
+                            if (dealer_price_box) {
                                 $("#dealer_price").html(
                                     currency_symbol + dealer_price.toFixed(2)
                                 )
                             }
-                            if(diff_price_box){
+                            if (diff_price_box) {
                                 $("#diff_price").html(
                                     currency_symbol + (price - dealer_price).toFixed(2)
                                 )
@@ -2034,10 +2034,10 @@ document.addEventListener("livewire:navigated", () => {
             slide: function (event, ui) {
                 $("#amount").val(
                     currency_symbol +
-                        ui.values[0] +
-                        " - " +
-                        currency_symbol +
-                        ui.values[1]
+                    ui.values[0] +
+                    " - " +
+                    currency_symbol +
+                    ui.values[1]
                 );
                 $("#min-price").val(ui.values[0]);
                 $("#max-price").val(ui.values[1]);
@@ -2045,10 +2045,10 @@ document.addEventListener("livewire:navigated", () => {
         });
         $("#amount").val(
             currency_symbol +
-                $("#slider-range").slider("values", 0) +
-                " - " +
-                currency_symbol +
-                $("#slider-range").slider("values", 1)
+            $("#slider-range").slider("values", 0) +
+            " - " +
+            currency_symbol +
+            $("#slider-range").slider("values", 1)
         );
     }
     price_slider();
@@ -2541,20 +2541,63 @@ document.addEventListener("livewire:navigated", () => {
 
     $(".update_order_item_status").on("click", function () {
         let order_status = $(this).data("status");
-        let order_item_id = $(this).data("item-id");
+        let initial_order_item_id = $(this).data("item-id");
         let confirm_title = "";
         let confirm_btn = "";
 
         if (order_status === "cancelled") {
-            confirm_title = "Are you sure you want to cancel this ordered item?";
+            confirm_title = "Are you sure you want to cancel the selected ordered items?";
             confirm_btn = "Yes Remove";
 
-            // Show refund option modal instead of direct Swal confirmation
             $('#refundOptionModal').modal('show');
+            $(`.cancel-item-checkbox[data-item-id="${initial_order_item_id}"]`).prop('checked', true);
 
-            // Handle confirm refund button click
+            // Налаштування варіантів повернення на основі методу оплати
+            const paymentMethod = $('#paymentMethod').val();
+            const paymentType = $('#paymentType').val();
+
+            if (paymentMethod === 'wallet') {
+                $('#refundWallet').prop('checked', true);
+                $('#refundCard').prop('disabled', true);
+            } else if (paymentMethod === 'transaction' && paymentType === 'stripe') {
+                $('#refundWallet').prop('checked', true); // За замовчуванням вибрано гаманець
+                $('#refundCard').prop('disabled', false); // Обидва варіанти доступні для Stripe
+            } else {
+                $('#refundWallet').prop('checked', true);
+                $('#refundCard').prop('disabled', true); // Для інших платіжних систем тільки гаманець
+            }
+
             $('#confirmRefund').off('click').on('click', function () {
                 const refundMethod = $('input[name="refundMethod"]:checked').val();
+                const selectedItems = $('.cancel-item-checkbox:checked').map(function () {
+                    return $(this).val();
+                }).get();
+
+                if (selectedItems.length === 0) {
+                    iziToast.error({
+                        message: "Please select at least one item to cancel",
+                        position: "topRight",
+                    });
+                    return;
+                }
+
+                // Перевірка для wallet: дозволяємо тільки повернення на гаманець
+                if (paymentMethod === 'wallet' && refundMethod !== 'wallet') {
+                    iziToast.error({
+                        message: "For wallet payments, refund can only be made to wallet",
+                        position: "topRight",
+                    });
+                    return;
+                }
+
+                // Для transaction+stripe дозволяємо обидва варіанти, для інших тільки wallet
+                if (paymentMethod === 'transaction' && paymentType !== 'stripe' && refundMethod !== 'wallet') {
+                    iziToast.error({
+                        message: "For this payment method, refund can only be made to wallet",
+                        position: "topRight",
+                    });
+                    return;
+                }
 
                 Swal.fire({
                     title: confirm_title,
@@ -2566,9 +2609,9 @@ document.addEventListener("livewire:navigated", () => {
                             type: "POST",
                             url: appUrl + "orders/update-order-item-status",
                             data: {
-                                order_status,
-                                order_item_id,
-                                refund_method: refundMethod // Add refund method to the request
+                                order_status: order_status,
+                                order_item_id: selectedItems,
+                                refund_method: refundMethod
                             },
                             dataType: "json",
                             success: function (response) {
@@ -2612,7 +2655,7 @@ document.addEventListener("livewire:navigated", () => {
                         url: appUrl + "orders/update-order-item-status",
                         data: {
                             order_status,
-                            order_item_id,
+                            order_item_id: initial_order_item_id,
                         },
                         dataType: "json",
                         success: function (response) {
@@ -2655,7 +2698,7 @@ document.addEventListener("livewire:navigated", () => {
             separateDialCode: !0,
             initialCountry: "auto",
             geoIpLookup: function (e) {
-                $.get("https://ipinfo.io", function () {}, "jsonp").always(
+                $.get("https://ipinfo.io", function () { }, "jsonp").always(
                     function (t) {
                         var a = t && t.country ? t.country : "";
                         e(a);
@@ -2771,8 +2814,8 @@ function newMessage() {
     }
     $(
         '<li class="sent"><img src="http://emilcarlsson.se/assets/mikeross.png" alt="" /><p>' +
-            message +
-            "</p></li>"
+        message +
+        "</p></li>"
     ).appendTo($(".messages ul"));
     $(".message-input input").val(null);
     $(".contact.active .preview").html("<span>You: </span>" + message);
@@ -2896,8 +2939,8 @@ function display_compare() {
                             (e.type == "simple_product"
                                 ? e.variants[0]["special_price"]
                                 : e.min_max_price.max_price +
-                                  "-" +
-                                  e.min_max_price.special_min_price) +
+                                "-" +
+                                e.min_max_price.special_min_price) +
                             "</span></div>";
                     });
 

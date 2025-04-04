@@ -26,10 +26,16 @@ class Transaction extends Model
         'message',
         'transaction_date',
         'is_refund',
+        'refund_amount',    // Додано
+        'refund_status',    // Додано
+        'refund_id',        // Додано
     ];
 
     protected $attributes = [
         'fee' => 0,
+        'refund_amount' => 0,    // За замовчуванням 0
+        'refund_status' => null, // За замовчуванням null
+        'refund_id' => null,     // За замовчуванням null
     ];
 
     public function user()
