@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Stripe\Refund;
 use Stripe\Stripe as StripeConfig;
+use App\Http\Controllers\CommissionController;
 
 class Details extends Component
 {
@@ -116,6 +117,13 @@ class Details extends Component
                 ]);
             }
 
+            // Отримуємо всі товари замовлення для перевірки повного/часткового повернення
+            $order_items = OrderItems::where('order_id', $order_item->order_id)->get();
+            $cancelled_items = OrderItems::whereIn('id', $order_item_ids)->get();
+            $total_order_amount = $order_items->sum('sub_total');
+            $cancelled_amount = $cancelled_items->sum('sub_total');
+            $is_full_refund = $total_order_amount == $cancelled_amount;
+
             foreach ($order_item_ids as $order_item_id) {
                 $order_item = OrderItems::find($order_item_id);
 
@@ -129,9 +137,13 @@ class Details extends Component
                 if ($refund_method === 'wallet') {
                     process_refund($order_item->id, $request['order_status']);
                 } elseif ($refund_method === 'card') {
-                    $this->processStripeRefund($request, $order_item); // Передаємо $request
+                    $this->processStripeRefund($request, $order_item);
                 }
             }
+
+            // Виклик методу з CommissionController для оновлення комісій
+            $commissionController = new CommissionController();
+            $commissionController->updateCommissions($order_item->order_id, $is_full_refund, $cancelled_items, $order_items);
 
             return response()->json([
                 'error' => false,

@@ -151,4 +151,35 @@ class CommissionController extends Controller
             'status' => CommissionDistribution::STATUS_PENDING,
         ]);
     }
+
+    /**
+     * Update commissions based on order cancellation
+     */
+    public function updateCommissions($order_id, $is_full_refund, $cancelled_items, $order_items)
+    {
+        $commissions = CommissionDistribution::where('order_id', $order_id)->get();
+
+        if ($is_full_refund) {
+            // Варіант 1: Повне повернення - змінюємо статус на canceled
+            CommissionDistribution::where('order_id', $order_id)
+                ->update(['status' => CommissionDistribution::STATUS_CANCELED]);
+        } else {
+            // Варіант 2: Часткове повернення - перераховуємо суми
+            $total_order_amount = $order_items->sum('sub_total');
+            $cancelled_amount = $cancelled_items->sum('sub_total');
+            $remaining_ratio = ($total_order_amount - $cancelled_amount) / $total_order_amount;
+
+            foreach ($commissions as $commission) {
+                $original_amount = $commission->amount;
+                $new_amount = $original_amount * $remaining_ratio;
+
+                $commission->update([
+                    'amount' => $new_amount,
+                    'message' => $commission->message . " (Adjusted due to partial refund: original {$original_amount}, new {$new_amount})",
+                ]);
+            }
+        }
+
+        Log::info("Commissions updated for order_id: {$order_id}, full_refund: " . ($is_full_refund ? 'yes' : 'no'));
+    }
 }
