@@ -1228,6 +1228,7 @@ document.addEventListener("livewire:navigating", () => {
 });
 
 document.addEventListener("livewire:navigated", () => {
+
     $(".loading-state").addClass("d-none");
     let store_slug = $("#store_slug").val();
     let current_store_id = $("#current_store_id").val();

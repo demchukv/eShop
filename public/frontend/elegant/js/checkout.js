@@ -208,6 +208,7 @@ function payWithPaystack(email, amount, public_key, reference_id) {
     });
     handler.openIframe();
 }
+
 document.addEventListener('livewire:navigated', () => {
 
     // select address

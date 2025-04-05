@@ -127,6 +127,13 @@
 
     @stack('scripts')
 
+    {{-- <script>
+        if (!document.querySelector('script[src="checkout.js"]')) {
+            const script = document.createElement('script');
+            script.src = "{{ asset('frontend/elegant/js/checkout.js') }}";
+            document.head.appendChild(script);
+        }
+    </script> --}}
     @if (request()->is('cart/checkout'))
         <script src="{{ asset('frontend/elegant/js/checkout-alpine.js') }}" defer></script>
     @endif
