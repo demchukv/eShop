@@ -67,6 +67,52 @@ class Details extends Component
         ])->title("Orders Detail |");
     }
 
+    /*************  ✨ Codeium Command ⭐  *************/
+    /**
+     * @OA\Post(
+     *     path="/orders/details/update_order_item_status",
+     *     summary="Update order item status",
+     *     description="Update order item status, cancel order item and make refund",
+     *     tags={"Order"},
+     *     @OA\RequestBody(
+     *         description="Order item status details",
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="order_status", type="string", example="cancelled", description="Order status (cancelled, returned)"),
+     *             @OA\Property(property="order_item_id", type="array", example={1,2,3}, description="Array of order item ids"),
+     *             @OA\Property(property="refund_method", type="string", example="wallet", description="Refund method (wallet, card)"),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Order item status updated successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="error", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Order Items Cancelled Successfully"),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="error", type="boolean", example=true),
+     *             @OA\Property(property="message", type="array", example={{"order_status is required"}}, description="Array of validation errors"),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Unable to cancel order items",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="error", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="No successful transaction found for this order"),
+     *         ),
+     *     ),
+     * )
+/******  924e5fa1-167a-436e-a8b1-82218899055b  *******/
     public function update_order_item_status(Request $request)
     {
         $validator = Validator::make($request->all(), [
