@@ -5,7 +5,7 @@ if (appUrl.charAt(appUrl.length - 1) !== '/') {
     appUrl += '/';
 }
 var user_id = $('#user_id').val()
-const d = new Date();
+const currentDated = new Date();
 
 function initListner(event, selector, callback) {
     $(selector).off(event)
@@ -438,7 +438,7 @@ document.addEventListener('livewire:navigated', () => {
                 dataType: "json",
                 success: function (response) {
                     $('#paypal-button-container').removeClass('d-none');
-                    let reference_id = d.getTime() + Math.round("100", "999");
+                    let reference_id = currentDated.getTime() + Math.round("100", "999");
                     if (response.error == false) {
                         paypal.Buttons({
                             createOrder: function (data, actions) {
@@ -493,7 +493,7 @@ document.addEventListener('livewire:navigated', () => {
                 },
                 dataType: "json",
                 success: function (response) {
-                    let reference_id = d.getTime() + Math.round("100", "999");
+                    let reference_id = currentDated.getTime() + Math.round("100", "999");
                     let public_key = $('#paystack_public_key').val();
                     let email = $("#user-email").val();
                     if (response.error == false) {

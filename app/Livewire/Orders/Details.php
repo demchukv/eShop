@@ -167,10 +167,6 @@ class Details extends Component
                     $this->processStripeRefund($request, $order_item, $transaction, $total_order_amount, $cancelled_amount);
                 }
             }
-            return response()->json([
-                'error' => true,
-                'message' => 'Stop processing order_items',
-            ]);
 
             $commissionController = new CommissionController();
             $commissionController->updateCommissions($order_item->order_id, $is_full_refund, $cancelled_items, $order_items);

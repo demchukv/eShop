@@ -60,7 +60,7 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
                                                         aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <form id="request-dealer-form" method="post"
+                                                    <form id="dealer-form" method="post"
                                                         action="{{ route('my-account.user-status.send_dealer_request') }}">
                                                         <div
                                                             class="form-row row-cols-lg-2 row-cols-md-2 row-cols-sm-1 row-cols-1">
