@@ -3208,41 +3208,40 @@ function arrays_equal(e, t) {
 
 
 
-document.addEventListener("DOMContentLoaded", function () {
-    // Делегування події кліку для всіх кнопок із класом .copy-btn
-    document.addEventListener("click", function (event) {
-        const button = event.target.closest(".copy-btn");
-        if (button) {
-            const text = button.getAttribute("data-copy-text");
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard
-                    .writeText(text)
-                    .then(() => {
-                        iziToast.success({
-                            message: "Copied to clipboard!",
-                            position: "topRight",
-                        });
-                    })
-                    .catch((err) => {
-                        iziToast.error({
-                            message: "Failed to copy!",
-                            position: "topRight",
-                        });
-                        console.error("Failed to copy: ", err);
+// Делегування події кліку для всіх кнопок із класом .copy-btn
+document.addEventListener("click", function (event) {
+    const button = event.target.closest(".copy-btn");
+    if (button) {
+        const text = button.getAttribute("data-copy-text");
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard
+                .writeText(text)
+                .then(() => {
+                    iziToast.success({
+                        message: "Copied to clipboard!",
+                        position: "topRight",
                     });
-            } else {
-                // Резервний варіант
-                const textarea = document.createElement("textarea");
-                textarea.value = text;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand("copy");
-                document.body.removeChild(textarea);
-                iziToast.success({
-                    message: "Copied to clipboard!",
-                    position: "topRight",
+                })
+                .catch((err) => {
+                    iziToast.error({
+                        message: "Failed to copy!",
+                        position: "topRight",
+                    });
+                    console.error("Failed to copy: ", err);
                 });
-            }
+        } else {
+            // Резервний варіант
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+            iziToast.success({
+                message: "Copied to clipboard!",
+                position: "topRight",
+            });
         }
-    });
+    }
 });
+
