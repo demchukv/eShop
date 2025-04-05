@@ -1,4 +1,3 @@
-// (function () {
 "use strict";
 $.ajaxSetup({
     headers: {
@@ -2623,9 +2622,6 @@ document.addEventListener("livewire:navigated", () => {
                                     });
                                     Livewire.dispatch("refreshComponent");
                                     $('#refundOptionModal').modal('hide');
-                                    const tm = setTimeout(() => {
-                                        location.reload();
-                                    }, 2000);
 
                                 } else {
                                     iziToast.error({
@@ -2732,59 +2728,6 @@ document.addEventListener("livewire:navigated", () => {
     // if (store_exsist == null) {
     //     Livewire.navigate(store);
     // }
-
-    // Check if handler is not already attached
-    if (!window.dealer_form_initialized) {
-        let send_dealer_request_form = document.querySelector("#request-dealer-form");
-        if (send_dealer_request_form) {
-            send_dealer_request_form.addEventListener("submit", function (e) {
-                e.preventDefault();
-                const formData = new FormData(this);
-                const first_name = formData.get("first_name");
-                const last_name = formData.get("last_name");
-                const dealer_birthdate = formData.get("dealer_birthdate");
-                const message = formData.get("message");
-                if (first_name == "" || last_name == "" || dealer_birthdate == "") {
-                    iziToast.error({
-                        message: "Please fill all the fields",
-                        position: "topRight",
-                    });
-                    return false;
-                }
-                $(".send_dealer_request").html("Sending...");
-                $(".send_dealer_request").attr("disabled", true);
-                $.ajax({
-                    type: "POST",
-                    url: appUrl + "my-account/user-status/send_dealer_request",
-                    data: {
-                        first_name: first_name,
-                        last_name: last_name,
-                        dealer_birthdate: dealer_birthdate,
-                        message: message,
-                    },
-                    success: function (response) {
-                        if (response.error == true) {
-                            $.each(response.message, function (key, value) {
-                                iziToast.error({
-                                    message: value[0],
-                                    position: "topRight",
-                                });
-                                return false;
-                            });
-                            return false;
-                        }
-                        iziToast.success({
-                            message: response.message,
-                            position: "topRight",
-                        });
-                        Livewire.dispatch("refreshComponent");
-                        $("#dealerModal").modal("hide");
-                    },
-                });
-            });
-        }
-        window.dealer_form_initialized = true;
-    }
 });
 
 $(function () {
@@ -3156,59 +3099,106 @@ function arrays_equal(e, t) {
     return !0;
 }
 
-if (!window.send_manager_request_form) {
-    const send_manager_request_form = document.querySelector("#manager-form");
-    if (send_manager_request_form) {
-        send_manager_request_form.addEventListener("submit", function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const first_name = formData.get("first_name");
-            const last_name = formData.get("last_name");
-            const birthdate = formData.get("birthdate");
-            if (first_name == "" || last_name == "" || birthdate == "") {
-                iziToast.error({
-                    message: "Please fill all the fields",
-                    position: "topRight",
-                });
-                return false;
-            }
-            $(".send_manager_request").html("Sending...");
-            $.ajax({
-                type: "POST",
-                url: appUrl + "my-account/user-status/send_manager_request",
-                data: {
-                    first_name: first_name,
-                    last_name: last_name,
-                    birthdate: birthdate,
-                },
-                success: function (response) {
-                    if (response.error == true) {
-                        $.each(response.message, function (key, value) {
-                            iziToast.error({
-                                message: value[0],
-                                position: "topRight",
-                            });
-                            return false;
+const send_dealer_request_form = document.querySelector("#dealer-form");
+if (send_dealer_request_form) {
+    send_dealer_request_form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const first_name = formData.get("first_name");
+        const last_name = formData.get("last_name");
+        const dealer_birthdate = formData.get("dealer_birthdate");
+        const message = formData.get("message");
+        if (first_name == "" || last_name == "" || dealer_birthdate == "") {
+            iziToast.error({
+                message: "Please fill all the fields",
+                position: "topRight",
+            });
+            return false;
+        }
+        $(".send_dealer_request").html("Sending...");
+        $(".send_dealer_request").attr("disabled", true);
+        $.ajax({
+            type: "POST",
+            url: appUrl + "my-account/user-status/send_dealer_request",
+            data: {
+                first_name: first_name,
+                last_name: last_name,
+                dealer_birthdate: dealer_birthdate,
+                message: message,
+            },
+            success: function (response) {
+                if (response.error == true) {
+                    $.each(response.message, function (key, value) {
+                        iziToast.error({
+                            message: value[0],
+                            position: "topRight",
                         });
                         return false;
-                    }
-                    iziToast.success({
-                        message:
-                            response.message +
-                            " " +
-                            first_name +
-                            " " +
-                            last_name +
-                            " " +
-                            birthdate,
-                        position: "topRight",
                     });
-                    Livewire.dispatch("refreshComponent");
-                    $("#managerModal").modal("hide");
-                },
-            });
+                    return false;
+                }
+                iziToast.success({
+                    message: response.message,
+                    position: "topRight",
+                });
+                Livewire.dispatch("refreshComponent");
+                $("#dealerModal").modal("hide");
+            },
         });
-    }
+    });
+}
+
+const send_manager_request_form = document.querySelector("#manager-form");
+if (send_manager_request_form) {
+    send_manager_request_form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const first_name = formData.get("first_name");
+        const last_name = formData.get("last_name");
+        const birthdate = formData.get("birthdate");
+        if (first_name == "" || last_name == "" || birthdate == "") {
+            iziToast.error({
+                message: "Please fill all the fields",
+                position: "topRight",
+            });
+            return false;
+        }
+        $(".send_manager_request").html("Sending...");
+        $.ajax({
+            type: "POST",
+            url: appUrl + "my-account/user-status/send_manager_request",
+            data: {
+                first_name: first_name,
+                last_name: last_name,
+                birthdate: birthdate,
+            },
+            success: function (response) {
+                if (response.error == true) {
+                    $.each(response.message, function (key, value) {
+                        iziToast.error({
+                            message: value[0],
+                            position: "topRight",
+                        });
+                        return false;
+                    });
+                    return false;
+                }
+                iziToast.success({
+                    message:
+                        response.message +
+                        " " +
+                        first_name +
+                        " " +
+                        last_name +
+                        " " +
+                        birthdate,
+                    position: "topRight",
+                });
+                Livewire.dispatch("refreshComponent");
+                $("#managerModal").modal("hide");
+            },
+        });
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -3248,7 +3238,4 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     });
-
-
 });
-// })();

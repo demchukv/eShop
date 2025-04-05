@@ -6289,6 +6289,8 @@ function updateOrder($set, $where, $isJson = false, $table = 'order_items', $fro
         $currentStatus = $set[$field[0]];
 
         $res = fetchDetails($table, $where, '*');
+        \Log::info("updateOrder: set=" . json_encode($set) . ", where=" . json_encode($where) . ", res=" . json_encode($res));
+
         if ($is_digital_product == 1) {
             $priorityStatus = [
                 'received' => 0,
@@ -6461,6 +6463,7 @@ function updateOrder($set, $where, $isJson = false, $table = 'order_items', $fro
             return $response;
         }
     } else {
+        \Log::info("updateOrder: set=" . json_encode($set) . ", where=" . json_encode($where) . ", teble=" . $table);
         DB::beginTransaction();
         try {
             DB::table($table)

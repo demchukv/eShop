@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Stripe\Refund;
 use Stripe\Stripe as StripeConfig;
 use App\Http\Controllers\CommissionController;
+use Carbon\Carbon;
 
 class Details extends Component
 {
@@ -67,52 +68,7 @@ class Details extends Component
         ])->title("Orders Detail |");
     }
 
-    /*************  ✨ Codeium Command ⭐  *************/
-    /**
-     * @OA\Post(
-     *     path="/orders/details/update_order_item_status",
-     *     summary="Update order item status",
-     *     description="Update order item status, cancel order item and make refund",
-     *     tags={"Order"},
-     *     @OA\RequestBody(
-     *         description="Order item status details",
-     *         required=true,
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="order_status", type="string", example="cancelled", description="Order status (cancelled, returned)"),
-     *             @OA\Property(property="order_item_id", type="array", example={1,2,3}, description="Array of order item ids"),
-     *             @OA\Property(property="refund_method", type="string", example="wallet", description="Refund method (wallet, card)"),
-     *         ),
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Order item status updated successfully",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="error", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Order Items Cancelled Successfully"),
-     *         ),
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="error", type="boolean", example=true),
-     *             @OA\Property(property="message", type="array", example={{"order_status is required"}}, description="Array of validation errors"),
-     *         ),
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Unable to cancel order items",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="error", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="No successful transaction found for this order"),
-     *         ),
-     *     ),
-     * )
-/******  924e5fa1-167a-436e-a8b1-82218899055b  *******/
+
     public function update_order_item_status(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -133,8 +89,17 @@ class Details extends Component
         $order_item_ids = $request->input('order_item_id');
         $refund_method = $request->input('refund_method', 'wallet');
 
+        \Log::info("Запит на оновлення статусу: order_status={$request['order_status']}, order_item_ids=" . json_encode($order_item_ids) . ", refund_method={$refund_method}");
+
         if ($request['order_status'] == 'cancelled') {
             $order_item = OrderItems::find($order_item_ids[0]);
+            if (!$order_item) {
+                return response()->json([
+                    'error' => true,
+                    'message' => 'Order item not found',
+                ]);
+            }
+
             $transaction = Transaction::where('order_id', $order_item->order_id)
                 ->where('status', 'success')
                 ->first();
@@ -163,7 +128,6 @@ class Details extends Component
                 ]);
             }
 
-            // Отримуємо всі товари замовлення для перевірки повного/часткового повернення
             $order_items = OrderItems::where('order_id', $order_item->order_id)->get();
             $cancelled_items = OrderItems::whereIn('id', $order_item_ids)->get();
             $total_order_amount = $order_items->sum('sub_total');
@@ -174,22 +138,46 @@ class Details extends Component
                 $order_item = OrderItems::find($order_item_id);
 
                 if (!$order_item) {
+                    \Log::warning("Product with ID {$order_item_id} not found, skip it.");
                     continue;
                 }
 
-                update_order_item($order_item->id, $request['order_status'], 1);
+                // Перевіряємо поточний статус
+                if ($order_item->active_status === 'cancelled') {
+                    \Log::warning("Product with ID {$order_item_id} alredy cancelled, skip.");
+                    continue;
+                }
+
+                // Викликаємо update_order_item
+                \Log::info("Parameters for update_order_item: order_item_id={$order_item->id}, status=cancelled, 1");
+                $update_result = update_order_item($order_item->id, 'cancelled', 1);
+
+                if ($update_result['error']) {
+                    \Log::warning("Error update for order_item_id {$order_item_id}: " . $update_result['message']);
+                    continue;
+                }
+
+                \Log::info("Successfully updated order_item_id: {$order_item_id} in update_order_item");
+
                 updateStock($order_item->product_variant_id, $order_item->quantity, 'plus');
 
                 if ($refund_method === 'wallet') {
                     process_refund($order_item->id, $request['order_status']);
-                } elseif ($refund_method === 'card') {
-                    $this->processStripeRefund($request, $order_item);
+                } elseif ($refund_method === 'card' && $transaction->type === 'stripe') {
+                    $this->processStripeRefund($request, $order_item, $transaction, $total_order_amount, $cancelled_amount);
                 }
             }
+            return response()->json([
+                'error' => true,
+                'message' => 'Stop processing order_items',
+            ]);
 
-            // Виклик методу з CommissionController для оновлення комісій
             $commissionController = new CommissionController();
             $commissionController->updateCommissions($order_item->order_id, $is_full_refund, $cancelled_items, $order_items);
+
+            // Логуємо стан усіх товарів після оновлення
+            $updated_items = OrderItems::where('order_id', $order_item->order_id)->get();
+            \Log::info("Стан товарів після скасування: " . json_encode($updated_items->toArray()));
 
             return response()->json([
                 'error' => false,
@@ -199,6 +187,12 @@ class Details extends Component
 
         if ($request['order_status'] == 'returned') {
             $order_item = OrderItems::find($order_item_ids[0]);
+            if (!$order_item) {
+                return response()->json([
+                    'error' => true,
+                    'message' => 'Order item not found',
+                ]);
+            }
 
             $res = validateOrderStatus(
                 $order_item->id,
@@ -215,43 +209,37 @@ class Details extends Component
                 return response()->json($response);
             }
 
-            $request['order_status'] = 'return_request_pending';
-            if (updateOrder(['status' => $request['order_status']], ['id' => $order_item->id], true)) {
-                updateOrder(['active_status' => $request['order_status']], ['id' => $order_item->id], false);
+            $update_result = update_order_item($order_item->id, 'returned', 0);
+
+            if ($update_result['error']) {
                 return response()->json([
-                    'error' => false,
-                    'message' => 'Order Status Updated Successfully',
+                    'error' => true,
+                    'message' => $update_result['message'],
                 ]);
             }
+
+            return response()->json([
+                'error' => false,
+                'message' => 'Order Status Updated Successfully',
+            ]);
         }
     }
 
-    private function processStripeRefund(Request $request, $order_item)
+    private function processStripeRefund(Request $request, $order_item, $transaction, $total_order_amount, $cancelled_amount)
     {
-        $transaction = Transaction::where('order_id', $order_item->order_id)
-            ->where('status', 'success')
-            ->where('transaction_type', 'transaction')
-            ->where('type', 'stripe')
-            ->first();
+        $stripe = new \App\Libraries\Stripe();
+        StripeConfig::setApiKey($stripe->getSecretKey());
 
-        if (!$transaction || !$transaction->txn_id) {
-            throw new \Exception('No valid Stripe transaction found for this order');
-        }
-
-        $order_items = OrderItems::where('order_id', $order_item->order_id)->get();
         $cancelled_items = OrderItems::whereIn('id', $request->input('order_item_id'))->get();
 
-        $total_order_amount = $order_items->sum('sub_total'); // Повна сума замовлення
-        $cancelled_amount = $cancelled_items->sum('sub_total'); // Сума скасованих товарів
-
-        // Ініціалізація Stripe
-        $stripe = new \App\Libraries\Stripe();
-        StripeConfig::setApiKey($stripe->getSecretKey()); // Використовуємо getSecretKey
-
+        // Базова сума повернення
         $refund_amount = $cancelled_amount;
-        if ($total_order_amount == $cancelled_amount) {
-            // Повне повернення: додаємо комісію
-            $refund_amount += $transaction->fee;
+
+        // Розрахунок пропорційної комісії для часткового повернення
+        if ($transaction->fee > 0 && $total_order_amount > 0) {
+            $refund_ratio = $cancelled_amount / $total_order_amount; // Співвідношення суми повернення до загальної суми
+            $proportional_fee = $transaction->fee * $refund_ratio;   // Пропорційна комісія
+            $refund_amount += $proportional_fee;                     // Додаємо пропорційну комісію до суми повернення
         }
 
         // Конвертуємо суму в центи (Stripe працює з найменшими одиницями валюти)
@@ -260,8 +248,8 @@ class Details extends Component
         try {
             // Створюємо повернення в Stripe
             $refund = Refund::create([
-                'payment_intent' => $transaction->txn_id, // ID оригінального платежу
-                'amount' => $refund_amount_cents,         // Сума повернення в центах
+                'payment_intent' => $transaction->txn_id,
+                'amount' => $refund_amount_cents,
                 'metadata' => [
                     'order_id' => $order_item->order_id,
                     'order_item_ids' => implode(',', $cancelled_items->pluck('id')->toArray()),
@@ -271,8 +259,8 @@ class Details extends Component
             // Оновлюємо транзакцію з інформацією про повернення
             $transaction->update([
                 'refund_amount' => $refund_amount,
-                'refund_status' => 'pending', // Статус спочатку pending
-                'refund_id' => $refund->id,   // Зберігаємо ID повернення від Stripe
+                'refund_status' => 'pending',
+                'refund_id' => $refund->id,
                 'is_refund' => true,
             ]);
         } catch (\Exception $e) {

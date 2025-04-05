@@ -455,75 +455,75 @@
             </div>
         </div>
     </div>
+</div>
+@push('scripts')
+    <script>
+        $(document).on("click", "#track_order", function(e) {
+            e.preventDefault();
 
-    @push('scripts')
-        <script>
-            $(document).on("click", "#track_order", function(e) {
-                e.preventDefault();
+            const orderTrackingDetails = document.getElementById("orderTrackingDetails");
+            const orderId = $(this).data("order-id");
+            const courierAgencyName = $(this).data("courier-agency-name");
+            const trackingData = $(this).data("aftership-data");
+            let aftershipData;
 
-                const orderTrackingDetails = document.getElementById("orderTrackingDetails");
-                const orderId = $(this).data("order-id");
-                const courierAgencyName = $(this).data("courier-agency-name");
-                const trackingData = $(this).data("aftership-data");
-                let aftershipData;
+            orderTrackingDetails.innerHTML = '';
+            const $modal = $('#trackOrderModal');
+            $modal.modal('show');
 
-                orderTrackingDetails.innerHTML = '';
-                const $modal = $('#trackOrderModal');
-                $modal.modal('show');
-
-                try {
-                    aftershipData = typeof trackingData === 'string' ? JSON.parse(trackingData) : trackingData;
-                } catch (error) {
-                    orderTrackingDetails.innerHTML = `
+            try {
+                aftershipData = typeof trackingData === 'string' ? JSON.parse(trackingData) : trackingData;
+            } catch (error) {
+                orderTrackingDetails.innerHTML = `
             <div class="alert alert-danger" role="alert">
                 Parsing error: ${error.message}<br>
                 Raw data: ${trackingData}
             </div>`;
-                    console.error("Invalid JSON:", trackingData);
-                    return;
-                }
+                console.error("Invalid JSON:", trackingData);
+                return;
+            }
 
-                if (!aftershipData || Object.keys(aftershipData).length === 0) {
-                    orderTrackingDetails.innerHTML = `
+            if (!aftershipData || Object.keys(aftershipData).length === 0) {
+                orderTrackingDetails.innerHTML = `
             <div class="alert alert-warning" role="alert">
                 No tracking information available.
             </div>`;
-                    return;
+                return;
+            }
+
+            const formatLocalDate = (dateString) => {
+                if (!dateString) return 'N/A';
+                const date = new Date(dateString);
+                return isNaN(date) ? 'Invalid date' : date.toLocaleString('en-US');
+            };
+
+            const renderCheckpoints = (checkpoints) => {
+                if (!checkpoints || !Array.isArray(checkpoints) || checkpoints.length === 0) {
+                    return '<div class="alert alert-info mt-3" role="alert">No checkpoints available.</div>';
                 }
 
-                const formatLocalDate = (dateString) => {
-                    if (!dateString) return 'N/A';
-                    const date = new Date(dateString);
-                    return isNaN(date) ? 'Invalid date' : date.toLocaleString('en-US');
+                const checkpointGroups = {
+                    Delivered: [],
+                    InTransit: [],
+                    InfoReceived: [],
+                    Other: []
                 };
 
-                const renderCheckpoints = (checkpoints) => {
-                    if (!checkpoints || !Array.isArray(checkpoints) || checkpoints.length === 0) {
-                        return '<div class="alert alert-info mt-3" role="alert">No checkpoints available.</div>';
-                    }
+                checkpoints.forEach(cp => {
+                    if (checkpointGroups[cp.tag]) checkpointGroups[cp.tag].push(cp);
+                    else checkpointGroups.Other.push(cp);
+                });
 
-                    const checkpointGroups = {
-                        Delivered: [],
-                        InTransit: [],
-                        InfoReceived: [],
-                        Other: []
-                    };
+                let html = '';
+                const checkpointTypes = ['Delivered', 'InTransit', 'InfoReceived', 'Other'];
 
-                    checkpoints.forEach(cp => {
-                        if (checkpointGroups[cp.tag]) checkpointGroups[cp.tag].push(cp);
-                        else checkpointGroups.Other.push(cp);
-                    });
+                checkpointTypes.forEach(type => {
+                    const group = checkpointGroups[type];
+                    if (group.length === 0) return;
 
-                    let html = '';
-                    const checkpointTypes = ['Delivered', 'InTransit', 'InfoReceived', 'Other'];
-
-                    checkpointTypes.forEach(type => {
-                        const group = checkpointGroups[type];
-                        if (group.length === 0) return;
-
-                        if (type === 'InTransit' && group.length > 1) {
-                            const latest = group[group.length - 1];
-                            html += `
+                    if (type === 'InTransit' && group.length > 1) {
+                        const latest = group[group.length - 1];
+                        html += `
                     <div class="mb-3">
                         <h6 class="text-warning mb-1">${formatLocalDate(latest.checkpoint_time)} - ${latest.tag}</h6>
                         <div class="fs-6"><strong>Message:</strong> ${latest.message || 'N/A'}</div>
@@ -532,13 +532,13 @@
                     </div>
                     <div class="collapse mb-0" id="allInTransit">
                         ${group.slice(0, -1).reverse().map(cp => `
-                                                                                                                <div class="mb-3">
-                                                                                                                    <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
-                                                                                                                    <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
-                                                                                                                    <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
-                                                                                                                    <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
-                                                                                                                </div>
-                                                                                                            `).join('')}
+                                                                                                                                    <div class="mb-3">
+                                                                                                                                        <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
+                                                                                                                                        <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
+                                                                                                                                        <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
+                                                                                                                                        <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
+                                                                                                                                    </div>
+                                                                                                                                `).join('')}
                     </div>
                     <p class="mb-3 mt-0">
                         <a href="#" class="text-primary fs-6" data-bs-target="#allInTransit"
@@ -546,8 +546,8 @@
                             Show all updates
                         </a>
                     </p>`;
-                        } else {
-                            html += group.reverse().map(cp => `
+                    } else {
+                        html += group.reverse().map(cp => `
                     <div class="mb-3">
                         <h6 class="text-${type === 'Delivered' ? 'success' : type === 'InfoReceived' ? 'info' : 'warning'} mb-1">
                             ${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}
@@ -557,13 +557,13 @@
                         <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
                     </div>
                 `).join('');
-                        }
-                    });
+                    }
+                });
 
-                    return html;
-                };
+                return html;
+            };
 
-                const html = `
+            const html = `
         <div class="card">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">Tracking Details (Order ID: ${orderId})</h5>
@@ -625,36 +625,36 @@
         </div>
     `;
 
-                orderTrackingDetails.innerHTML = html;
+            orderTrackingDetails.innerHTML = html;
 
-                // Оновлений обробник для #toggleInTransit
-                const toggleLink = document.getElementById('toggleInTransit');
-                if (toggleLink) {
-                    const collapseElement = document.getElementById('allInTransit');
+            // Оновлений обробник для #toggleInTransit
+            const toggleLink = document.getElementById('toggleInTransit');
+            if (toggleLink) {
+                const collapseElement = document.getElementById('allInTransit');
 
-                    // Переконуємося, що блок спочатку згорнутий
-                    collapseElement.classList.remove('show');
+                // Переконуємося, що блок спочатку згорнутий
+                collapseElement.classList.remove('show');
 
-                    // Ініціалізація Bootstrap Collapse
-                    const collapseInstance = new bootstrap.Collapse(collapseElement, {
-                        toggle: false // Не перемикаємо автоматично при ініціалізації
-                    });
+                // Ініціалізація Bootstrap Collapse
+                const collapseInstance = new bootstrap.Collapse(collapseElement, {
+                    toggle: false // Не перемикаємо автоматично при ініціалізації
+                });
 
-                    // Видаляємо попередні обробники, якщо вони є
-                    toggleLink.removeEventListener('click', toggleLink._clickHandler);
-                    toggleLink._clickHandler = (e) => {
-                        e.preventDefault();
-                        if (collapseElement.classList.contains('show')) {
-                            collapseInstance.hide();
-                            toggleLink.textContent = 'Show all updates';
-                        } else {
-                            collapseInstance.show();
-                            toggleLink.textContent = 'Hide all updates';
-                        }
-                    };
-                    toggleLink.addEventListener('click', toggleLink._clickHandler);
+                // Видаляємо попередні обробники, якщо вони є
+                toggleLink.removeEventListener('click', toggleLink._clickHandler);
+                toggleLink._clickHandler = (e) => {
+                    e.preventDefault();
+                    if (collapseElement.classList.contains('show')) {
+                        collapseInstance.hide();
+                        toggleLink.textContent = 'Show all updates';
+                    } else {
+                        collapseInstance.show();
+                        toggleLink.textContent = 'Hide all updates';
+                    }
+                };
+                toggleLink.addEventListener('click', toggleLink._clickHandler);
 
-                }
-            });
-        </script>
-    @endpush
+            }
+        });
+    </script>
+@endpush

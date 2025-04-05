@@ -761,9 +761,9 @@ class Webhook extends Controller
                     ]);
 
                     // Оновлюємо статус замовлення, якщо є order_id
-                    if (!empty($transaction->order_id)) {
-                        updateDetails(['active_status' => 'cancelled'], ['order_id' => $transaction->order_id], 'order_items');
-                    }
+                    // if (!empty($transaction->order_id)) {
+                    //     updateDetails(['active_status' => 'cancelled'], ['order_id' => $transaction->order_id], 'order_items');
+                    // }
                     Log::alert("Charge refunded for transaction {$transaction->id}: amount = {$refundAmount}");
                 } else {
                     Log::alert("Charge refunded but no transaction found with payment_intent: {$paymentIntentId}");
