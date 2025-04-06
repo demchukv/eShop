@@ -579,7 +579,9 @@
 @if ($payment_method->paystack_method == 1)
     <script src="https://js.paystack.co/v1/inline.js"></script>
 @endif
-
+@if ($payment_method->stripe_method == 1)
+    <script src="https://js.stripe.com/v3/" data-navigate-once></script>
+@endif
 @push('scripts')
     <script>
         window.baseTotal = {{ $final_total }};
@@ -587,5 +589,5 @@
         window.walletUsed = {{ $is_wallet_use ? $wallet_used_balance : 0 }};
         window.isWalletUsed = {{ $is_wallet_use ? 'true' : 'false' }};
     </script>
-    {{-- <script src="{{ asset('frontend/elegant/js/checkout-alpine.js') }}"></script> --}}
+    <script src="{{ asset('frontend/elegant/js/checkout-alpine.js') }}" defer data-navigate-once></script>
 @endpush

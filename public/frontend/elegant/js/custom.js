@@ -2624,7 +2624,9 @@ document.addEventListener("livewire:navigated", () => {
                                     });
                                     Livewire.dispatch("refreshComponent");
                                     $('#refundOptionModal').modal('hide');
-
+                                    const reloadTimer = setTimeout(() => {
+                                        location.reload();
+                                    }, 1500);
                                 } else {
                                     iziToast.error({
                                         message: response.message,

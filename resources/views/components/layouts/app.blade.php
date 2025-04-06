@@ -19,8 +19,8 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script> --}}
 
+    <!-- Livewire scripts -->
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/plugins.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/vendor/photoswipe.min.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/bootstrap-table.min.css') }}">
@@ -76,7 +76,20 @@
     @endif
 
     <x-include-modal.modals />
-    <link rel="stylesheet" href="{{ asset('frontend/elegant/css/lightbox.css') }}">
+
+    <script>
+        function triggerLivewireNavigated() {
+            const navigatedEvent = new Event('livewire:navigated');
+            document.dispatchEvent(navigatedEvent);
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            triggerLivewireNavigated();
+            console.log('Livewire navigated event triggered with DOM loaded');
+        });
+        document.addEventListener('livewire:navigated', () => {
+            // Livewire сам викличе цю подію при wire:navigate
+        });
+    </script>
 
     @livewireScripts
 
@@ -87,21 +100,30 @@
             window.isScriptsInitialized = true;
 
             const loadScript = (src, isModule = false) => {
-                return new Promise((resolve) => {
+                return new Promise((resolve, reject) => {
                     const script = document.createElement('script');
                     script.src = src;
-                    script.defer = true;
                     if (isModule) script.type = 'module';
-                    script.onload = resolve;
+                    // Без defer, щоб скрипт виконувався одразу після завантаження
+                    script.onload = () => {
+                        resolve();
+                    };
+                    script.onerror = () => {
+                        console.error(`Error loading script: ${src}`);
+                        reject();
+                    };
                     document.body.appendChild(script);
                 });
             };
 
             (async () => {
+                if (typeof jQuery === 'undefined') {
+                    console.error('jQuery is not loaded');
+                    return;
+                }
                 await loadScript("https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js");
                 await loadScript("{{ asset('frontend/elegant/js/plugins.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/firebase-app.js') }}");
-                await loadScript("{{ asset('frontend/elegant/js/firebase-auth.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/firebase-firestore.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/bootstrap-table.min.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/bootstrap-table-export.min.js') }}");
@@ -122,25 +144,15 @@
                 await loadScript("{{ asset('frontend/elegant/js/swiper-bundle.min.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/shareon.iife.js') }}");
                 await loadScript("https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js", true);
+                triggerLivewireNavigated();
             })();
         }
-
-        document.addEventListener('livewire:navigated', () => {
-            console.log('Livewire navigated - scripts already loaded');
-        });
     </script>
 
     @filepondScripts
 
-    @if (request()->is('cart/checkout') || request()->is('my-account/wallet'))
-        <script src="https://js.stripe.com/v3/"></script>
-    @endif
-
     @stack('scripts')
 
-    @if (request()->is('cart/checkout'))
-        <script src="{{ asset('frontend/elegant/js/checkout-alpine.js') }}" defer></script>
-    @endif
 </body>
 
 </html>

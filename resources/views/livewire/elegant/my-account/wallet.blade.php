@@ -343,7 +343,7 @@
     <script src="https://js.paystack.co/v1/inline.js"></script>
 @endif
 @if ($payment_method->stripe_method == 1)
-    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://js.stripe.com/v3/" data-navigate-once></script>
 @endif
 <script>
     function user_wallet_credit_params(p) {
