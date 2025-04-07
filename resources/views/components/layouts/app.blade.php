@@ -84,7 +84,7 @@
         }
         document.addEventListener('DOMContentLoaded', () => {
             triggerLivewireNavigated();
-            console.log('Livewire navigated event triggered with DOM loaded');
+            // console.log('Livewire navigated event triggered with DOM loaded');
         });
         document.addEventListener('livewire:navigated', () => {
             // Livewire сам викличе цю подію при wire:navigate

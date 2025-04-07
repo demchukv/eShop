@@ -1120,6 +1120,11 @@ function bootstrap_table_initialize() {
             return '<i class="fa fa-spinner fa-spin fa-fw"></i>';
         },
     });
+    $("#pending_commissions").bootstrapTable({
+        formatLoadingMessage: function () {
+            return '<i class="fa fa-spinner fa-spin fa-fw"></i>';
+        },
+    });
 }
 function qnt_incre() {
     $(document).on("click", ".qtyBtn", function () {

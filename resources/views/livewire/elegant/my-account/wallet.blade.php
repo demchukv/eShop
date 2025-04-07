@@ -156,6 +156,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div wire:ignore.self class="modal fade" id="withdrawal_modal" tabindex="-1"
                     aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
@@ -291,6 +292,7 @@
                                 </table>
                             </div>
                         </div>
+
                         <!-- Нова вкладка Pending Commissions -->
                         <h3 class="tabs-ac-style d-md-none" rel="Pending-tab">
                             {{ labels('front_messages.pending_commissions', 'Pending Commissions') }}</h3>
