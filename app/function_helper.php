@@ -5142,6 +5142,7 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
         ->leftJoin('order_trackings as ot', 'ot.order_item_id', '=', 'oi.id')
         ->leftJoin('addresses as a', 'a.id', '=', 'o.address_id')
         ->leftJoin('combo_products as cp', 'cp.id', '=', 'oi.product_variant_id')
+
         ->where(function ($query) {
             $query->where('oi.order_type', 'regular_order')
                 ->orWhere('oi.order_type', 'combo_order');
@@ -5488,6 +5489,7 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
                 'ss.store_description',
                 'ss.rating AS seller_rating',
                 'ss.logo AS seller_profile',
+                'ss.slug AS store_slug',
                 'ot.courier_agency',
                 'ot.tracking_id',
                 'ot.awb_code',
@@ -5566,6 +5568,7 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
                 'ss.store_description',
                 'ss.rating AS seller_rating',
                 'ss.logo AS seller_profile',
+                'ss.slug AS store_slug',
                 'ot.courier_agency',
                 'ot.tracking_id',
                 'ot.awb_code',

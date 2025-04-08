@@ -63,6 +63,12 @@ class AfterShipApiController extends Controller
             file_put_contents($cacheFile, json_encode($response));
             return response()->json($response);
         } catch (AfterShipError $e) {
+            if (file_exists($cacheFile)) {
+                // Читаємо дані з кешу
+                $cachedData = json_decode(file_get_contents($cacheFile), true);
+                \Log::error('Return couriers list from cache ');
+                return response()->json($cachedData);
+            }
             return response()->json(['error' => 'Error loading data from AfterShip', 'aftership' => $e->getMessage()], 400);
         }
     }

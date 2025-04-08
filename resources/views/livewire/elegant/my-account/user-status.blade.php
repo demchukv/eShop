@@ -231,39 +231,37 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
                                                         {{-- </form> --}}
                                                     </form>
                                                     <script>
-                                                        document.addEventListener('DOMContentLoaded', function() {
-                                                            if (typeof $.fn.datepicker !== 'undefined') {
-                                                                $('.datepicker').datepicker({
-                                                                    autoclose: true,
-                                                                    format: 'yyyy-mm-dd',
-                                                                    todayHighlight: true
-                                                                }).on('change', function(e) {
-                                                                    @this.set('manager_birthdate', e.target.value);
-                                                                });
+                                                        if (typeof $.fn.datepicker !== 'undefined') {
+                                                            $('.datepicker').datepicker({
+                                                                autoclose: true,
+                                                                format: 'yyyy-mm-dd',
+                                                                todayHighlight: true
+                                                            }).on('change', function(e) {
+                                                                @this.set('manager_birthdate', e.target.value);
+                                                            });
+                                                        }
+
+                                                        // Додаємо обробник для відкриття модального вікна з фото
+                                                        $('.preview-photo').click(function() {
+                                                            var photoUrl = $(this).data('photo-url');
+                                                            var photoTitle = $(this).data('photo-title');
+                                                            $('#modalPhoto').attr('src', photoUrl);
+                                                            $('#photoPreviewModalLabel').text(photoTitle);
+                                                            var modal = new bootstrap.Modal(document.getElementById('photoPreviewModal'));
+                                                            modal.show();
+                                                        });
+
+                                                        // Додаємо слухач події для закриття модального вікна
+                                                        Livewire.on('closeModal', () => {
+                                                            const modal = bootstrap.Modal.getInstance(document.getElementById('managerModal'));
+                                                            if (modal) {
+                                                                modal.hide();
                                                             }
+                                                        });
 
-                                                            // Додаємо обробник для відкриття модального вікна з фото
-                                                            $('.preview-photo').click(function() {
-                                                                var photoUrl = $(this).data('photo-url');
-                                                                var photoTitle = $(this).data('photo-title');
-                                                                $('#modalPhoto').attr('src', photoUrl);
-                                                                $('#photoPreviewModalLabel').text(photoTitle);
-                                                                var modal = new bootstrap.Modal(document.getElementById('photoPreviewModal'));
-                                                                modal.show();
-                                                            });
-
-                                                            // Додаємо слухач події для закриття модального вікна
-                                                            Livewire.on('closeModal', () => {
-                                                                const modal = bootstrap.Modal.getInstance(document.getElementById('managerModal'));
-                                                                if (modal) {
-                                                                    modal.hide();
-                                                                }
-                                                            });
-
-                                                            // Додаємо слухач події для оновлення сторінки
-                                                            Livewire.on('refresh-page', () => {
-                                                                window.location.reload();
-                                                            });
+                                                        // Додаємо слухач події для оновлення сторінки
+                                                        Livewire.on('refresh-page', () => {
+                                                            window.location.reload();
                                                         });
                                                     </script>
                                                 </div>
@@ -388,8 +386,9 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
             </div>
         </div>
     </div>
+</div>
 
-
+@push('styles')
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.standalone.min.css">
 
@@ -408,10 +407,30 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
             opacity: 0.5 !important;
         }
     </style>
-
+@endpush
+@push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Видаляємо функції для відкриття модального вікна з фото
+        document.addEventListener('livewire:navigated', () => {
+            // Чекаємо, поки Livewire буде завантажено
+            if (typeof Livewire !== 'undefined') {
+                // Закриваємо модальне вікно менеджера
+                Livewire.on('closeModal', function() {
+                    const managerModal = document.getElementById('managerModal');
+                    if (managerModal) {
+                        const bsModal = bootstrap.Modal.getInstance(managerModal);
+                        if (bsModal) {
+                            bsModal.hide();
+                        }
+                    }
+                });
+
+                // Оновлюємо сторінку
+                Livewire.on('refresh-page', function() {
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 500);
+                });
+            }
 
             // Додаємо обробник для видалення modal-backdrop
             const managerModal = document.getElementById('managerModal');
@@ -441,32 +460,16 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
                 });
             }
 
-            // Закриваємо модальне вікно менеджера
-            Livewire.on('closeModal', function() {
-                const managerModal = document.getElementById('managerModal');
-                if (managerModal) {
-                    const bsModal = bootstrap.Modal.getInstance(managerModal);
-                    if (bsModal) {
-                        bsModal.hide();
-                    }
-                }
-            });
-
-            // Оновлюємо сторінку
-            Livewire.on('refresh-page', function() {
-                setTimeout(function() {
-                    window.location.reload();
-                }, 500);
-            });
-
             // Ініціалізація datepicker
-            if (typeof $.fn.datepicker !== 'undefined') {
+            if (typeof jQuery !== 'undefined' && typeof $.fn.datepicker !== 'undefined') {
                 $('.datepicker').datepicker({
                     autoclose: true,
                     format: 'yyyy-mm-dd',
                     todayHighlight: true
                 }).on('change', function(e) {
-                    @this.set('manager_birthdate', e.target.value);
+                    if (typeof Livewire !== 'undefined') {
+                        @this.set('manager_birthdate', e.target.value);
+                    }
                 });
             }
 
@@ -506,9 +509,11 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
             attachPhotoHandlers();
 
             // Оновлюємо обробники після оновлення фото через Livewire
-            Livewire.on('photos-updated', function() {
-                setTimeout(attachPhotoHandlers, 100);
-            });
+            if (typeof Livewire !== 'undefined') {
+                Livewire.on('photos-updated', function() {
+                    setTimeout(attachPhotoHandlers, 100);
+                });
+            }
         });
     </script>
-</div>
+@endpush

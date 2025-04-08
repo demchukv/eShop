@@ -64,7 +64,8 @@ class Details extends Component
             'user_orders' => $user_orders,
             'order_transaction' => $user_orders_transaction_data,
             'currency_symbol' => $currency_symbol,
-            'transaction' => $main_transaction
+            'transaction' => $main_transaction,
+            'user_info' => $user
         ])->title("Orders Detail |");
     }
 
