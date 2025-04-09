@@ -23,4 +23,17 @@ class OrderItems extends Model
     {
         return $this->belongsTo(Order::class);
     }
+
+    // Додаємо зв’язок із Product через product_variant_id
+    public function product()
+    {
+        return $this->hasOneThrough(
+            Product::class,
+            Product_variants::class,
+            'id',              // Foreign key у Product_variants
+            'id',              // Foreign key у Product
+            'product_variant_id', // Local key у OrderItems
+            'product_id'       // Local key у Product_variants
+        );
+    }
 }

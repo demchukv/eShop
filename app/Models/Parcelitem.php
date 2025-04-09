@@ -16,4 +16,9 @@ class Parcelitem extends Model
         'unit_price',
         'quantity',
     ];
+
+    public function orderItem()
+    {
+        return $this->belongsTo(OrderItems::class, 'order_item_id', 'id');
+    }
 }

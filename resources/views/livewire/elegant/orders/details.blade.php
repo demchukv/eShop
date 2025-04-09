@@ -169,7 +169,7 @@
                                                     }
                                                 }
                                             @endphp
-                                            <div class="d-flex">
+                                            <div class="d-flex gap-2">
                                                 @if (
                                                     $user_order_item['is_already_cancelled'] == 0 &&
                                                         $user_order_item['is_cancelable'] == 1 &&
@@ -179,14 +179,27 @@
                                                         data-item-id="{{ $user_order_item['id'] }}">{{ labels('front_messages.cancle', 'Cancel') }}</button>
                                                 @endif
                                                 @if (
+                                                    ($user_order_item['active_status'] == 'shipped' || $user_order_item['active_status'] == 'delivered') &&
+                                                        $user_order_item['is_completed'] == 0)
+                                                    <button class="btn btn-primary btn-sm confirm_received_btn"
+                                                        data-item-id="{{ $user_order_item['id'] }}">{{ labels('front_messages.confirm_received', 'Confirm received') }}</button>
+                                                    @if ($user_order_item['active_status'] == 'delivered')
+                                                        <div class="fs-8">
+                                                            {{ labels('front_messages.confirm_info', 'The system will automatically confirm receipt after 81 days. If the item you received is defective or not as described, you can open a dispute within 15 days of receipt.') }}
+                                                        </div>
+                                                    @endif
+                                                @endif
+                                                @if (
                                                     $user_order_item['is_returnable'] == 1 &&
                                                         $user_order_item['return_request_submitted'] != 1 &&
                                                         $user_order_item['active_status'] == 'delivered' &&
-                                                        $is_return_time_is_over == true)
+                                                        $is_return_time_is_over == true &&
+                                                        $user_order_item['is_completed'] == 1)
                                                     <button class="btn btn-primary btn-sm update_order_item_status"
                                                         data-status="returned"
                                                         data-item-id="{{ $user_order_item['id'] }}">{{ labels('front_messages.return', 'Return') }}</button>
                                                 @endif
+
                                             </div>
                                         </div>
                                     </div>
@@ -492,9 +505,163 @@
             </div>
         </div>
     </div>
+
+    {{-- Confirm received Modal --}}
+    <div class="modal fade" id="confirmReceivedModal" tabindex="-1" aria-labelledby="confirmReceivedModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmReceivedModalLabel">Item received confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Logistic shows that your package has been delivered. Please check your order and if you're
+                        satisfied click the "Confirm" button to confirm receipt.</p>
+                    <form id="confirmReceivedForm">
+                        <div class="mb-3" id="confirmItemList">
+                        </div>
+                        <input type="hidden" id="order_item_id" value="{{ $transaction['transaction_type'] }}">
+                        <input type="hidden" id="paymentType" value="{{ $transaction['type'] }}">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmReceived">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
 @push('scripts')
     <script>
+        // Відкриття модального вікна та завантаження списку товарів
+        $(document).on("click", ".confirm_received_btn", function(e) {
+            e.preventDefault();
+            const itemId = $(this).data('item-id'); // Отримуємо itemId з кнопки
+            const $modal = $('#confirmReceivedModal');
+            const $itemList = $('#confirmItemList'); // Блок для списку товарів
+
+            $itemList.html('<p>Loading...</p>');
+
+            $modal.modal('show');
+
+            $.ajax({
+                url: '/orders/get-parcel-items',
+                method: 'POST',
+                data: {
+                    order_item_id: itemId,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    // Перевіряємо, чи є дані в відповіді
+                    if (response.success && response.data) {
+                        let html = '';
+
+                        // Формуємо HTML для списку товарів
+                        if (Array.isArray(response.data)) {
+                            response.data.forEach(item => {
+                                html += `
+                                    <div class="form-check d-flex align-items-center mb-2">
+                                        <input class="form-check-input me-2" type="checkbox" name="confirm_items[]"
+                                            value="${item.id}" id="confirm_item_${item.id}">
+                                        <img src="${item.image}" alt="${item.product_name}" class="me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                        <label class="form-check-label" for="confirm_item_${item.id}">
+                                            ${item.product_name} ${item.variant_name ? ' - ' + item.variant_name : ''}
+                                            (${item.price_formatted})
+                                        </label>
+                                    </div>
+                                `;
+                            });
+                        } else {
+                            // Якщо повертається один товар
+                            html = `
+                                <div class="form-check d-flex align-items-center mb-2">
+                                    <input class="form-check-input me-2" type="checkbox" name="confirm_items[]"
+                                        value="${response.data.id}" id="confirm_item_${response.data.id}" checked>
+                                    <img src="${response.data.image}" alt="${response.data.product_name}" class="me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                    <label class="form-check-label" for="confirm_item_${response.data.id}">
+                                        ${response.data.product_name} ${response.data.variant_name ? ' - ' + response.data.variant_name : ''}
+                                        (${response.data.price_formatted})
+                                    </label>
+                                </div>
+                            `;
+                        }
+
+                        $itemList.html(html);
+                    } else {
+                        $itemList.html('<p>Failed to load items. Please try again.</p>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $itemList.html(`<p>Error: ${xhr.status} - ${error}</p>`);
+                    console.error('AJAX Error:', error);
+                }
+            });
+
+            // Зберігаємо itemId у приховане поле форми для подальшого використання
+            $('#order_item_id').val(itemId);
+        });
+
+        // Обробник кнопки "Confirm" у модальному вікні
+        $(document).on("click", "#confirmReceived", function(e) {
+            e.preventDefault();
+            const $form = $('#confirmReceivedForm');
+            const itemId = $('#order_item_id').val();
+            const selectedItems = $form.find('input[name="confirm_items[]"]:checked')
+                .map(function() {
+                    return $(this).val(); // Значення — це parcel_item.id
+                })
+                .get();
+
+            if (selectedItems.length === 0) {
+                iziToast.error({
+                    position: 'topRight',
+                    title: "Error",
+                    message: 'Please select at least one product for confirmation'
+                });
+                return;
+            }
+
+            $.ajax({
+                url: '/orders/confirm-received',
+                method: 'POST',
+                data: {
+                    item_id: itemId,
+                    items: selectedItems,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        iziToast.success({
+                            position: 'topRight',
+                            title: "Success",
+                            message: "Receipt of goods successfully confirmed!"
+                        })
+                        $('#confirmReceivedModal').modal('hide');
+                        location.reload();
+                    } else {
+                        iziToast.error({
+                            position: 'topRight',
+                            title: "Error",
+                            message: response.message || 'Something went wrong.'
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    iziToast.error({
+                        position: 'topRight',
+                        title: "Error",
+                        message: 'Server error: ' + error
+                    });
+                    console.error('AJAX Error:', error);
+                }
+            });
+        });
+
+
+        // Out tracking details
         $(document).on("click", "#track_order", function(e) {
             e.preventDefault();
 
@@ -509,7 +676,8 @@
             $modal.modal('show');
 
             try {
-                aftershipData = typeof trackingData === 'string' ? JSON.parse(trackingData) : trackingData;
+                aftershipData = typeof trackingData === 'string' ? JSON.parse(trackingData) :
+                    trackingData;
             } catch (error) {
                 orderTrackingDetails.innerHTML = `
             <div class="alert alert-danger" role="alert">
@@ -569,13 +737,13 @@
                     </div>
                     <div class="collapse mb-0" id="allInTransit">
                         ${group.slice(0, -1).reverse().map(cp => `
-                                                                                                                                                                                                                                                   <div class="mb-3">
-                                                                                                                                                                                                                                                        <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
-                                                                                                                                                                                                                                                        <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
-                                                                                                                                                                                                                                                        <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
-                                                                                                                                                                                                                                                        <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
-                                                                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                                                                `).join('')}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   <div class="mb-3">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                `).join('')}
                     </div>
                     <p class="mb-3 mt-0">
                         <a href="#" class="text-primary fs-6" data-bs-target="#allInTransit"

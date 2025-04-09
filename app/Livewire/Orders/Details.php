@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Stripe\Refund;
 use Stripe\Stripe as StripeConfig;
 use App\Http\Controllers\CommissionController;
-use Carbon\Carbon;
+use App\Models\Parcelitem;
 
 class Details extends Component
 {
@@ -264,6 +264,132 @@ class Details extends Component
         } catch (\Exception $e) {
             \Log::error('Stripe Refund Error: ' . $e->getMessage());
             throw $e;
+        }
+    }
+
+    public function getParcelItems(Request $request)
+    {
+        // Валідація вхідного order_item_id
+        $validator = Validator::make($request->all(), [
+            'order_item_id' => 'required|exists:order_items,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->all(),
+            ], 422);
+        }
+
+        $orderItemId = $request->input('order_item_id');
+
+        // Отримуємо parcel_id за order_item_id з таблиці parcel_items
+        $parcelItem = Parcelitem::where('order_item_id', $orderItemId)->first();
+
+        if (!$parcelItem) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Parcel item not found for the given order_item_id',
+            ], 404);
+        }
+
+        $parcelId = $parcelItem->parcel_id;
+
+        // Отримуємо всі parcel_items за parcel_id з пов’язаними OrderItems і Product
+        $parcelItems = Parcelitem::where('parcel_id', $parcelId)
+            ->with(['orderItem' => function ($query) {
+                $query->with('product'); // Завантажуємо Product через OrderItems
+            }])
+            ->get();
+
+        if ($parcelItems->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No parcel items found for this parcel_id',
+            ], 404);
+        }
+
+        // Формуємо масив даних для відповіді
+        $responseData = $parcelItems->map(function ($item) {
+            $orderItem = $item->orderItem;
+            $product = $orderItem->product ?? null; // Отримуємо Product
+
+            return [
+                'id' => $item->id,
+                'order_item_id' => $item->order_item_id,
+                'product_name' => $orderItem->product_name ?? 'N/A',
+                'variant_name' => $orderItem->variant_name ?? null,
+                'price_formatted' => $orderItem ? number_format($item->unit_price, 2) . ' ' . ($orderItem->order->order_payment_currency_code ?? '') : 'N/A',
+                'image' => $product ? dynamic_image($product->image, 50) : asset('default-image.jpg'), // Додаємо зображення
+            ];
+        })->all();
+
+        return response()->json([
+            'success' => true,
+            'data' => $responseData,
+        ]);
+    }
+
+    public function confirmReceived(Request $request)
+    {
+        // Валідація вхідних даних
+        $validator = Validator::make($request->all(), [
+            'item_id' => 'required|exists:order_items,id',
+            'items' => 'required|array',
+            'items.*' => 'exists:parcel_items,id', // Перевіряємо, що кожен item є в parcel_items
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->all(),
+            ], 422);
+        }
+
+        $orderItemId = $request->input('item_id');
+        $selectedParcelItemIds = $request->input('items');
+
+        // Перевіряємо, чи order_item_id належить до посилки
+        $parcelItem = Parcelitem::where('order_item_id', $orderItemId)->first();
+        if (!$parcelItem) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Parcel item not found for the given order_item_id',
+            ], 404);
+        }
+
+        $parcelId = $parcelItem->parcel_id;
+
+        // Отримуємо всі order_item_id, пов’язані з parcel_id
+        $parcelItems = Parcelitem::where('parcel_id', $parcelId)
+            ->whereIn('id', $selectedParcelItemIds)
+            ->pluck('order_item_id')
+            ->toArray();
+
+        if (empty($parcelItems)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No valid order items found for the selected parcel items',
+            ], 404);
+        }
+
+        // Оновлюємо поле is_completed для всіх вибраних order_item_id
+        $updatedCount = OrderItems::whereIn('id', $parcelItems)
+            ->where('is_completed', 0) // Оновлюємо тільки ті, що ще не підтверджені
+            ->update(['is_completed' => 1]);
+
+        if ($updatedCount > 0) {
+            \Log::info("Successfully updated is_completed for order_item_ids: " . json_encode($parcelItems));
+            return response()->json([
+                'success' => true,
+                'message' => 'Items confirmed successfully',
+                'updated_count' => $updatedCount,
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'No items were updated. They may already be confirmed.',
+            ], 400);
         }
     }
 }
