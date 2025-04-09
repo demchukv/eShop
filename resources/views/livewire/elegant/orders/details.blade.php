@@ -28,6 +28,9 @@
                                 ]);
                             @endphp
                             @foreach ($order_transaction as $user_order)
+                                {{-- @php
+                                    dd($user_order);
+                                @endphp --}}
                                 @foreach ($user_order['order_items'] as $user_order_item)
                                     <div class="row mt-3">
                                         <div class="col-lg-2 col-md-3 col-sm-4">
@@ -566,13 +569,13 @@
                     </div>
                     <div class="collapse mb-0" id="allInTransit">
                         ${group.slice(0, -1).reverse().map(cp => `
-                                                                                                                                                                                                                                       <div class="mb-3">
-                                                                                                                                                                                                                                            <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
-                                                                                                                                                                                                                                            <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
-                                                                                                                                                                                                                                            <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
-                                                                                                                                                                                                                                            <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
-                                                                                                                                                                                                                                        </div>
-                                                                                                                                                                                                                                    `).join('')}
+                                                                                                                                                                                                                                                   <div class="mb-3">
+                                                                                                                                                                                                                                                        <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
+                                                                                                                                                                                                                                                        <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
+                                                                                                                                                                                                                                                        <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
+                                                                                                                                                                                                                                                        <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
+                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                                `).join('')}
                     </div>
                     <p class="mb-3 mt-0">
                         <a href="#" class="text-primary fs-6" data-bs-target="#allInTransit"
