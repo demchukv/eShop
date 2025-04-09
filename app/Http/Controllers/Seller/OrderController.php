@@ -828,6 +828,9 @@ class OrderController extends Controller
             }
             $parcel_items = fetchDetails('parcel_items', ['parcel_id' => $parcel[0]->id], '*');
             $order_id = $parcel[0]->order_id;
+            $order_data = fetchDetails('orders', ['id' => $order_id], 'is_custom_courier');
+            $is_custom_courier = $order_data[0]->is_custom_courier;
+
             $order_item_data = fetchDetails('order_items', ['order_id' => $order_id], '*');
             if (empty($order_item_data)) {
                 $response = [
@@ -841,23 +844,25 @@ class OrderController extends Controller
             $delivery_boy_updated = 0;
             $message = '';
 
-            $delivery_boy_id = $request->filled('deliver_by') ? $request->input('deliver_by') : 0;
-            if ($request->filled('status') && $request->input('status') === 'processed') {
-                if (!isset($delivery_boy_id) || empty($delivery_boy_id) || $delivery_boy_id == 0) {
-                    return response()->json([
-                        'error' => true,
-                        'message' => labels('admin_labels.select_delivery_boy_to_mark_order_processed', 'Please select a delivery boy to mark this order as processed.'),
-                        'data' => [],
-                    ]);
+            if ($is_custom_courier == 0) {
+                $delivery_boy_id = $request->filled('deliver_by') ? $request->input('deliver_by') : 0;
+                if ($request->filled('status') && $request->input('status') === 'processed') {
+                    if (!isset($delivery_boy_id) || empty($delivery_boy_id) || $delivery_boy_id == 0) {
+                        return response()->json([
+                            'error' => true,
+                            'message' => labels('admin_labels.select_delivery_boy_to_mark_order_processed', 'Please select a delivery boy to mark this order as processed.'),
+                            'data' => [],
+                        ]);
+                    }
                 }
-            }
-            if ($request->filled('status') && $request->input('status') === 'shipped') {
-                if ((!isset($order_item_data[0]->delivery_boy_id) || empty($order_item_data[0]->delivery_boy_id) || $order_item_data[0]->delivery_boy_id == 0) && (empty($request->filled('deliver_by')) || $request->filled('deliver_by') == '')) {
-                    return response()->json([
-                        'error' => true,
-                        'message' => labels('admin_labels.select_delivery_boy_to_mark_order_shipped', 'Please select a delivery boy to mark this order as shipped.'),
-                        'data' => [],
-                    ]);
+                if ($request->filled('status') && $request->input('status') === 'shipped') {
+                    if ((!isset($order_item_data[0]->delivery_boy_id) || empty($order_item_data[0]->delivery_boy_id) || $order_item_data[0]->delivery_boy_id == 0) && (empty($request->filled('deliver_by')) || $request->filled('deliver_by') == '')) {
+                        return response()->json([
+                            'error' => true,
+                            'message' => labels('admin_labels.select_delivery_boy_to_mark_order_shipped', 'Please select a delivery boy to mark this order as shipped.'),
+                            'data' => [],
+                        ]);
+                    }
                 }
             }
             $awaitingPresent = false;
@@ -1010,6 +1015,9 @@ class OrderController extends Controller
                 updateOrder(['active_status' => $request->input('status')], ['id' => $parcel_id], false, 'parcels');
                 foreach ($parcel_items as $item) {
                     updateOrder(['status' => $request->input('status')], ['id' => $item->order_item_id], true, 'order_items');
+                    if ($is_custom_courier == 1) {
+                        $delivery_boy_id = 0;
+                    }
                     updateOrder(['active_status' => $request->input('status'), 'delivery_boy_id' => $delivery_boy_id], ['id' => $item->order_item_id], false, 'order_items');
                     $data = [
                         'order_item_id' => $item->order_item_id,

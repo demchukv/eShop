@@ -6292,7 +6292,9 @@ function updateOrder($set, $where, $isJson = false, $table = 'order_items', $fro
         $currentStatus = $set[$field[0]];
 
         $res = fetchDetails($table, $where, '*');
-        \Log::info("updateOrder: set=" . json_encode($set) . ", where=" . json_encode($where) . ", res=" . json_encode($res));
+        $order_data = fetchDetails('orders', ['id' => $res[0]->order_id], 'is_custom_courier');
+        $is_custom_courier = $order_data[0]->is_custom_courier;
+        \Log::info("updateOrder: set=" . json_encode($set) . ", where=" . json_encode($where) . ", res=" . json_encode($res) . ', is_custom_courier=' . $is_custom_courier);
 
         if ($is_digital_product == 1) {
             $priorityStatus = [
@@ -6366,7 +6368,7 @@ function updateOrder($set, $where, $isJson = false, $table = 'order_items', $fro
                 }
 
                 // Additional code for commission and transactions can be added here
-                if ($currentStatus == 'delivered') {
+                if ($currentStatus == 'delivered' && $is_custom_courier == 0) {
                     if ($table == "parcels") {
                         $parcel_items = fetchDetails('parcel_items', ['parcel_id' => $where['id']]);
                         $order_item_ids = array_map(function ($item) {

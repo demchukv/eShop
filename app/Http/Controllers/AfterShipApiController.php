@@ -292,6 +292,8 @@ class AfterShipApiController extends Controller
             'Pending' => 'shipped',
             'InfoReceived' => 'shipped',
             'InTransit' => 'shipped',
+            'OutForDelivery' => 'shipped',
+            'AvailableForPickup' => 'shipped',
             'Delivered' => 'delivered',
             // Додаткові статуси можна додати тут у майбутньому
             // 'OutForDelivery' => 'shipped',

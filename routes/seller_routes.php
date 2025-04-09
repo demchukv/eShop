@@ -49,7 +49,7 @@ Route::group(
 
         Route::get('seller/account/{id}', [UserController::class, 'edit']);
 
-        Route::put('seller/account/update/{id}', [UserController::class, 'update'])->name('seller.account.update')->middleware(['demo_restriction']);
+        Route::put('seller/account/update/{id}', [UserController::class, 'update'])->name('seller.account.update');
 
         // categories
 
@@ -81,14 +81,14 @@ Route::group(
 
         Route::get('seller/pickup_locations/list', [PickupLocationController::class, 'list'])->name('pickup_locations.list');
 
-        Route::post('seller/pickup_locations', [PickupLocationController::class, 'store'])->name('pickup_locations.store')->middleware(['demo_restriction']);
+        Route::post('seller/pickup_locations', [PickupLocationController::class, 'store'])->name('pickup_locations.store');
         // media
         Route::get('seller/media/image', [MediaController::class, 'dynamic_image'])->name('seller.dynamic_image');
-        Route::post('seller/media/upload', [MediaController::class, 'upload'])->name('seller.media.upload')->middleware(['demo_restriction']);
+        Route::post('seller/media/upload', [MediaController::class, 'upload'])->name('seller.media.upload');
 
         Route::get('seller/media', [MediaController::class, 'index'])->name('seller.media');
 
-        Route::get('seller/media/destroy/{id}', [MediaController::class, 'destroy'])->name('seller.media.destroy')->middleware(['demo_restriction']);
+        Route::get('seller/media/destroy/{id}', [MediaController::class, 'destroy'])->name('seller.media.destroy');
 
         // location
 
@@ -139,15 +139,15 @@ Route::group(
             'index' => 'seller.products.index',
             'edit' => 'seller.products.edit',
         ])->except('show');
-        Route::post('seller/products', [ProductController::class, 'store'])->name('seller_products.store')->middleware(['demo_restriction']);
+        Route::post('seller/products', [ProductController::class, 'store'])->name('seller_products.store');
 
-        Route::get('seller/products/update_status/{id}', [ProductController::class, 'update_status'])->middleware(['demo_restriction']);
+        Route::get('seller/products/update_status/{id}', [ProductController::class, 'update_status']);
 
-        Route::get('seller/products/destroy/{id}', [ProductController::class, 'destroy'])->name('seller.products.destroy')->middleware(['demo_restriction']);
+        Route::get('seller/products/destroy/{id}', [ProductController::class, 'destroy'])->name('seller.products.destroy');
 
         Route::get('seller/products/fetch_attributes_by_id', [ProductController::class, 'fetchAttributesById']);
 
-        Route::put('seller/products/update/{id}', [ProductController::class, 'update'])->name('seller.products.update')->middleware(['demo_restriction']);
+        Route::put('seller/products/update/{id}', [ProductController::class, 'update'])->name('seller.products.update');
 
         Route::get('seller/products/fetch_attribute_values_by_id', [ProductController::class, 'fetch_attribute_values_by_id']);
 
@@ -173,7 +173,7 @@ Route::group(
 
         Route::get('seller/product/product_bulk_upload', [ProductController::class, 'bulk_upload'])->name('seller.product_bulk_upload');
 
-        Route::post("seller/product/bulk_upload", [ProductController::class, 'process_bulk_upload'])->name('seller.product.bulk_upload')->middleware(['demo_restriction']);
+        Route::post("seller/product/bulk_upload", [ProductController::class, 'process_bulk_upload'])->name('seller.product.bulk_upload');
 
         Route::get('seller/product/view_product/{id}', [ProductController::class, 'show'])->name('seller.product.show');
 
@@ -183,11 +183,11 @@ Route::group(
         Route::resource("seller/product_faqs", ProductFaqController::class)->names([
             'index' => 'seller.product_faqs.index',
         ])->except('show');
-        Route::post('seller/product_faqs', [ProductFaqController::class, 'store'])->name('seller.product_faqs.store')->middleware(['demo_restriction']);
+        Route::post('seller/product_faqs', [ProductFaqController::class, 'store'])->name('seller.product_faqs.store');
         Route::get('seller/product_faqs/list', [ProductFaqController::class, 'list'])->name('seller.product_faqs.list');
         Route::get('seller/product_faqs/edit/{id}', [ProductFaqController::class, 'edit']);
-        Route::put('seller/product_faqs/update/{id}', [ProductFaqController::class, 'update'])->middleware(['demo_restriction']);
-        Route::get('seller/product_faqs/destroy/{id}', [ProductFaqController::class, 'destroy'])->name('seller.product_faqs.destroy')->middleware(['demo_restriction']);
+        Route::put('seller/product_faqs/update/{id}', [ProductFaqController::class, 'update']);
+        Route::get('seller/product_faqs/destroy/{id}', [ProductFaqController::class, 'destroy'])->name('seller.product_faqs.destroy');
 
 
         //combo product faqs
@@ -195,11 +195,11 @@ Route::group(
         Route::resource("seller/combo_product_faqs", ComboProductFaqController::class)->names([
             'index' => 'seller.combo_product_faqs.index',
         ])->except('show');
-        Route::post('seller/combo_product_faqs', [ComboProductFaqController::class, 'store'])->name('seller.combo_product_faqs.store')->middleware(['demo_restriction']);
+        Route::post('seller/combo_product_faqs', [ComboProductFaqController::class, 'store'])->name('seller.combo_product_faqs.store');
         Route::get('seller/combo_product_faqs/list', [ComboProductFaqController::class, 'list'])->name('seller.combo_product_faqs.list');
         Route::get('seller/combo_product_faqs/edit/{id}', [ComboProductFaqController::class, 'edit']);
-        Route::put('seller/combo_product_faqs/update/{id}', [ComboProductFaqController::class, 'update'])->middleware(['demo_restriction']);
-        Route::get('seller/combo_product_faqs/destroy/{id}', [ComboProductFaqController::class, 'destroy'])->name('seller.combo_product_faqs.destroy')->middleware(['demo_restriction']);
+        Route::put('seller/combo_product_faqs/update/{id}', [ComboProductFaqController::class, 'update']);
+        Route::get('seller/combo_product_faqs/destroy/{id}', [ComboProductFaqController::class, 'destroy'])->name('seller.combo_product_faqs.destroy');
 
         //Transaction
         Route::get('seller/transaction/wallet_transactions', [TransactionController::class, 'wallet_transactions'])->name('seller.transaction.wallet_transactions');
@@ -212,13 +212,13 @@ Route::group(
         //Payment Request
         Route::get('seller/payment_request/withdrawal_requests', [PaymentRequestController::class, 'withdrawal_requests'])->name('seller.payment_request.withdrawal_requests');
         Route::get('seller/payment_request/get_payment_request_list', [PaymentRequestController::class, 'get_payment_request_list'])->name('seller.payment_request.get_payment_request_list');
-        Route::put('seller/payment_request/add_withdrawal_request', [PaymentRequestController::class, 'add_withdrawal_request'])->name('seller.payment_request.add_withdrawal_request')->middleware(['demo_restriction']);
+        Route::put('seller/payment_request/add_withdrawal_request', [PaymentRequestController::class, 'add_withdrawal_request'])->name('seller.payment_request.add_withdrawal_request');
 
         //pos
 
         Route::get('seller/point_of_sale', [PosController::class, 'index'])->name('seller.point_of_sale.index');
 
-        Route::post('seller/point_of_sale/register_user', [PosController::class, 'register_user'])->name('register.user')->middleware(['demo_restriction']);
+        Route::post('seller/point_of_sale/register_user', [PosController::class, 'register_user'])->name('register.user');
 
         Route::get('seller/point_of_sale/get_users', [PosController::class, 'get_users']);
 
@@ -226,9 +226,9 @@ Route::group(
 
         Route::get('seller/point_of_sale/get_combo_products', [PosController::class, 'get_combo_products']);
 
-        Route::post('seller/point_of_sale/place_order', [PosController::class, 'place_order'])->name('place.order')->middleware(['demo_restriction']);
+        Route::post('seller/point_of_sale/place_order', [PosController::class, 'place_order'])->name('place.order');
 
-        Route::post('seller/point_of_sale/combo_place_order', [PosController::class, 'combo_place_order'])->name('combo.place.order')->middleware(['demo_restriction']);
+        Route::post('seller/point_of_sale/combo_place_order', [PosController::class, 'combo_place_order'])->name('combo.place.order');
 
         Route::post('seller/point_of_sale/get_poduct_variants', [PosController::class, 'get_poduct_variants']);
 
@@ -244,14 +244,14 @@ Route::group(
 
         Route::get('seller/manage_stock/edit/{id}', [StockController::class, 'edit'])->name('stock.edit');
 
-        Route::put('seller/manage_stock/update/{id}', [StockController::class, 'update'])->name('stock.update')->middleware(['demo_restriction']);
+        Route::put('seller/manage_stock/update/{id}', [StockController::class, 'update'])->name('stock.update');
 
         // Manage Combo Stock
 
 
         Route::get('seller/manage_combo_stock', [StockController::class, 'manage_combo_stock'])->name('seller.manage_combo_stock.index');
 
-        Route::put('seller/manage_combo_stock/update/{id}', [StockController::class, 'combo_stock_update'])->name('seller.combo_stock.update')->middleware(['demo_restriction']);
+        Route::put('seller/manage_combo_stock/update/{id}', [StockController::class, 'combo_stock_update'])->name('seller.combo_stock.update');
 
         Route::get('seller/manage_combo_stock/list', [StockController::class, 'combo_stock_list'])->name('seller.manage_combo_stock.list');
 
@@ -277,14 +277,14 @@ Route::group(
         ])->except('show');
 
 
-        Route::post('seller/orders/update_order_status', [OrderController::class, 'update_order_status'])->middleware(['demo_restriction']);
-        Route::post('seller/orders/update_order_tracking', [OrderController::class, 'update_order_tracking'])->name('seller.orders.update_order_tracking')->middleware(['demo_restriction']);
-        Route::post('seller/orders/create_shiprocket_order', [OrderController::class, 'create_shiprocket_order'])->name('seller.orders.create_shiprocket_order')->middleware(['demo_restriction']);
-        Route::post('seller/orders/generate_awb', [OrderController::class, 'generate_awb'])->name('seller.orders.generate_awb')->middleware(['demo_restriction']);
-        Route::post('seller/orders/send_pickup_request', [OrderController::class, 'send_pickup_request'])->name('seller.orders.send_pickup_request')->middleware(['demo_restriction']);
-        Route::post('seller/orders/cancel_shiprocket_order', [OrderController::class, 'cancel_shiprocket_order'])->name('seller.orders.cancel_shiprocket_order')->middleware(['demo_restriction']);
-        Route::post('seller/orders/generate_label', [OrderController::class, 'generate_label'])->name('seller.orders.generate_label')->middleware(['demo_restriction']);
-        Route::post('seller/orders/generate_invoice', [OrderController::class, 'generate_invoice'])->name('seller.orders.generate_invoice')->middleware(['demo_restriction']);
+        Route::post('seller/orders/update_order_status', [OrderController::class, 'update_order_status'])->name('seller.orders.update_order_status');
+        Route::post('seller/orders/update_order_tracking', [OrderController::class, 'update_order_tracking'])->name('seller.orders.update_order_tracking');
+        Route::post('seller/orders/create_shiprocket_order', [OrderController::class, 'create_shiprocket_order'])->name('seller.orders.create_shiprocket_order');
+        Route::post('seller/orders/generate_awb', [OrderController::class, 'generate_awb'])->name('seller.orders.generate_awb');
+        Route::post('seller/orders/send_pickup_request', [OrderController::class, 'send_pickup_request'])->name('seller.orders.send_pickup_request');
+        Route::post('seller/orders/cancel_shiprocket_order', [OrderController::class, 'cancel_shiprocket_order'])->name('seller.orders.cancel_shiprocket_order');
+        Route::post('seller/orders/generate_label', [OrderController::class, 'generate_label'])->name('seller.orders.generate_label');
+        Route::post('seller/orders/generate_invoice', [OrderController::class, 'generate_invoice'])->name('seller.orders.generate_invoice');
         Route::post('seller/orders/getSellerOrderTrackingList', [OrderController::class, 'getSellerOrderTrackingList']);
         Route::post('seller/orders/update_shiprocket_order_status', [OrderController::class, 'update_shiprocket_order_status']);
 
@@ -293,9 +293,9 @@ Route::group(
 
         Route::get('seller/orders/order_item_list', [OrderController::class, 'order_item_list'])->name('seller.orders.item_list');
 
-        Route::get('seller/orders/destroy/{id}', [OrderController::class, 'destroy'])->name('orders.destroy')->middleware(['demo_restriction']);
+        Route::get('seller/orders/destroy/{id}', [OrderController::class, 'destroy'])->name('orders.destroy');
 
-        Route::post('seller/orders/send_digital_product', [OrderController::class, 'send_digital_product'])->name('seller.orders.send_digital_product')->middleware(['demo_restriction']);
+        Route::post('seller/orders/send_digital_product', [OrderController::class, 'send_digital_product'])->name('seller.orders.send_digital_product');
         // Route::get('seller/orders/generatInvoicePDF/{id}', [OrderController::class, 'generatInvoicePDF'])->name('seller.orders.generatInvoicePDF');
         // Route::get('seller/orders/generatParcelInvoicePDF/{id}', [OrderController::class, 'generatParcelInvoicePDF'])->name('seller.orders.generatParcelInvoicePDF');
 
@@ -325,12 +325,12 @@ Route::group(
             'index' => 'seller.combo_products.index',
             'edit' => 'seller.combo_products.edit',
         ])->except('show');
-        Route::put('seller/combo_products/update/{id}', [ComboProductController::class, 'update'])->name('seller.combo_products.update')->middleware(['demo_restriction']);
+        Route::put('seller/combo_products/update/{id}', [ComboProductController::class, 'update'])->name('seller.combo_products.update');
 
 
-        Route::get('combo_products/destroy/{id}', [ComboProductController::class, 'destroy'])->name('seller.combo_products.destroy')->middleware(['demo_restriction']);
+        Route::get('combo_products/destroy/{id}', [ComboProductController::class, 'destroy'])->name('seller.combo_products.destroy');
 
-        Route::post("seller/combo_products/store", [ComboProductController::class, 'store'])->name('seller.combo_products.store')->middleware(['demo_restriction']);
+        Route::post("seller/combo_products/store", [ComboProductController::class, 'store'])->name('seller.combo_products.store');
 
         Route::get('seller/combo_products/manage_product', [ComboProductController::class, 'manageProduct'])->name('seller.combo_products.manage_product');
         Route::get('seller/combo_products/get_product_details', [ComboProductController::class, 'getProductdetails']);
@@ -340,7 +340,7 @@ Route::group(
             [ComboProductController::class, 'list']
         )->name('seller.combo_products.list');
 
-        Route::get('seller/combo_products/update_status/{id}', [ComboProductController::class, 'update_status'])->middleware(['demo_restriction']);
+        Route::get('seller/combo_products/update_status/{id}', [ComboProductController::class, 'update_status']);
 
         Route::get('seller/combo_products/fetch_attributes_by_id', [ComboProductController::class, 'fetchAttributesById']);
 
@@ -348,7 +348,7 @@ Route::group(
 
         Route::get('seller/combo_product/product_bulk_upload', [ComboProductController::class, 'bulk_upload'])->name('seller.combo.product.bulk_upload');
 
-        Route::post("seller/combo_product/bulk_upload", [ComboProductController::class, 'process_bulk_upload'])->name('seller.combo.product.process_bulk_upload')->middleware(['demo_restriction']);
+        Route::post("seller/combo_product/bulk_upload", [ComboProductController::class, 'process_bulk_upload'])->name('seller.combo.product.process_bulk_upload');
 
         Route::get('seller/products/get_product_details_for_combo', [ProductController::class, 'getProductdetailsForCombo']);
         // language
@@ -372,7 +372,7 @@ Route::group(
 
         // parcel routes
 
-        Route::post("seller/orders/create_parcel", [OrderController::class, 'create_parcel'])->name('seller.create_parcel')->middleware(['demo_restriction']);
+        Route::post("seller/orders/create_parcel", [OrderController::class, 'create_parcel'])->name('seller.create_parcel');
 
         Route::get(
             'seller/parcels/list',

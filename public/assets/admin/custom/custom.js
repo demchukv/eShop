@@ -9751,6 +9751,7 @@ $(document).on("show.bs.modal", "#parcel_status_modal", function (event) {
 
     let parcel_items = $(current_selected_image).data("items");
     let parcel_id = $(current_selected_image).data("parcel-id");
+    let parcel_status = $(current_selected_image).data("status");
     let tracking_data = $(current_selected_image).data("tracking-data");
 
     let order_tracking = $("#order_tracking").val();
@@ -9897,6 +9898,7 @@ $(document).on("show.bs.modal", "#parcel_status_modal", function (event) {
     const $form = $(this).find("#courier-selection-form"); // Отримуємо форму в межах модального вікна
     $form.find("[name='parcel_id']").val(parcel_id);
     if (tracking_data && tracking_data.length > 0) {
+        console.log(tracking_data);
         let latestTracking = tracking_data[0]; // Беремо перший запис трекінгу
         // Заповнення полів форми
         $form.find("[name='courier_agency']").val(latestTracking.courier_agency).trigger("change"); // Для Select2
@@ -9907,6 +9909,13 @@ $(document).on("show.bs.modal", "#parcel_status_modal", function (event) {
             aftership_courier_alert.classList.add('d-none');
         } else {
             aftership_courier_alert.classList.remove('d-none');
+        }
+        if (latestTracking.tracking_id !== "") {
+            const manualStatusBlock = document.querySelector('.manual-status-update-box');
+            manualStatusBlock.classList.remove('d-none');
+            const $manualStatusform = $(this).find("#manual-status-update-form");
+            $manualStatusform.find("[name='parcel_id']").val(parcel_id);
+            $manualStatusform.find("[name='status']").val(parcel_status);
         }
     } else {
         // Скидаємо форму
@@ -9923,8 +9932,69 @@ function capitalizeFirstLetter(status) {
 function formatStatus(status) {
     return capitalizeFirstLetter(status.replace(/_/g, " "));
 }
-//  update parcel order status
 
+$(document).on("click", "#update_parcel_status_btn", function (e) {
+    e.preventDefault();
+    const manualStatusForm = document.getElementById("manual-status-update-form");
+    const parcel_id = manualStatusForm.elements.parcel_id.value;
+    const status = manualStatusForm.elements.status.value;
+    if (status == "" || status == null) {
+        iziToast.error({
+            message: "Please Select Status",
+        });
+        return false;
+    }
+    Swal.fire({
+        title: "Are You Sure!",
+        text: "You won't be able to revert this!",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, update it!",
+        showLoaderOnConfirm: true,
+        preConfirm: function () {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: "POST",
+                    url: appUrl + from + "/orders/update_order_status",
+                    data: {
+                        parcel_id,
+                        status,
+                        _token: $('meta[name="csrf-token"]').attr("content"),
+                    },
+
+                    dataType: "json",
+                    success: function (result) {
+                        if (result["error"] == false) {
+                            $("#parcel_table").bootstrapTable("refresh");
+                            $("#seller_parcel_table").bootstrapTable("refresh");
+                            iziToast.success({
+                                message: result["message"],
+                            });
+                            result.data.forEach((element) => {
+                                $(".status-" + element["order_item_id"])
+                                    .addClass("badge-info")
+                                    .html(element["status"]);
+                            });
+                        } else {
+                            iziToast.error({
+                                message: result["message"],
+                            });
+                        }
+                        swal.close();
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1000);
+                    },
+                });
+            });
+        },
+        allowOutsideClick: false,
+    });
+});
+
+//  update parcel order status
 $(document).on("click", ".parcel_order_status_update", function (e) {
     let parcel_id = $("#parcel_id").val();
     let status = $(".parcel_status").val();
