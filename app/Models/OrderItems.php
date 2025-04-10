@@ -12,11 +12,12 @@ class OrderItems extends Model
     use HasApiTokens, HasFactory, Notifiable;
 
     // Додаємо поле is_completed до fillable
-    protected $fillable = ['is_completed'];
+    protected $fillable = ['is_completed', 'is_write_review'];
 
     // Встановлюємо значення за замовчуванням
     protected $attributes = [
         'is_completed' => 0,
+        'is_write_review' => 0,
     ];
 
     public function order()
