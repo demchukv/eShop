@@ -141,7 +141,10 @@
                                                 true,
                                             )
                                             : $max_price;
-                                    $diff_price = currentCurrencyPrice($product_details->min_max_price['max_price'] - $min_dealer_price, true);
+                                    $diff_price = currentCurrencyPrice(
+                                        $product_details->min_max_price['max_price'] - $min_dealer_price,
+                                        true,
+                                    );
                                 @endphp
                                 <span class="price old-price" id="special_price"></span>
                                 <span class="price product_price" id="price">{{ $max_price }} -
@@ -373,6 +376,7 @@
                                 wire:navigate
                                 href="{{ customUrl('sellers/' . $product_details->seller_slug) }}">{{ $product_details->seller_name }}</a>
                         </div>
+
                         {{-- @dd($product_details) --}}
                         <div class="product-review d-flex-center mb-2 gap-2">
                             <input id="input-3-ltr-star-md" name="input-3-ltr-star-md"
@@ -531,7 +535,6 @@
                 </h3>
                 <div id="reviews" class="tab-content">
                     <livewire:pages.customer-ratings :product_id="$product_id" :product_details="$product_details" />
-
                 </div>
                 <!--End Review-->
             </div>

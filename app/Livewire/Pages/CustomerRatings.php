@@ -120,7 +120,7 @@ class CustomerRatings extends Component
             );
             if ($validator->fails()) {
                 $errors = $validator->errors();
-                $this->dispatch('validationErrorshow',['data' => $errors]);
+                $this->dispatch('validationErrorshow', ['data' => $errors]);
                 $response['error'] = true;
                 $response['message'] = $errors;
                 return $response;

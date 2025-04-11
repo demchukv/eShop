@@ -123,20 +123,20 @@
                 }
                 await loadScript("https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js");
                 await loadScript("{{ asset('frontend/elegant/js/plugins.js') }}");
+                await loadScript("{{ asset('frontend/elegant/js/star-rating.js') }}"); // Раніше
+                await loadScript("{{ asset('frontend/elegant/js/star-rating.min.js') }}"); // Раніше
+                await loadScript("{{ asset('frontend/elegant/js/custom.js') }}"); // Раніше
                 await loadScript("{{ asset('frontend/elegant/js/firebase-app.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/firebase-firestore.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/bootstrap-table.min.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/bootstrap-table-export.min.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/main.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/daterangepicker.js') }}");
-                await loadScript("{{ asset('frontend/elegant/js/star-rating.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/intlTelInput.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/iziToast.min.js') }}");
-                await loadScript("{{ asset('frontend/elegant/js/star-rating.min.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/select2.min.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/checkout.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/wallet.js') }}");
-                await loadScript("{{ asset('frontend/elegant/js/custom.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/vendor/jquery.elevatezoom.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/moment.min.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/sweetalert2.all.min.js') }}");
@@ -144,6 +144,8 @@
                 await loadScript("{{ asset('frontend/elegant/js/swiper-bundle.min.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/shareon.iife.js') }}");
                 await loadScript("https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js", true);
+
+                window.dispatchEvent(new Event('scripts:loaded'));
                 triggerLivewireNavigated();
             })();
         }

@@ -1662,9 +1662,11 @@ document.addEventListener("livewire:navigated", () => {
             });
         });
     }
+
     attributes();
 
     initialize();
+
     if ($(".kv-ltr-theme-svg-star").length > 0) {
         $(".kv-ltr-theme-svg-star").rating({
             hoverOnClear: false,
