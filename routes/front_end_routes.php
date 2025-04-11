@@ -55,6 +55,7 @@ use App\Livewire\Products\ComboProductListing;
 use App\Livewire\MyAccount\UserStatus;
 use App\Livewire\MyAccount\ReferralStats;
 use App\Livewire\Orders\Review;
+use App\Livewire\Orders\ReturnOptions;
 
 /*
 |--------------------------------------------------------------------------
@@ -103,6 +104,7 @@ Route::middleware(App\Http\Middleware\checkAuth::class)->group(function () {
     Route::post('/orders/get-parcel-items', [OrdersDetails::class, 'getParcelItems'])->name('orders.get-parcel-items');
     Route::post('/orders/confirm-received', [OrdersDetails::class, 'confirmReceived'])->name('orders.confirm-received');
     Route::get('/orders/review/{itemId}', Review::class)->name('front_end.orders.review');
+    Route::get('/orders/return-options/{orderItemId}', ReturnOptions::class)->name('orders.return-options');
 
     // MyAccount
     Route::get('/my-account', Dashboard::class)->name('my-account');

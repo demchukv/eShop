@@ -2666,8 +2666,8 @@ document.addEventListener("livewire:navigated", () => {
                         type: "POST",
                         url: appUrl + "orders/update-order-item-status",
                         data: {
-                            order_status,
-                            order_item_id: initial_order_item_id,
+                            order_status: order_status,
+                            order_item_id: [initial_order_item_id],
                         },
                         dataType: "json",
                         success: function (response) {
@@ -2677,6 +2677,9 @@ document.addEventListener("livewire:navigated", () => {
                                     position: "topRight",
                                 });
                                 Livewire.dispatch("refreshComponent");
+                                const reloadTimer = setTimeout(() => {
+                                    location.reload();
+                                }, 1500);
                             } else {
                                 iziToast.error({
                                     message: response.message,

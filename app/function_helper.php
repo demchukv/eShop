@@ -5756,10 +5756,8 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
                 $orderItemData[$k]->is_already_cancelled = ($orderItemData[$k]->active_status == 'cancelled') ? '1' : '0';
 
                 $return_request_key = array_search($orderItemData[$k]->id, array_column($return_request, 'order_item_id'));
-
                 if ($return_request_key !== false) {
                     $orderItemData[$k]->return_request_submitted = $return_request[$return_request_key]->status;
-
                     if ($orderItemData[$k]->return_request_submitted == '1') {
                         $return_request_submitted_count += $orderItemData[$k]->return_request_submitted;
                     }

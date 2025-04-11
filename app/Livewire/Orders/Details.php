@@ -185,6 +185,7 @@ class Details extends Component
 
         if ($request['order_status'] == 'returned') {
             $order_item = OrderItems::find($order_item_ids[0]);
+            \Log::alert('return order item id: ' . json_encode(($order_item)));
             if (!$order_item) {
                 return response()->json([
                     'error' => true,
