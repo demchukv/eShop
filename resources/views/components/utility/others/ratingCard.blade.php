@@ -26,6 +26,12 @@
                     </div>
                 </div>
                 <p class="spr-review-body">{{ $reviews->comment }}</p>
+                @if ($rating->advantages)
+                    <p><strong>Advantages:</strong> {{ $rating->advantages }}</p>
+                @endif
+                @if ($rating->disadvantages)
+                    <p><strong>Disadvantages:</strong> {{ $rating->disadvantages }}</p>
+                @endif
                 <div class="d-flex align-items-center overflow-auto max-w-300px">
                     @php
                         $images = json_decode($reviews->images);

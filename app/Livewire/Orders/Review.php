@@ -24,6 +24,8 @@ class Review extends Component
     public $rating = '';
     public $comment = '';
     public $images = [];
+    public $advantages = '';
+    public $disadvantages = '';
     public $review = null;
 
     public function mount($itemId)
@@ -94,17 +96,23 @@ class Review extends Component
             [
                 'rating' => $this->rating,
                 'comment' => $this->comment,
+                'advantages' => $this->advantages,
+                'disadvantages' => $this->disadvantages,
                 'images' => $this->images,
             ],
             [
                 'rating' => 'required|integer|min:1|max:5',
                 'comment' => 'required|string|max:500',
+                'advantages' => $this->advantages,
+                'disadvantages' => $this->disadvantages,
                 'images' => 'nullable|array',
                 'images.*' => 'nullable|string', // Оскільки це шляхи до файлів
             ],
             [
                 'comment' => 'Please Write a Review',
                 'rating.required' => 'Please select a rating.',
+                'advantages.max' => 'Advantages must not exceed 500 characters.',
+                'disadvantages.max' => 'Disadvantages must not exceed 500 characters.',
             ]
         );
 
@@ -139,6 +147,8 @@ class Review extends Component
             'product_id' => $product->id,
             'rating' => $this->rating,
             'comment' => $this->comment,
+            'advantages' => $this->advantages,
+            'disadvantages' => $this->disadvantages,
             'user_id' => Auth::id(),
             'images' => json_encode($images),
         ];
@@ -169,7 +179,7 @@ class Review extends Component
 
         // Скидаємо поля форми
         $this->review = $validated;
-        $this->reset(['rating', 'comment', 'images']);
+        $this->reset(['rating', 'comment', 'advantages', 'disadvantages', 'images']);
         $this->orderItems = $this->orderItems->fresh();
         $this->dispatch('showSuccess', 'The review has been successfully added.');
     }

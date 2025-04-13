@@ -89,6 +89,34 @@
                                                                 @enderror
                                                             </div>
                                                         </div>
+                                                        <div class="col-12 spr-form-review-body form-group">
+                                                            <label class="spr-form-label" for="advantages">
+                                                                {{ labels('front_messages.advantages', 'Advantages') }}
+                                                                (optional)
+                                                            </label>
+                                                            <div class="spr-form-input">
+                                                                <textarea wire:model="advantages" class="spr-form-input spr-form-input-textarea" id="advantages" name="advantages"
+                                                                    rows="3"></textarea>
+                                                                @error('advantages')
+                                                                    <p class="fw-400 text-danger mt-1">{{ $message }}
+                                                                    </p>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12 spr-form-review-body form-group">
+                                                            <label class="spr-form-label" for="disadvantages">
+                                                                {{ labels('front_messages.disadvantages', 'Disadvantages') }}
+                                                                (optional)
+                                                            </label>
+                                                            <div class="spr-form-input">
+                                                                <textarea wire:model="disadvantages" class="spr-form-input spr-form-input-textarea" id="disadvantages"
+                                                                    name="disadvantages" rows="3"></textarea>
+                                                                @error('disadvantages')
+                                                                    <p class="fw-400 text-danger mt-1">{{ $message }}
+                                                                    </p>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
                                                     </fieldset>
                                                     <div class="spr-form-actions clearfix">
                                                         <input type="submit"
@@ -100,8 +128,15 @@
                                         @else
                                             @if ($review)
                                                 <div class="review-display">
-                                                    <p><strong>Ваш рейтинг:</strong> {{ $review->rating }}/5</p>
-                                                    <p><strong>Коментар:</strong> {{ $review->comment }}</p>
+                                                    <p><strong>Rating:</strong> {{ $review->rating }}/5</p>
+                                                    <p><strong>Comment:</strong> {{ $review->comment }}</p>
+                                                    @if ($review->advantages)
+                                                        <p><strong>Advantages:</strong> {{ $review->advantages }}</p>
+                                                    @endif
+                                                    @if ($review->disadvantages)
+                                                        <p><strong>Disadvantages:</strong> {{ $review->disadvantages }}
+                                                        </p>
+                                                    @endif
                                                     @if ($review->images)
                                                         @foreach (json_decode($review->images) as $image)
                                                             <img src="{{ asset('storage/' . $image) }}"

@@ -17,6 +17,8 @@ class ProductRating extends Model
         'rating',
         'images',
         'comment',
+        'advantages',
+        'disadvantages',
     ];
 
     public function user()
