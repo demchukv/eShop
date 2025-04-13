@@ -57,7 +57,8 @@
                                                                         value="" wire:model="rating"
                                                                         dir="ltr" data-size="s"
                                                                         data-show-clear="false"
-                                                                        data-show-caption="false" data-step="1">
+                                                                        data-show-caption="false" data-step="1"
+                                                                        wire:key>
                                                                 </div>
                                                                 @error('rating')
                                                                     <p class="fw-400 text-danger mt-1">{{ $message }}
@@ -69,9 +70,8 @@
                                                             <label class="spr-form-label" for="add_image">
                                                                 {{ labels('front_messages.add_image_or_video', 'Add Image or Video') }}
                                                             </label>
-                                                            <input wire:model="images" id="review_image" type="file"
-                                                                name="image[]" multiple
-                                                                accept="image/gif, image/jpeg, image/png">
+                                                            <input id="review_image" type="file" name="image[]"
+                                                                multiple accept="image/gif, image/jpeg, image/png">
                                                         </div>
                                                         @error('images')
                                                             <p class="fw-400 text-danger mt-1"></p>
@@ -131,3 +131,92 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+    <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
+    <script src="https://unpkg.com/filepond@^4/dist/filepond.min.js"></script>
+    <script>
+        // Функція для ініціалізації FilePond
+        function initializeFilePond() {
+            const inputElement = document.querySelector('#review_image');
+            if (inputElement) {
+                const pond = FilePond.create(inputElement, {
+                    allowMultiple: true,
+                    acceptedFileTypes: ['image/gif', 'image/jpeg', 'image/png'],
+                    maxFileSize: '2MB',
+                    server: {
+                        process: (fieldName, file, metadata, load, error, progress, abort) => {
+                            const formData = new FormData();
+                            formData.append('file', file, file.name);
+
+                            fetch('/upload-temp', {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                            .content,
+                                    },
+                                    body: formData,
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.path) {
+                                        load(data.path);
+                                        @this.call('addImage', data.path);
+                                    } else {
+                                        error('Upload failed');
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error('FilePond process error:', err);
+                                    error('Request failed');
+                                });
+                        },
+                        revert: (uniqueFileId, load, error) => {
+                            fetch('/delete-temp', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                            .content,
+                                    },
+                                    body: JSON.stringify({
+                                        path: uniqueFileId
+                                    }),
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        @this.call('removeImage', uniqueFileId);
+                                        load();
+                                    } else {
+                                        error('Delete failed');
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error('FilePond revert error:', err);
+                                    error('Request failed');
+                                });
+                        },
+                    },
+                });
+
+                window.addEventListener('showSuccess', () => {
+                    pond.removeFiles();
+                });
+            } else {
+                console.error('FilePond input (#review_image) not found');
+            }
+        }
+
+        // Виконуємо ініціалізацію після завантаження всіх скриптів
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.isScriptsInitialized) {
+                initializeFilePond();
+            } else {
+                window.addEventListener('scripts:loaded', () => {
+                    initializeFilePond();
+                });
+            }
+        });
+    </script>
+@endpush

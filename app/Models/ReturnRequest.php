@@ -18,5 +18,13 @@ class ReturnRequest extends Model
         'order_item_id',
         'status',
         'remarks',
+        'delivery_status',
+        'reason',
+        'application_type',
+        'refund_amount',
+        'refund_method',
+        'description',
+        'evidence_path',
+        'return_method',
     ];
 }

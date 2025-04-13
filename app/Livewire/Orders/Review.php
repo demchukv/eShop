@@ -60,8 +60,26 @@ class Review extends Component
         }
     }
 
+    public function addImage($path)
+    {
+        $this->images[] = $path;
+    }
+
+    public function removeImage($path)
+    {
+        // Видаляємо шлях із $this->images
+        $this->images = array_filter($this->images, fn($image) => $image !== $path);
+    }
+
+    public function updateRating($update_rating)
+    {
+        $this->rating = $update_rating;
+    }
+
     public function save_review($orderItemId)
     {
+        \Log::debug('Rating value:', [$this->rating]); // Дебаг рейтингу
+
         $orderItem = OrderItems::with(['productVariant', 'product'])
             ->find($orderItemId);
         $product = $orderItem->product;
@@ -71,20 +89,22 @@ class Review extends Component
             return;
         }
 
-        // Валідація з CustomerRatings.php
+        // Валідація
         $validator = Validator::make(
             [
                 'rating' => $this->rating,
                 'comment' => $this->comment,
-                'images.*' => $this->images,
+                'images' => $this->images,
             ],
             [
                 'rating' => 'required|integer|min:1|max:5',
                 'comment' => 'required|string|max:500',
-                'images.*' => 'image|max:2048'
+                'images' => 'nullable|array',
+                'images.*' => 'nullable|string', // Оскільки це шляхи до файлів
             ],
             [
-                'comment' => 'Please Write a Review'
+                'comment' => 'Please Write a Review',
+                'rating.required' => 'Please select a rating.',
             ]
         );
 
@@ -94,7 +114,7 @@ class Review extends Component
             return;
         }
 
-        // Перевіряємо, чи є вже відгук для цього продукту від користувача
+        // Перевіряємо, чи є вже відгук
         $existingReview = ProductRating::where('user_id', Auth::id())
             ->where('product_id', $orderItem->product_id)
             ->first();
@@ -106,10 +126,12 @@ class Review extends Component
 
         // Збереження зображень
         $images = [];
-        foreach ($this->images as $key => $image) {
-            $imageName = 'image_' . time() . '_' . $key . '.' . $image->getClientOriginalExtension();
-            $review_image = $image->storeAs('review_image', $imageName, 'public');
-            array_push($images, $review_image);
+        if (!empty($this->images)) {
+            foreach ($this->images as $key => $path) {
+                $imageName = 'image_' . time() . '_' . $key . '.' . pathinfo($path, PATHINFO_EXTENSION);
+                Storage::disk('public')->move($path, 'review_image/' . $imageName);
+                array_push($images, 'review_image/' . $imageName);
+            }
         }
 
         // Дані для збереження
@@ -129,6 +151,7 @@ class Review extends Component
 
         $orderItem->update(['is_write_review' => 1]);
 
+        // Оновлення середнього рейтингу
         if ($product->type == "combo-product") {
             $averageRating = ComboProductRating::where(["product_id" => $product->id])->avg('rating');
         } else {
@@ -149,12 +172,6 @@ class Review extends Component
         $this->reset(['rating', 'comment', 'images']);
         $this->orderItems = $this->orderItems->fresh();
         $this->dispatch('showSuccess', 'The review has been successfully added.');
-        return;
-    }
-
-    public function updateRating($update_rating)
-    {
-        $this->rating = $update_rating;
     }
 
     public function render()

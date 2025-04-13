@@ -56,6 +56,7 @@ use App\Livewire\MyAccount\UserStatus;
 use App\Livewire\MyAccount\ReferralStats;
 use App\Livewire\Orders\Review;
 use App\Livewire\Orders\ReturnOptions;
+use App\Http\Controllers\Orders\ReviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -104,6 +105,8 @@ Route::middleware(App\Http\Middleware\checkAuth::class)->group(function () {
     Route::post('/orders/get-parcel-items', [OrdersDetails::class, 'getParcelItems'])->name('orders.get-parcel-items');
     Route::post('/orders/confirm-received', [OrdersDetails::class, 'confirmReceived'])->name('orders.confirm-received');
     Route::get('/orders/review/{itemId}', Review::class)->name('front_end.orders.review');
+    Route::post('/upload-temp', [ReviewController::class, 'uploadTemp']);
+    Route::post('/delete-temp', [ReviewController::class, 'deleteTemp']);
     Route::get('/orders/return-options/{orderItemId}', ReturnOptions::class)->name('orders.return-options');
 
     // MyAccount

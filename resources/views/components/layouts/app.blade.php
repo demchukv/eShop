@@ -123,7 +123,7 @@
                 }
                 await loadScript("https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js");
                 await loadScript("{{ asset('frontend/elegant/js/plugins.js') }}");
-                await loadScript("{{ asset('frontend/elegant/js/star-rating.js') }}"); // Раніше
+                // await loadScript("{{ asset('frontend/elegant/js/star-rating.js') }}"); // Раніше
                 await loadScript("{{ asset('frontend/elegant/js/star-rating.min.js') }}"); // Раніше
                 await loadScript("{{ asset('frontend/elegant/js/custom.js') }}"); // Раніше
                 await loadScript("{{ asset('frontend/elegant/js/firebase-app.js') }}");
