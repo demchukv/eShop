@@ -26,11 +26,11 @@
                     </div>
                 </div>
                 <p class="spr-review-body">{{ $reviews->comment }}</p>
-                @if ($rating->advantages)
-                    <p><strong>Advantages:</strong> {{ $rating->advantages }}</p>
+                @if ($reviews->advantages)
+                    <p class="mb-0"><strong>Advantages:</strong> {{ $reviews->advantages }}</p>
                 @endif
-                @if ($rating->disadvantages)
-                    <p><strong>Disadvantages:</strong> {{ $rating->disadvantages }}</p>
+                @if ($reviews->disadvantages)
+                    <p class="mb-0"><strong>Disadvantages:</strong> {{ $reviews->disadvantages }}</p>
                 @endif
                 <div class="d-flex align-items-center overflow-auto max-w-300px">
                     @php

@@ -1556,7 +1556,9 @@ document.addEventListener("livewire:navigated", () => {
     });
 
     $(".star-rating").on("rating:change", function (event, value, caption) {
-        Livewire.dispatch("updateRating", { update_rating: value });
+        // Livewire.dispatch("updateRating", { update_rating: value });
+        const orderItemId = $(this).attr("id").replace("rating-", "") ?? null;
+        Livewire.dispatch("updateRating", { update_rating: value, orderItemId: orderItemId });
     });
 
     function attributes() {

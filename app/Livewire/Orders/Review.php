@@ -21,11 +21,11 @@ class Review extends Component
 
     public $itemId;
     public $orderItems = [];
-    public $rating = '';
-    public $comment = '';
-    public $images = [];
-    public $advantages = '';
-    public $disadvantages = '';
+    public $ratings = []; // Масив для рейтингів
+    public $comments = []; // Масив для коментарів
+    public $images = []; // Масив для зображень
+    public $advantages = []; // Масив для переваг
+    public $disadvantages = []; // Масив для недоліків
     public $review = null;
 
     public function mount($itemId)
@@ -62,126 +62,144 @@ class Review extends Component
         }
     }
 
-    public function addImage($path)
+    public function addImage($path, $orderItemId)
     {
-        $this->images[] = $path;
+        if (!isset($this->images[$orderItemId])) {
+            $this->images[$orderItemId] = [];
+        }
+        $this->images[$orderItemId][] = $path;
     }
 
-    public function removeImage($path)
+    public function removeImage($path, $orderItemId)
     {
-        // Видаляємо шлях із $this->images
-        $this->images = array_filter($this->images, fn($image) => $image !== $path);
+        if (isset($this->images[$orderItemId])) {
+            $this->images[$orderItemId] = array_filter($this->images[$orderItemId], fn($image) => $image !== $path);
+        }
     }
 
-    public function updateRating($update_rating)
+    public function updateRating($update_rating, $orderItemId)
     {
-        $this->rating = $update_rating;
+        $this->ratings[$orderItemId] = $update_rating;
     }
 
-    public function save_review($orderItemId)
+    public function save_review()
     {
-        \Log::debug('Rating value:', [$this->rating]); // Дебаг рейтингу
+        $errors = [];
 
-        $orderItem = OrderItems::with(['productVariant', 'product'])
-            ->find($orderItemId);
-        $product = $orderItem->product;
+        foreach ($this->orderItems as $item) {
+            $orderItemId = $item->id;
 
-        if (!$orderItem || $orderItem->is_completed != 1 || $orderItem->is_write_review != 0) {
-            $this->addError('general', 'Cannot submit review for this item.');
-            return;
+            $orderItem = OrderItems::with(['productVariant', 'product'])
+                ->find($orderItemId);
+            $product = $orderItem->product;
+
+            if (!$orderItem || $orderItem->is_completed != 1 || $orderItem->is_write_review != 0) {
+                $errors[$orderItemId] = 'Cannot submit review for this item.';
+                continue;
+            }
+
+            // Валідація для кожного товару
+            $validator = Validator::make(
+                [
+                    'rating' => $this->ratings[$orderItemId] ?? null,
+                    'comment' => $this->comments[$orderItemId] ?? null,
+                    'advantages' => $this->advantages[$orderItemId] ?? null,
+                    'disadvantages' => $this->disadvantages[$orderItemId] ?? null,
+                    'images' => $this->images[$orderItemId] ?? [],
+                ],
+                [
+                    'rating' => 'required|integer|min:1|max:5',
+                    'comment' => 'required|string|max:500',
+                    'advantages' => 'nullable|string|max:500',
+                    'disadvantages' => 'nullable|string|max:500',
+                    'images' => 'nullable|array',
+                    'images.*' => 'nullable|string',
+                ],
+                [
+                    'comment' => 'Please Write a Review',
+                    'rating.required' => 'Please select a rating.',
+                    'advantages.max' => 'Advantages must not exceed 500 characters.',
+                    'disadvantages.max' => 'Disadvantages must not exceed 500 characters.',
+                ]
+            );
+
+            if ($validator->fails()) {
+                $errors[$orderItemId] = $validator->errors()->all();
+                continue;
+            }
+
+            // Перевіряємо, чи є вже відгук
+            $existingReview = ProductRating::where('user_id', Auth::id())
+                ->where('product_id', $orderItem->product_id)
+                ->first();
+
+            if ($existingReview) {
+                $errors[$orderItemId] = 'You have already submitted a review for this product.';
+                continue;
+            }
+
+            // Збереження зображень
+            $savedImages = [];
+            if (!empty($this->images[$orderItemId])) {
+                foreach ($this->images[$orderItemId] as $key => $path) {
+                    $imageName = 'image_' . time() . '_' . $key . '.' . pathinfo($path, PATHINFO_EXTENSION);
+                    Storage::disk('public')->move($path, 'review_image/' . $imageName);
+                    $savedImages[] = 'review_image/' . $imageName;
+                }
+            }
+
+            // Дані для збереження
+            $validated = [
+                'product_id' => $product->id,
+                'rating' => $this->ratings[$orderItemId],
+                'comment' => $this->comments[$orderItemId],
+                'advantages' => $this->advantages[$orderItemId] ?? null,
+                'disadvantages' => $this->disadvantages[$orderItemId] ?? null,
+                'user_id' => Auth::id(),
+                'images' => json_encode($savedImages),
+            ];
+
+            // Збереження відгуку
+            if ($product->type == "combo-product") {
+                ComboProductRating::create($validated);
+            } else {
+                ProductRating::create($validated);
+            }
+
+            $orderItem->update(['is_write_review' => 1]);
+
+            // Оновлення середнього рейтингу
+            if ($product->type == "combo-product") {
+                $averageRating = ComboProductRating::where(["product_id" => $product->id])->avg('rating');
+            } else {
+                $averageRating = ProductRating::where(["product_id" => $product->id])->avg('rating');
+            }
+            $ratingUpdate = [
+                'rating' => $averageRating
+            ];
+            $ratingUpdate['no_of_ratings'] = DB::raw('no_of_ratings + 1');
+            if ($product->type == "combo-product") {
+                updateDetails($ratingUpdate, ['id' => $validated['product_id']], 'combo_products');
+            } else {
+                updateDetails($ratingUpdate, ['id' => $validated['product_id']], 'products');
+            }
         }
 
-        // Валідація
-        $validator = Validator::make(
-            [
-                'rating' => $this->rating,
-                'comment' => $this->comment,
-                'advantages' => $this->advantages,
-                'disadvantages' => $this->disadvantages,
-                'images' => $this->images,
-            ],
-            [
-                'rating' => 'required|integer|min:1|max:5',
-                'comment' => 'required|string|max:500',
-                'advantages' => $this->advantages,
-                'disadvantages' => $this->disadvantages,
-                'images' => 'nullable|array',
-                'images.*' => 'nullable|string', // Оскільки це шляхи до файлів
-            ],
-            [
-                'comment' => 'Please Write a Review',
-                'rating.required' => 'Please select a rating.',
-                'advantages.max' => 'Advantages must not exceed 500 characters.',
-                'disadvantages.max' => 'Disadvantages must not exceed 500 characters.',
-            ]
-        );
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
+        // Перевірка помилок
+        if (!empty($errors)) {
             $this->dispatch('validationErrorshow', ['data' => $errors]);
             return;
         }
 
-        // Перевіряємо, чи є вже відгук
-        $existingReview = ProductRating::where('user_id', Auth::id())
-            ->where('product_id', $orderItem->product_id)
-            ->first();
-
-        if ($existingReview) {
-            $this->addError('general', 'You have already submitted a review for this product.');
-            return;
-        }
-
-        // Збереження зображень
-        $images = [];
-        if (!empty($this->images)) {
-            foreach ($this->images as $key => $path) {
-                $imageName = 'image_' . time() . '_' . $key . '.' . pathinfo($path, PATHINFO_EXTENSION);
-                Storage::disk('public')->move($path, 'review_image/' . $imageName);
-                array_push($images, 'review_image/' . $imageName);
-            }
-        }
-
-        // Дані для збереження
-        $validated = [
-            'product_id' => $product->id,
-            'rating' => $this->rating,
-            'comment' => $this->comment,
-            'advantages' => $this->advantages,
-            'disadvantages' => $this->disadvantages,
-            'user_id' => Auth::id(),
-            'images' => json_encode($images),
-        ];
-
-        if ($product->type == "combo-product") {
-            ComboProductRating::create($validated);
-        } else {
-            ProductRating::create($validated);
-        }
-
-        $orderItem->update(['is_write_review' => 1]);
-
-        // Оновлення середнього рейтингу
-        if ($product->type == "combo-product") {
-            $averageRating = ComboProductRating::where(["product_id" => $product->id])->avg('rating');
-        } else {
-            $averageRating = ProductRating::where(["product_id" => $product->id])->avg('rating');
-        }
-        $ratingUpdate = [
-            'rating' => $averageRating
-        ];
-        $ratingUpdate['no_of_ratings'] = DB::raw('no_of_ratings + 1');
-        if ($product->type == "combo-product") {
-            updateDetails($ratingUpdate, ['id' => $validated['product_id']], 'combo_products');
-        } else {
-            updateDetails($ratingUpdate, ['id' => $validated['product_id']], 'products');
-        }
-
         // Скидаємо поля форми
-        $this->review = $validated;
-        $this->reset(['rating', 'comment', 'advantages', 'disadvantages', 'images']);
+        $this->reset(['ratings', 'comments', 'advantages', 'disadvantages', 'images']);
         $this->orderItems = $this->orderItems->fresh();
-        $this->dispatch('showSuccess', 'The review has been successfully added.');
+        $this->dispatch('showSuccess', 'The reviews have been successfully added.');
+        // Показати повідомлення
+        session()->flash('message', 'Your review has been submitted successfully.');
+
+        // Перенаправлення на ту ж сторінку
+        return redirect()->route('orders.review');
     }
 
     public function render()
