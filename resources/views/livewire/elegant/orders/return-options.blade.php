@@ -154,7 +154,7 @@
                                         style="display: flex; flex-wrap: wrap; gap: 10px;">
                                         @foreach ($tempUploads as $key => $file)
                                             <div class="preview-item"
-                                                style="position: relative; width: 170px; height: 170px;">
+                                                style="position: relative; width: 100px; height: 100px;">
                                                 @if (in_array($file->getMimeType(), ['image/jpeg', 'image/png', 'image/gif']))
                                                     <img src="{{ $file->temporaryUrl() }}" alt="Preview"
                                                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 5px;">
@@ -211,8 +211,8 @@
 
         .preview-item {
             position: relative;
-            width: 170px;
-            height: 170px;
+            width: 100px;
+            height: 100px;
             border: 1px solid #ddd;
             border-radius: 5px;
             overflow: hidden;

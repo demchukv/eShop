@@ -9,6 +9,7 @@ use App\Models\OrderItems;
 use App\Models\ReturnRequest;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Models\Disput;
 
 class ReturnOptions extends Component
 {
@@ -84,7 +85,7 @@ class ReturnOptions extends Component
         if (!empty($value)) {
             // Валідуємо нові файли
             $this->validate([
-                'newUploads.*' => 'file|mimes:jpeg,png,gif,mp4|max:10240', // 10MB
+                'newUploads.*' => 'file|mimes:jpeg,png,gif,mp4|max:20480', // 20MB
             ]);
 
             // Додаємо нові файли до tempUploads з унікальними ключами
@@ -190,8 +191,16 @@ class ReturnOptions extends Component
             'evidence_path' => $evidencePath,
         ]);
 
+        // Створюємо диспут
+        $disput = Disput::create([
+            'return_request_id' => $returnRequest->id,
+            'user_id' => $this->user->id,
+            'seller_id' => $this->orderItem->seller_id,
+            'status' => 'open',
+        ]);
+
         session()->flash('message', 'Return request submitted successfully!');
-        return redirect()->route('orders.details', $this->orderItem->order_id);
+        return redirect()->route('disput.show', $disput->id); // Перенаправлення на сторінку диспуту
     }
 
     private function handleUpload()
