@@ -14,8 +14,9 @@ $(".loading-state").addClass("d-none");
 Livewire.on("validationErrorshow", (message) => {
     let messages = message[0].data;
     $.each(messages, function (key, value) {
+
         iziToast.error({
-            message: value[0],
+            message: Array.isArray(value) ? value[0] : value,
             position: "topRight",
         });
         return false;
@@ -1557,9 +1558,21 @@ document.addEventListener("livewire:navigated", () => {
 
     $(".star-rating").on("rating:change", function (event, value, caption) {
         // Livewire.dispatch("updateRating", { update_rating: value });
+        const id = $(this).attr("id");
+        if (id.startsWith("seller-")) {
+            const field = $(this).attr('id').replace('seller-', '').replace(/-/g, '_');
+            Livewire.dispatch('updateSellerRating', {
+                field: field,
+                value: value
+            });
+            return;
+        }
         const orderItemId = $(this).attr("id").replace("rating-", "") ?? null;
         Livewire.dispatch("updateRating", { update_rating: value, orderItemId: orderItemId });
     });
+
+
+
 
     $(document).on("shown.bs.collapse", ".accordion-collapse", function () {
         const ratingInputs = $(this).find(".kv-ltr-theme-svg-star");

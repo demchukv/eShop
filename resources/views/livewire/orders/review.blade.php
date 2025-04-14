@@ -12,6 +12,93 @@
                         @else
                             <form wire:submit.prevent="save_review" class="product-review-form new-review-form"
                                 enctype="multipart/form-data" wire:ignore>
+                                <!-- Секція оцінки продавця -->
+                                <div class="mb-4">
+                                    <h4 class="mb-3">Review the Seller</h4>
+                                    <div class="row">
+                                        <!-- Quality of Service -->
+                                        <div class="col-sm-4 spr-form-review-rating form-group">
+                                            <label class="spr-form-label">Quality of Service</label>
+                                            <div class="product-review pt-1">
+                                                <div class="review-rating">
+                                                    <input id="seller-quality-of-service"
+                                                        name="seller_quality_of_service"
+                                                        class="kv-ltr-theme-svg-star star-rating rating-loading"
+                                                        value="{{ $this->sellerQualityOfService ?? '' }}" dir="ltr"
+                                                        data-size="s" data-show-clear="false" data-show-caption="false"
+                                                        data-step="1">
+                                                </div>
+                                                @error('seller')
+                                                    @foreach ($errors as $error)
+                                                        @if (str_contains($error, 'Quality of Service'))
+                                                            <p class="fw-400 text-danger mt-1">{{ $error }}</p>
+                                                        @endif
+                                                    @endforeach
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <!-- On-time Delivery -->
+                                        <div class="col-sm-4 spr-form-review-rating form-group">
+                                            <label class="spr-form-label">On-time Delivery</label>
+                                            <div class="product-review pt-1">
+                                                <div class="review-rating">
+                                                    <input id="seller-on-time-delivery" name="seller_on_time_delivery"
+                                                        class="kv-ltr-theme-svg-star star-rating rating-loading"
+                                                        value="{{ $this->sellerOnTimeDelivery ?? '' }}" dir="ltr"
+                                                        data-size="s" data-show-clear="false" data-show-caption="false"
+                                                        data-step="1">
+                                                </div>
+                                                @error('seller')
+                                                    @foreach ($errors as $error)
+                                                        @if (str_contains($error, 'On-time Delivery'))
+                                                            <p class="fw-400 text-danger mt-1">{{ $error }}</p>
+                                                        @endif
+                                                    @endforeach
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <!-- Relevance of Price and Availability -->
+                                        <div class="col-sm-4 spr-form-review-rating form-group">
+                                            <label class="spr-form-label">Relevance of Price and Availability</label>
+                                            <div class="product-review pt-1">
+                                                <div class="review-rating">
+                                                    <input id="seller-relevance-price-availability"
+                                                        name="seller_relevance_price_availability"
+                                                        class="kv-ltr-theme-svg-star star-rating rating-loading"
+                                                        value="{{ $this->sellerPriceAvailability ?? '' }}"
+                                                        dir="ltr" data-size="s" data-show-clear="false"
+                                                        data-show-caption="false" data-step="1">
+                                                </div>
+                                                @error('seller')
+                                                    @foreach ($errors as $error)
+                                                        @if (str_contains($error, 'Relevance of Price'))
+                                                            <p class="fw-400 text-danger mt-1">{{ $error }}</p>
+                                                        @endif
+                                                    @endforeach
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <!-- Коментар про продавця -->
+                                        <div class="col-12 spr-form-review-body form-group mt-3">
+                                            <label class="spr-form-label" for="seller-comment">
+                                                Comment about the Seller
+                                            </label>
+                                            <div class="spr-form-input">
+                                                <textarea wire:model="sellerComment" class="spr-form-input spr-form-input-textarea" id="seller-comment"
+                                                    name="seller_comment" rows="3"></textarea>
+                                                @error('seller')
+                                                    @foreach ($errors as $error)
+                                                        @if (str_contains($error, 'write a comment'))
+                                                            <p class="fw-400 text-danger mt-1">{{ $error }}</p>
+                                                        @endif
+                                                    @endforeach
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Акордіон для товарів -->
                                 <div class="accordion" id="reviewAccordion">
                                     @foreach ($orderItems as $index => $item)
                                         <div class="accordion-item">
@@ -195,9 +282,11 @@
     <script src="https://unpkg.com/filepond@^4/dist/filepond.min.js"></script>
     <script>
         // Функція для ініціалізації FilePond для всіх полів
-        function initializeFilePonds() {
-            const inputs = document.querySelectorAll('input[id^="review_image_"]');
+        function initializeFilePonds(container = document) {
+            const inputs = container.querySelectorAll('input[id^="review_image_"]');
             inputs.forEach(input => {
+                if (input.dataset.filepondInitialized) return;
+                input.dataset.filepondInitialized = true;
                 const orderItemId = input.id.replace('review_image_', '');
                 const pond = FilePond.create(input, {
                     allowMultiple: true,
@@ -265,7 +354,7 @@
             });
         }
 
-        // Виконуємо ініціалізацію після завантаження всіх скриптів
+        // Ініціалізація FilePond після завантаження сторінки
         document.addEventListener('DOMContentLoaded', () => {
             if (window.isScriptsInitialized) {
                 initializeFilePonds();
@@ -274,6 +363,11 @@
                     initializeFilePonds();
                 });
             }
+        });
+
+        // Ініціалізація FilePond після розгортання акордіона
+        document.addEventListener('shown.bs.collapse', (event) => {
+            initializeFilePonds(event.target);
         });
     </script>
 @endpush

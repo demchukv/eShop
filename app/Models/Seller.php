@@ -13,11 +13,12 @@ class Seller extends Model implements HasMedia
 {
     use InteractsWithMedia, HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'seller_data';
+    protected $table = 'seller_store'; // Виправлено на 'seller_store'
 
     protected $fillable = [
+        'seller_id',
         'user_id',
-        'store_ids',
+        'store_id',
         'store_name',
         'store_url',
         'store_description',
@@ -33,12 +34,12 @@ class Seller extends Model implements HasMedia
         'permissions',
         'slug',
         'address_proof',
-        'authorized_signature',
         'logo',
         'store_thumbnail',
-        'national_identity_card',
         'category_ids',
         'disk',
+        'rating',
+        'no_of_ratings',
     ];
 
     /**
@@ -46,7 +47,7 @@ class Seller extends Model implements HasMedia
      */
     public function ratings()
     {
-        return $this->hasMany(SellerRating::class, 'seller_id');
+        return $this->hasMany(SellerRating::class, 'seller_id', 'seller_id');
     }
 
     /**
@@ -67,7 +68,7 @@ class Seller extends Model implements HasMedia
 
     public function order_items()
     {
-        return $this->hasMany(OrderItems::class, 'id', 'partner_id');
+        return $this->hasMany(OrderItems::class, 'seller_id', 'seller_id');
     }
 
     public function user()
@@ -77,12 +78,17 @@ class Seller extends Model implements HasMedia
 
     public function products()
     {
-        return $this->hasMany(Product::class)->with('variants');
+        return $this->hasMany(Product::class, 'seller_id', 'seller_id');
     }
 
     public function stores()
     {
-        return $this->belongsToMany(Store::class)->withPivot('store_name');
+        return $this->belongsToMany(Store::class, 'seller_store', 'seller_id', 'store_id')->withPivot('store_name');
+    }
+
+    public function sellerData()
+    {
+        return $this->belongsTo(SellerData::class, 'seller_id', 'id');
     }
 
     public function registerMediaCollections(): void
