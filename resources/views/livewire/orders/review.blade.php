@@ -12,141 +12,166 @@
                         @else
                             <form wire:submit.prevent="save_review" class="product-review-form new-review-form"
                                 enctype="multipart/form-data" wire:ignore>
-                                @foreach ($orderItems as $item)
-                                    <div class="mb-4">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <!-- Зображення продукту -->
-                                            @if ($item->productVariant->product->image)
-                                                <img src="{{ asset('storage/' . $item->productVariant->product->image) }}"
-                                                    alt="{{ $item->product->name ?? 'Product image' }}"
-                                                    style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
-                                            @else
-                                                <img src="{{ asset('path/to/default-image.jpg') }}"
-                                                    alt="Default product image"
-                                                    style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
-                                            @endif
-                                            <!-- Назва продукту як посилання -->
-                                            <h5>
-                                                <a href="{{ route('products.details', $item->productVariant->product->slug ?? $item->productVariant->product->id) }}"
-                                                    class="text-decoration-none">
-                                                    {{ $item->product->name ?? 'Product name' }}
-                                                </a>
-                                                @if ($item->variant_name)
-                                                    - {{ $item->variant_name }}
-                                                @endif
-                                            </h5>
+                                <div class="accordion" id="reviewAccordion">
+                                    @foreach ($orderItems as $index => $item)
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header" id="heading-{{ $item->id }}">
+                                                <button class="accordion-button {{ $index === 0 ? '' : 'collapsed' }}"
+                                                    type="button" data-bs-toggle="collapse"
+                                                    data-bs-target="#collapse-{{ $item->id }}"
+                                                    aria-expanded="{{ $index === 0 ? 'true' : 'false' }}"
+                                                    aria-controls="collapse-{{ $item->id }}">
+                                                    <div class="d-flex align-items-center">
+                                                        @if ($item->productVariant->product->image)
+                                                            <img src="{{ asset('storage/' . $item->productVariant->product->image) }}"
+                                                                alt="{{ $item->product->name ?? 'Product image' }}"
+                                                                style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
+                                                        @else
+                                                            <img src="{{ asset('path/to/default-image.jpg') }}"
+                                                                alt="Default product image"
+                                                                style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
+                                                        @endif
+                                                        <span>
+                                                            {{ $item->product->name ?? 'Product name' }}
+                                                            @if ($item->variant_name)
+                                                                - {{ $item->variant_name }}
+                                                            @endif
+                                                        </span>
+                                                    </div>
+                                                </button>
+                                            </h2>
+                                            <div id="collapse-{{ $item->id }}"
+                                                class="accordion-collapse collapse {{ $index === 0 ? 'show' : '' }}"
+                                                aria-labelledby="heading-{{ $item->id }}"
+                                                data-bs-parent="#reviewAccordion">
+                                                <div class="accordion-body">
+                                                    @if ($item->is_completed == 1)
+                                                        @php
+                                                            $review = \App\Models\ProductRating::where(
+                                                                'user_id',
+                                                                Auth::id(),
+                                                            )
+                                                                ->where('product_id', $item->product_id)
+                                                                ->first();
+                                                        @endphp
+                                                        @if ($item->is_write_review == 0)
+                                                            <fieldset class="row spr-form-contact">
+                                                                <div class="col-sm-6 spr-form-review-rating form-group">
+                                                                    <label
+                                                                        class="spr-form-label">{{ labels('front_messages.rating', 'Rating') }}</label>
+                                                                    <div class="product-review pt-1">
+                                                                        <div class="review-rating">
+                                                                            <input id="rating-{{ $item->id }}"
+                                                                                name="ratings[{{ $item->id }}]"
+                                                                                class="kv-ltr-theme-svg-star star-rating rating-loading review_rating"
+                                                                                value=""
+                                                                                wire:model="ratings.{{ $item->id }}"
+                                                                                dir="ltr" data-size="s"
+                                                                                data-show-clear="false"
+                                                                                data-show-caption="false"
+                                                                                data-step="1">
+                                                                        </div>
+                                                                        @error('ratings.' . $item->id)
+                                                                            <p class="fw-400 text-danger mt-1">
+                                                                                {{ $message }}</p>
+                                                                        @enderror
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 spr-form-review-body form-group">
+                                                                    <label class="spr-form-label"
+                                                                        for="add_image_{{ $item->id }}">
+                                                                        {{ labels('front_messages.add_image_or_video', 'Add Image or Video') }}
+                                                                    </label>
+                                                                    <input id="review_image_{{ $item->id }}"
+                                                                        type="file"
+                                                                        name="images[{{ $item->id }}][]" multiple
+                                                                        accept="image/gif, image/jpeg, image/png">
+                                                                    @error('images.' . $item->id)
+                                                                        <p class="fw-400 text-danger mt-1">
+                                                                            {{ $message }}</p>
+                                                                    @enderror
+                                                                </div>
+                                                                <div class="col-12 spr-form-review-body form-group">
+                                                                    <label class="spr-form-label"
+                                                                        for="message_{{ $item->id }}">
+                                                                        {{ labels('front_messages.description', 'Description') }}
+                                                                    </label>
+                                                                    <div class="spr-form-input">
+                                                                        <textarea wire:model="comments.{{ $item->id }}" class="spr-form-input spr-form-input-textarea"
+                                                                            id="message_{{ $item->id }}" name="comments[{{ $item->id }}]" rows="3"></textarea>
+                                                                        @error('comments.' . $item->id)
+                                                                            <p class="fw-400 text-danger mt-1">
+                                                                                {{ $message }}</p>
+                                                                        @enderror
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 spr-form-review-body form-group">
+                                                                    <label class="spr-form-label"
+                                                                        for="advantages_{{ $item->id }}">
+                                                                        {{ labels('front_messages.advantages', 'Advantages') }}
+                                                                        (optional)
+                                                                    </label>
+                                                                    <div class="spr-form-input">
+                                                                        <textarea wire:model="advantages.{{ $item->id }}" class="spr-form-input spr-form-input-textarea"
+                                                                            id="advantages_{{ $item->id }}" name="advantages[{{ $item->id }}]" rows="1"></textarea>
+                                                                        @error('advantages.' . $item->id)
+                                                                            <p class="fw-400 text-danger mt-1">
+                                                                                {{ $message }}</p>
+                                                                        @enderror
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 spr-form-review-body form-group">
+                                                                    <label class="spr-form-label"
+                                                                        for="disadvantages_{{ $item->id }}">
+                                                                        {{ labels('front_messages.disadvantages', 'Disadvantages') }}
+                                                                        (optional)
+                                                                    </label>
+                                                                    <div class="spr-form-input">
+                                                                        <textarea wire:model="disadvantages.{{ $item->id }}" class="spr-form-input spr-form-input-textarea"
+                                                                            id="disadvantages_{{ $item->id }}" name="disadvantages[{{ $item->id }}]" rows="1"></textarea>
+                                                                        @error('disadvantages.' . $item->id)
+                                                                            <p class="fw-400 text-danger mt-1">
+                                                                                {{ $message }}</p>
+                                                                        @enderror
+                                                                    </div>
+                                                                </div>
+                                                            </fieldset>
+                                                        @else
+                                                            @if ($review)
+                                                                <div class="review-display">
+                                                                    <p><strong>Rating:</strong> {{ $review->rating }}/5
+                                                                    </p>
+                                                                    <p><strong>Comment:</strong> {{ $review->comment }}
+                                                                    </p>
+                                                                    @if ($review->advantages)
+                                                                        <p><strong>Advantages:</strong>
+                                                                            {{ $review->advantages }}</p>
+                                                                    @endif
+                                                                    @if ($review->disadvantages)
+                                                                        <p><strong>Disadvantages:</strong>
+                                                                            {{ $review->disadvantages }}</p>
+                                                                    @endif
+                                                                    @if ($review->images)
+                                                                        @foreach (json_decode($review->images) as $image)
+                                                                            <img src="{{ asset('storage/' . $image) }}"
+                                                                                alt="Review image"
+                                                                                style="max-width: 100px;" />
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            @else
+                                                                <p>The review has been saved.</p>
+                                                            @endif
+                                                        @endif
+                                                    @else
+                                                        <p>This item has not yet been confirmed as received.</p>
+                                                    @endif
+                                                </div>
+                                            </div>
                                         </div>
-                                        @if ($item->is_completed == 1)
-                                            @php
-                                                $review = \App\Models\ProductRating::where('user_id', Auth::id())
-                                                    ->where('product_id', $item->product_id)
-                                                    ->first();
-                                            @endphp
-                                            @if ($item->is_write_review == 0)
-                                                <fieldset class="row spr-form-contact">
-                                                    <div class="col-sm-6 spr-form-review-rating form-group">
-                                                        <label
-                                                            class="spr-form-label">{{ labels('front_messages.rating', 'Rating') }}</label>
-                                                        <div class="product-review pt-1">
-                                                            <div class="review-rating">
-                                                                <input id="rating-{{ $item->id }}"
-                                                                    name="ratings[{{ $item->id }}]"
-                                                                    class="kv-ltr-theme-svg-star star-rating rating-loading review_rating"
-                                                                    value=""
-                                                                    wire:model="ratings.{{ $item->id }}"
-                                                                    dir="ltr" data-size="s"
-                                                                    data-show-clear="false" data-show-caption="false"
-                                                                    data-step="1">
-                                                            </div>
-                                                            @error('ratings.' . $item->id)
-                                                                <p class="fw-400 text-danger mt-1">{{ $message }}</p>
-                                                            @enderror
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12 spr-form-review-body form-group">
-                                                        <label class="spr-form-label"
-                                                            for="add_image_{{ $item->id }}">
-                                                            {{ labels('front_messages.add_image_or_video', 'Add Image or Video') }}
-                                                        </label>
-                                                        <input id="review_image_{{ $item->id }}" type="file"
-                                                            name="images[{{ $item->id }}][]" multiple
-                                                            accept="image/gif, image/jpeg, image/png">
-                                                        @error('images.' . $item->id)
-                                                            <p class="fw-400 text-danger mt-1">{{ $message }}</p>
-                                                        @enderror
-                                                    </div>
-                                                    <div class="col-12 spr-form-review-body form-group">
-                                                        <label class="spr-form-label"
-                                                            for="message_{{ $item->id }}">
-                                                            {{ labels('front_messages.description', 'Description') }}
-                                                        </label>
-                                                        <div class="spr-form-input">
-                                                            <textarea wire:model="comments.{{ $item->id }}" class="spr-form-input spr-form-input-textarea"
-                                                                id="message_{{ $item->id }}" name="comments[{{ $item->id }}]" rows="3"></textarea>
-                                                            @error('comments.' . $item->id)
-                                                                <p class="fw-400 text-danger mt-1">{{ $message }}</p>
-                                                            @enderror
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12 spr-form-review-body form-group">
-                                                        <label class="spr-form-label"
-                                                            for="advantages_{{ $item->id }}">
-                                                            {{ labels('front_messages.advantages', 'Advantages') }}
-                                                            (optional)
-                                                        </label>
-                                                        <div class="spr-form-input">
-                                                            <textarea wire:model="advantages.{{ $item->id }}" class="spr-form-input spr-form-input-textarea"
-                                                                id="advantages_{{ $item->id }}" name="advantages[{{ $item->id }}]" rows="3"></textarea>
-                                                            @error('advantages.' . $item->id)
-                                                                <p class="fw-400 text-danger mt-1">{{ $message }}</p>
-                                                            @enderror
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12 spr-form-review-body form-group">
-                                                        <label class="spr-form-label"
-                                                            for="disadvantages_{{ $item->id }}">
-                                                            {{ labels('front_messages.disadvantages', 'Disadvantages') }}
-                                                            (optional)
-                                                        </label>
-                                                        <div class="spr-form-input">
-                                                            <textarea wire:model="disadvantages.{{ $item->id }}" class="spr-form-input spr-form-input-textarea"
-                                                                id="disadvantages_{{ $item->id }}" name="disadvantages[{{ $item->id }}]" rows="3"></textarea>
-                                                            @error('disadvantages.' . $item->id)
-                                                                <p class="fw-400 text-danger mt-1">{{ $message }}</p>
-                                                            @enderror
-                                                        </div>
-                                                    </div>
-                                                </fieldset>
-                                            @else
-                                                @if ($review)
-                                                    <div class="review-display">
-                                                        <p><strong>Rating:</strong> {{ $review->rating }}/5</p>
-                                                        <p><strong>Comment:</strong> {{ $review->comment }}</p>
-                                                        @if ($review->advantages)
-                                                            <p><strong>Advantages:</strong> {{ $review->advantages }}
-                                                            </p>
-                                                        @endif
-                                                        @if ($review->disadvantages)
-                                                            <p><strong>Disadvantages:</strong>
-                                                                {{ $review->disadvantages }}</p>
-                                                        @endif
-                                                        @if ($review->images)
-                                                            @foreach (json_decode($review->images) as $image)
-                                                                <img src="{{ asset('storage/' . $image) }}"
-                                                                    alt="Review image" style="max-width: 100px;" />
-                                                            @endforeach
-                                                        @endif
-                                                    </div>
-                                                @else
-                                                    <p>The review has been saved.</p>
-                                                @endif
-                                            @endif
-                                        @else
-                                            <p>This item has not yet been confirmed as received.</p>
-                                        @endif
-                                    </div>
-                                @endforeach
-                                <div class="spr-form-actions clearfix">
+                                    @endforeach
+                                </div>
+                                <div class="spr-form-actions clearfix mt-3">
                                     <input type="submit" class="btn btn-primary spr-button spr-button-primary"
                                         value="Submit Reviews" />
                                 </div>

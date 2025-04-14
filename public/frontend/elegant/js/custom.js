@@ -1561,6 +1561,16 @@ document.addEventListener("livewire:navigated", () => {
         Livewire.dispatch("updateRating", { update_rating: value, orderItemId: orderItemId });
     });
 
+    $(document).on("shown.bs.collapse", ".accordion-collapse", function () {
+        const ratingInputs = $(this).find(".kv-ltr-theme-svg-star");
+        if (ratingInputs.length > 0) {
+            ratingInputs.rating({
+                hoverOnClear: false,
+                theme: "krajee-svg",
+            });
+        }
+    });
+
     function attributes() {
         $(".attributes").on("change", function (e) {
             e.preventDefault();

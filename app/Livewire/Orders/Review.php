@@ -42,6 +42,8 @@ class Review extends Component
             abort(404, 'Order item not found or you do not have permission to review it.');
         }
 
+        dd($initialOrderItem);
+
         $parcelItem = Parcelitem::where('order_item_id', $this->itemId)->first();
 
         if (!$parcelItem) {
