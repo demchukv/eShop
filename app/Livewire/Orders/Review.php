@@ -34,11 +34,14 @@ class Review extends Component
     public $sellerComment; // Коментар про продавця
     public $review = null;
     public $initialOrderItem; // Зберігаємо initialOrderItem для доступу до store_id, seller_id, order_id
+    public $sellerReview; // Відгук про продавця
+    public $productReviews = []; // Відгуки про товари
 
     public function mount($itemId)
     {
         $this->itemId = $itemId;
 
+        // Завантажуємо initialOrderItem
         $this->initialOrderItem = OrderItems::where('id', $this->itemId)
             ->whereHas('order', function ($query) {
                 $query->where('user_id', Auth::id());
@@ -49,6 +52,15 @@ class Review extends Component
             abort(404, 'Order item not found or you do not have permission to review it.');
         }
 
+        \Log::debug('initialOrderItem seller_id: ' . $this->initialOrderItem->seller_id);
+
+        // Перевіряємо наявність відгуку продавця
+        $this->sellerReview = SellerRating::where('user_id', Auth::id())
+            ->where('order_id', $this->initialOrderItem->order_id)
+            ->where('store_id', $this->initialOrderItem->store_id)
+            ->first();
+
+        // Завантажуємо orderItems
         $parcelItem = Parcelitem::where('order_item_id', $this->itemId)->first();
 
         if (!$parcelItem) {
@@ -67,6 +79,39 @@ class Review extends Component
                 ->with(['productVariant.product'])
                 ->get();
         }
+
+        // Завантажуємо відгуки про товари
+        // Завантажуємо відгуки про товари
+        foreach ($this->orderItems as $item) {
+            if (!$item->productVariant || !$item->productVariant->product) {
+                \Log::warning('Missing productVariant or product for item_id: ' . $item->id);
+                $this->productReviews[$item->id] = null;
+                continue;
+            }
+
+            $productId = $item->productVariant->product_id;
+            $productType = $item->productVariant->product->type;
+
+            \Log::debug('Checking review for item_id: ' . $item->id . ', product_id: ' . $productId . ', user_id: ' . Auth::id() . ', product_type: ' . $productType);
+
+            $review = ProductRating::where('user_id', Auth::id())
+                ->where('product_id', $productId)
+                ->first();
+
+            if (!$review && $productType == 'combo-product') {
+                $review = ComboProductRating::where('user_id', Auth::id())
+                    ->where('product_id', $productId)
+                    ->first();
+            }
+
+            $this->productReviews[$item->id] = $review;
+
+            \Log::debug('Review for item_id: ' . $item->id . ': ' . json_encode($review));
+            \Log::debug('is_write_review: ' . $item->is_write_review . ', product_type: ' . $productType);
+        }
+
+        \Log::debug('sellerReview: ' . json_encode($this->sellerReview));
+        \Log::debug('productReviews: ' . json_encode($this->productReviews));
     }
 
     public function addImage($path, $orderItemId)
@@ -91,7 +136,6 @@ class Review extends Component
 
     public function updateSellerRating($field, $value)
     {
-        // Оновлюємо відповідне поле оцінки продавця
         if (in_array($field, ['quality_of_service', 'on_time_delivery', 'relevance_price_availability'])) {
             $property = match ($field) {
                 'quality_of_service' => 'sellerQualityOfService',
@@ -106,45 +150,42 @@ class Review extends Component
     {
         $errors = [];
 
-        // Валідація оцінки продавця
-        $sellerValidator = Validator::make(
-            [
-                'quality_of_service' => $this->sellerQualityOfService,
-                'on_time_delivery' => $this->sellerOnTimeDelivery,
-                'relevance_price_availability' => $this->sellerPriceAvailability,
-                'comment' => $this->sellerComment,
-            ],
-            [
-                'quality_of_service' => 'required|integer|min:1|max:5',
-                'on_time_delivery' => 'required|integer|min:1|max:5',
-                'relevance_price_availability' => 'required|integer|min:1|max:5',
-                'comment' => 'required|string|max:1000',
-            ],
-            [
-                'quality_of_service.required' => 'Please select a rating for Quality of Service.',
-                'on_time_delivery.required' => 'Please select a rating for On-time Delivery.',
-                'relevance_price_availability.required' => 'Please select a rating for Relevance of Price and Availability.',
-                'comment.required' => 'Please write a comment about the seller.',
-            ]
-        );
+        // Валідація оцінки продавця, якщо форма активна
+        if (!$this->sellerReview) {
+            $sellerValidator = Validator::make(
+                [
+                    'quality_of_service' => $this->sellerQualityOfService,
+                    'on_time_delivery' => $this->sellerOnTimeDelivery,
+                    'relevance_price_availability' => $this->sellerPriceAvailability,
+                    'comment' => $this->sellerComment,
+                ],
+                [
+                    'quality_of_service' => 'required|integer|min:1|max:5',
+                    'on_time_delivery' => 'required|integer|min:1|max:5',
+                    'relevance_price_availability' => 'required|integer|min:1|max:5',
+                    'comment' => 'required|string|max:1000',
+                ],
+                [
+                    'quality_of_service.required' => 'Please select a rating for Quality of Service.',
+                    'on_time_delivery.required' => 'Please select a rating for On-time Delivery.',
+                    'relevance_price_availability.required' => 'Please select a rating for Relevance of Price and Availability.',
+                    'comment.required' => 'Please write a comment about the seller.',
+                ]
+            );
 
-        if ($sellerValidator->fails()) {
-            $errors['seller'] = $sellerValidator->errors()->all();
-        } else {
-            // Перевірка, чи відгук про продавця вже існує
-            $existingSellerReview = SellerRating::where('user_id', Auth::id())
-                ->where('order_id', $this->initialOrderItem->order_id)
-                ->where('store_id', $this->initialOrderItem->store_id)
-                ->first();
-
-            if ($existingSellerReview) {
-                $errors['seller'] = ['You have already submitted a review for this seller.'];
+            if ($sellerValidator->fails()) {
+                $errors['seller'] = $sellerValidator->errors()->all();
             }
         }
 
         // Валідація відгуків про товари
         foreach ($this->orderItems as $item) {
             $orderItemId = $item->id;
+
+            // Пропускаємо, якщо відгук уже є
+            if (isset($this->productReviews[$orderItemId])) {
+                continue;
+            }
 
             $orderItem = OrderItems::with(['productVariant', 'product'])
                 ->find($orderItemId);
@@ -183,17 +224,10 @@ class Review extends Component
                 $errors[$orderItemId] = $validator->errors()->all();
                 continue;
             }
-
-            // Перевіряємо, чи є вже відгук
-            $existingReview = ProductRating::where('user_id', Auth::id())
-                ->where('product_id', $orderItem->product_id)
-                ->first();
-
-            if ($existingReview) {
-                $errors[$orderItemId] = 'You have already submitted a review for this product.';
-                continue;
-            }
         }
+
+        \Log::debug('relevance_price_availability = ' . $this->sellerPriceAvailability);
+        \Log::debug('Validation errors', $errors);
 
         // Якщо є помилки, повертаємо їх
         if (!empty($errors)) {
@@ -202,30 +236,39 @@ class Review extends Component
         }
 
         // Збереження даних, якщо немає помилок
-        // Збереження відгуку про продавця
-        SellerRating::create([
-            'seller_id' => $this->initialOrderItem->seller_id,
-            'store_id' => $this->initialOrderItem->store_id,
-            'order_id' => $this->initialOrderItem->order_id,
-            'user_id' => Auth::id(),
-            'comment' => $this->sellerComment,
-            'quality_of_service' => $this->sellerQualityOfService,
-            'on_time_delivery' => $this->sellerOnTimeDelivery,
-            'relevance_price_availability' => $this->sellerPriceAvailability,
-        ]);
+        // Збереження відгуку про продавця, якщо його ще немає
+        if (!$this->sellerReview) {
+            SellerRating::create([
+                'seller_id' => $this->initialOrderItem->seller_id,
+                'store_id' => $this->initialOrderItem->store_id,
+                'order_id' => $this->initialOrderItem->order_id,
+                'user_id' => Auth::id(),
+                'comment' => $this->sellerComment,
+                'quality_of_service' => $this->sellerQualityOfService,
+                'on_time_delivery' => $this->sellerOnTimeDelivery,
+                'relevance_price_availability' => $this->sellerPriceAvailability,
+            ]);
 
-        // Оновлення рейтингу продавця
-        $seller = Seller::where('seller_id', $this->initialOrderItem->seller_id)
-            ->where('store_id', $this->initialOrderItem->store_id)
-            ->first();
-
-        if ($seller) {
-            $seller->updateRating();
+            // Оновлення рейтингу продавця
+            $seller = Seller::where('seller_id', $this->initialOrderItem->seller_id)
+                ->where('store_id', $this->initialOrderItem->store_id)
+                ->first();
+            \Log::debug('Seller find result: ' . json_encode($seller));
+            if ($seller) {
+                $seller->updateRating();
+            } else {
+                \Log::error('Seller not found for seller_id: ' . $this->initialOrderItem->seller_id . ', store_id: ' . $this->initialOrderItem->store_id);
+            }
         }
 
         // Збереження відгуків про товари
         foreach ($this->orderItems as $item) {
             $orderItemId = $item->id;
+
+            // Пропускаємо, якщо відгук уже є
+            if (isset($this->productReviews[$orderItemId])) {
+                continue;
+            }
 
             $orderItem = OrderItems::with(['productVariant', 'product'])
                 ->find($orderItemId);

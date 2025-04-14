@@ -15,87 +15,101 @@
                                 <!-- Секція оцінки продавця -->
                                 <div class="mb-4">
                                     <h4 class="mb-3">Review the Seller</h4>
-                                    <div class="row">
-                                        <!-- Quality of Service -->
-                                        <div class="col-sm-4 spr-form-review-rating form-group">
-                                            <label class="spr-form-label">Quality of Service</label>
-                                            <div class="product-review pt-1">
-                                                <div class="review-rating">
-                                                    <input id="seller-quality-of-service"
-                                                        name="seller_quality_of_service"
-                                                        class="kv-ltr-theme-svg-star star-rating rating-loading"
-                                                        value="{{ $this->sellerQualityOfService ?? '' }}" dir="ltr"
-                                                        data-size="s" data-show-clear="false" data-show-caption="false"
-                                                        data-step="1">
+                                    @if ($sellerReview)
+                                        <div class="review-display">
+                                            <p><strong>Quality of Service:</strong>
+                                                {{ $sellerReview->quality_of_service }}/5</p>
+                                            <p><strong>On-time Delivery:</strong>
+                                                {{ $sellerReview->on_time_delivery }}/5</p>
+                                            <p><strong>Relevance of Price and Availability:</strong>
+                                                {{ $sellerReview->relevance_price_availability }}/5</p>
+                                            <p><strong>Comment:</strong> {{ $sellerReview->comment }}</p>
+                                        </div>
+                                    @else
+                                        <div class="row">
+                                            <!-- Quality of Service -->
+                                            <div class="col-sm-4 spr-form-review-rating form-group">
+                                                <label class="spr-form-label">Quality of Service</label>
+                                                <div class="product-review pt-1">
+                                                    <div class="review-rating">
+                                                        <input id="seller-quality-of-service"
+                                                            name="seller_quality_of_service"
+                                                            class="kv-ltr-theme-svg-star star-rating rating-loading"
+                                                            value="{{ $this->sellerQualityOfService ?? '' }}"
+                                                            dir="ltr" data-size="s" data-show-clear="false"
+                                                            data-show-caption="false" data-step="1">
+                                                    </div>
+                                                    @error('seller')
+                                                        @foreach ($errors as $error)
+                                                            @if (str_contains($error, 'Quality of Service'))
+                                                                <p class="fw-400 text-danger mt-1">{{ $error }}</p>
+                                                            @endif
+                                                        @endforeach
+                                                    @enderror
                                                 </div>
-                                                @error('seller')
-                                                    @foreach ($errors as $error)
-                                                        @if (str_contains($error, 'Quality of Service'))
-                                                            <p class="fw-400 text-danger mt-1">{{ $error }}</p>
-                                                        @endif
-                                                    @endforeach
-                                                @enderror
                                             </div>
-                                        </div>
-                                        <!-- On-time Delivery -->
-                                        <div class="col-sm-4 spr-form-review-rating form-group">
-                                            <label class="spr-form-label">On-time Delivery</label>
-                                            <div class="product-review pt-1">
-                                                <div class="review-rating">
-                                                    <input id="seller-on-time-delivery" name="seller_on_time_delivery"
-                                                        class="kv-ltr-theme-svg-star star-rating rating-loading"
-                                                        value="{{ $this->sellerOnTimeDelivery ?? '' }}" dir="ltr"
-                                                        data-size="s" data-show-clear="false" data-show-caption="false"
-                                                        data-step="1">
+                                            <!-- On-time Delivery -->
+                                            <div class="col-sm-4 spr-form-review-rating form-group">
+                                                <label class="spr-form-label">On-time Delivery</label>
+                                                <div class="product-review pt-1">
+                                                    <div class="review-rating">
+                                                        <input id="seller-on-time-delivery"
+                                                            name="seller_on_time_delivery"
+                                                            class="kv-ltr-theme-svg-star star-rating rating-loading"
+                                                            value="{{ $this->sellerOnTimeDelivery ?? '' }}"
+                                                            dir="ltr" data-size="s" data-show-clear="false"
+                                                            data-show-caption="false" data-step="1">
+                                                    </div>
+                                                    @error('seller')
+                                                        @foreach ($errors as $error)
+                                                            @if (str_contains($error, 'On-time Delivery'))
+                                                                <p class="fw-400 text-danger mt-1">{{ $error }}</p>
+                                                            @endif
+                                                        @endforeach
+                                                    @enderror
                                                 </div>
-                                                @error('seller')
-                                                    @foreach ($errors as $error)
-                                                        @if (str_contains($error, 'On-time Delivery'))
-                                                            <p class="fw-400 text-danger mt-1">{{ $error }}</p>
-                                                        @endif
-                                                    @endforeach
-                                                @enderror
                                             </div>
-                                        </div>
-                                        <!-- Relevance of Price and Availability -->
-                                        <div class="col-sm-4 spr-form-review-rating form-group">
-                                            <label class="spr-form-label">Relevance of Price and Availability</label>
-                                            <div class="product-review pt-1">
-                                                <div class="review-rating">
-                                                    <input id="seller-relevance-price-availability"
-                                                        name="seller_relevance_price_availability"
-                                                        class="kv-ltr-theme-svg-star star-rating rating-loading"
-                                                        value="{{ $this->sellerPriceAvailability ?? '' }}"
-                                                        dir="ltr" data-size="s" data-show-clear="false"
-                                                        data-show-caption="false" data-step="1">
+                                            <!-- Relevance of Price and Availability -->
+                                            <div class="col-sm-4 spr-form-review-rating form-group">
+                                                <label class="spr-form-label">Relevance of Price and
+                                                    Availability</label>
+                                                <div class="product-review pt-1">
+                                                    <div class="review-rating">
+                                                        <input id="seller-relevance-price-availability"
+                                                            name="seller_relevance_price_availability"
+                                                            class="kv-ltr-theme-svg-star star-rating rating-loading"
+                                                            value="{{ $this->sellerPriceAvailability ?? '' }}"
+                                                            dir="ltr" data-size="s" data-show-clear="false"
+                                                            data-show-caption="false" data-step="1">
+                                                    </div>
+                                                    @error('seller')
+                                                        @foreach ($errors as $error)
+                                                            @if (str_contains($error, 'Relevance of Price'))
+                                                                <p class="fw-400 text-danger mt-1">{{ $error }}</p>
+                                                            @endif
+                                                        @endforeach
+                                                    @enderror
                                                 </div>
-                                                @error('seller')
-                                                    @foreach ($errors as $error)
-                                                        @if (str_contains($error, 'Relevance of Price'))
-                                                            <p class="fw-400 text-danger mt-1">{{ $error }}</p>
-                                                        @endif
-                                                    @endforeach
-                                                @enderror
+                                            </div>
+                                            <!-- Коментар про продавця -->
+                                            <div class="col-12 spr-form-review-body form-group mt-3">
+                                                <label class="spr-form-label" for="seller-comment">
+                                                    Comment about the Seller
+                                                </label>
+                                                <div class="spr-form-input">
+                                                    <textarea wire:model="sellerComment" class="spr-form-input spr-form-input-textarea" id="seller-comment"
+                                                        name="seller_comment" rows="3"></textarea>
+                                                    @error('seller')
+                                                        @foreach ($errors as $error)
+                                                            @if (str_contains($error, 'write a comment'))
+                                                                <p class="fw-400 text-danger mt-1">{{ $error }}</p>
+                                                            @endif
+                                                        @endforeach
+                                                    @enderror
+                                                </div>
                                             </div>
                                         </div>
-                                        <!-- Коментар про продавця -->
-                                        <div class="col-12 spr-form-review-body form-group mt-3">
-                                            <label class="spr-form-label" for="seller-comment">
-                                                Comment about the Seller
-                                            </label>
-                                            <div class="spr-form-input">
-                                                <textarea wire:model="sellerComment" class="spr-form-input spr-form-input-textarea" id="seller-comment"
-                                                    name="seller_comment" rows="3"></textarea>
-                                                @error('seller')
-                                                    @foreach ($errors as $error)
-                                                        @if (str_contains($error, 'write a comment'))
-                                                            <p class="fw-400 text-danger mt-1">{{ $error }}</p>
-                                                        @endif
-                                                    @endforeach
-                                                @enderror
-                                            </div>
-                                        </div>
-                                    </div>
+                                    @endif
                                 </div>
 
                                 <!-- Акордіон для товарів -->
@@ -133,15 +147,31 @@
                                                 data-bs-parent="#reviewAccordion">
                                                 <div class="accordion-body">
                                                     @if ($item->is_completed == 1)
-                                                        @php
-                                                            $review = \App\Models\ProductRating::where(
-                                                                'user_id',
-                                                                Auth::id(),
-                                                            )
-                                                                ->where('product_id', $item->product_id)
-                                                                ->first();
-                                                        @endphp
-                                                        @if ($item->is_write_review == 0)
+                                                        @if (isset($productReviews[$item->id]))
+                                                            <div class="review-display">
+                                                                <p><strong>Rating:</strong>
+                                                                    {{ $productReviews[$item->id]->rating }}/5</p>
+                                                                <p><strong>Comment:</strong>
+                                                                    {{ $productReviews[$item->id]->comment }}</p>
+                                                                @if ($productReviews[$item->id]->advantages)
+                                                                    <p><strong>Advantages:</strong>
+                                                                        {{ $productReviews[$item->id]->advantages }}
+                                                                    </p>
+                                                                @endif
+                                                                @if ($productReviews[$item->id]->disadvantages)
+                                                                    <p><strong>Disadvantages:</strong>
+                                                                        {{ $productReviews[$item->id]->disadvantages }}
+                                                                    </p>
+                                                                @endif
+                                                                @if ($productReviews[$item->id]->images)
+                                                                    @foreach (json_decode($productReviews[$item->id]->images) as $image)
+                                                                        <img src="{{ asset('storage/' . $image) }}"
+                                                                            alt="Review image"
+                                                                            style="max-width: 100px;" />
+                                                                    @endforeach
+                                                                @endif
+                                                            </div>
+                                                        @else
                                                             <fieldset class="row spr-form-contact">
                                                                 <div class="col-sm-6 spr-form-review-rating form-group">
                                                                     <label
@@ -223,32 +253,6 @@
                                                                     </div>
                                                                 </div>
                                                             </fieldset>
-                                                        @else
-                                                            @if ($review)
-                                                                <div class="review-display">
-                                                                    <p><strong>Rating:</strong> {{ $review->rating }}/5
-                                                                    </p>
-                                                                    <p><strong>Comment:</strong> {{ $review->comment }}
-                                                                    </p>
-                                                                    @if ($review->advantages)
-                                                                        <p><strong>Advantages:</strong>
-                                                                            {{ $review->advantages }}</p>
-                                                                    @endif
-                                                                    @if ($review->disadvantages)
-                                                                        <p><strong>Disadvantages:</strong>
-                                                                            {{ $review->disadvantages }}</p>
-                                                                    @endif
-                                                                    @if ($review->images)
-                                                                        @foreach (json_decode($review->images) as $image)
-                                                                            <img src="{{ asset('storage/' . $image) }}"
-                                                                                alt="Review image"
-                                                                                style="max-width: 100px;" />
-                                                                        @endforeach
-                                                                    @endif
-                                                                </div>
-                                                            @else
-                                                                <p>The review has been saved.</p>
-                                                            @endif
                                                         @endif
                                                     @else
                                                         <p>This item has not yet been confirmed as received.</p>
@@ -258,10 +262,12 @@
                                         </div>
                                     @endforeach
                                 </div>
-                                <div class="spr-form-actions clearfix mt-3">
-                                    <input type="submit" class="btn btn-primary spr-button spr-button-primary"
-                                        value="Submit Reviews" />
-                                </div>
+                                @if (!$sellerReview || $orderItems->where('is_write_review', 0)->where('is_completed', 1)->isNotEmpty())
+                                    <div class="spr-form-actions clearfix mt-3">
+                                        <input type="submit" class="btn btn-primary spr-button spr-button-primary"
+                                            value="Submit Reviews" />
+                                    </div>
+                                @endif
                             </form>
                         @endif
                         @if (session('message'))
