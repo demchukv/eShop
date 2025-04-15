@@ -56,6 +56,12 @@
                                  <span class="nav-link-text ">{{ labels('admin_labels.orders', 'Orders') }}</span>
                              </a>
                          </li>
+                         <li class="nav-item {{ Request::is('seller/return-requests*') ? 'active' : '' }}">
+                             <a class="nav-link" href="{{ route('seller.return_requests.index') }}">
+                                 <span
+                                     class="nav-link-text">{{ labels('admin_labels.return_requests', 'Return Requests') }}</span>
+                             </a>
+                         </li>
                      </ul>
                  </div>
              </li>

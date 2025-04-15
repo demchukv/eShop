@@ -32,6 +32,8 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Seller\PendingPaymentController;
 use App\Http\Controllers\Seller\ParcelController;
+use App\Http\Controllers\Seller\SellerReturnRequestController;
+use App\Http\Controllers\Seller\SellerDisputController;
 
 Route::get('seller/orders/generatParcelInvoicePDF/{id}', [OrderController::class, 'generatParcelInvoicePDF'])->name('seller.orders.generatParcelInvoicePDF');
 Route::get('seller/orders/generatInvoicePDF/{id}/{seller_id?}', [OrderController::class, 'generatInvoicePDF'])
@@ -382,6 +384,15 @@ Route::group(
         Route::post('seller/orders/delete_parcel', [OrderController::class, 'delete_parcel']);
 
         Route::get('/seller/products/comments/{productId}', [App\Http\Controllers\Seller\ProductController::class, 'getComments'])->name('seller.products.comments');
+
+        //Return request
+        Route::get('seller/return-requests', [SellerReturnRequestController::class, 'index'])->name('seller.return_requests.index');
+        Route::get('seller/return-requests/list', [SellerReturnRequestController::class, 'list'])->name('seller.return_requests.list');
+        Route::post('seller/return-requests/{id}/approve', [SellerReturnRequestController::class, 'approve'])->name('seller.return_requests.approve');
+        Route::post('seller/return-requests/{id}/decline', [SellerReturnRequestController::class, 'decline'])->name('seller.return_requests.decline');
+        Route::get('seller/disput/{id}', [SellerDisputController::class, 'show'])->name('seller.disput.show');
+        Route::get('seller/disput/{id}/messages', [SellerDisputController::class, 'messages'])->name('seller.disput.messages');
+        Route::post('seller/disput/{id}/send-message', [SellerDisputController::class, 'sendMessage'])->name('seller.disput.send_message');
     }
 
 
