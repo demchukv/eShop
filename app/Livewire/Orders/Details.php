@@ -12,6 +12,8 @@ use Stripe\Refund;
 use Stripe\Stripe as StripeConfig;
 use App\Http\Controllers\CommissionController;
 use App\Models\Parcelitem;
+use App\Models\ReturnRequest;
+use App\Models\Disput;
 
 class Details extends Component
 {
@@ -51,6 +53,19 @@ class Details extends Component
                 $user_order_item['courier_agency_name'] = $courierSlug && isset($couriersMap[$courierSlug])
                     ? $couriersMap[$courierSlug]
                     : 'Unknown Courier';
+
+                // Додаємо ID диспуту, якщо active_status = return_request_pending
+                if ($user_order_item['active_status'] === 'return_request_pending') {
+                    $return_request = ReturnRequest::where('order_item_id', $order_item_id)->first();
+                    if ($return_request) {
+                        $disput = Disput::where('return_request_id', $return_request->id)->first();
+                        $user_order_item['disput_id'] = $disput ? $disput->id : null;
+                    } else {
+                        $user_order_item['disput_id'] = null;
+                    }
+                } else {
+                    $user_order_item['disput_id'] = null;
+                }
             }
         }
 

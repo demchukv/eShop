@@ -200,7 +200,7 @@ class ReturnOptions extends Component
         ]);
 
         session()->flash('message', 'Return request submitted successfully!');
-        return redirect()->route('disput.show', $disput->id);
+        return redirect()->route('disputs.show', $disput->id);
     }
 
     private function handleUpload()

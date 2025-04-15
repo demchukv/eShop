@@ -53,6 +53,7 @@ use Illuminate\Support\Facades\Artisan;
 use PHPUnit\Event\Telemetry\System;
 use App\Http\Controllers\Admin\UserStatusController;
 use App\Http\Controllers\Admin\BalanceController;
+use App\Http\Controllers\Admin\AdminDisputController;
 
 Route::group(
     ['middleware' => ['auth', 'role:super_admin,admin,editor', 'CheckPurchaseCode', 'CheckStoreNotEmpty']],
@@ -1097,6 +1098,11 @@ Route::group(
 
         Route::get('/admin/balance', [BalanceController::class, 'index'])->name('admin.balance.index');
         Route::get('/admin/balance/list', [BalanceController::class, 'list'])->name('admin.balance.list');
+
+        //Return request and disputs
+        Route::get('disput/{id}', [AdminDisputController::class, 'show'])->name('disput.show');
+        Route::get('disput/{id}/messages', [AdminDisputController::class, 'messages'])->name('disput.messages');
+        Route::post('disput/{id}/send-message', [AdminDisputController::class, 'sendMessage'])->name('disput.send_message');
     }
 
 );

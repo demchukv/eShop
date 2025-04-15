@@ -4,9 +4,8 @@
             <div class="col-12">
                 <div class="container mt-4">
                     <h2>Disput for Return Request #{{ $disput ? $disput->return_request_id : 'Unknown' }}</h2>
-
                     <!-- Контейнер для повідомлень -->
-                    <div class="disput-container"
+                    <div class="disput-container" wire:poll.10s="loadMessages"
                         style="border: 1px solid #ddd; padding: 15px; height: 400px; overflow-y: auto; margin-bottom: 20px;">
                         @forelse ($messages as $message)
                             <div
@@ -49,10 +48,5 @@
                 disputContainer.scrollTop = disputContainer.scrollHeight;
             }
         });
-
-        // Періодичне оновлення повідомлень (кожні 10 секунд)
-        setInterval(() => {
-            @this.call('loadMessages');
-        }, 10000);
     </script>
 @endpush

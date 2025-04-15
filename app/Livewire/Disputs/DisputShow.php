@@ -4,8 +4,9 @@ namespace App\Livewire\Disputs;
 
 use Livewire\Component;
 use App\Models\Disput;
-use App\Models\DisputMessage;
+use App\Services\DisputChatService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class DisputShow extends Component
 {
@@ -14,12 +15,46 @@ class DisputShow extends Component
     public $messages;
     public $newMessage;
 
-    public function mount($disputId)
-    {
-        $this->disputId = $disputId;
-        $this->disput = Disput::with(['messages.sender', 'returnRequest'])->findOrFail($disputId);
+    protected $chatService;
 
-        if ($this->disput->user_id !== Auth::id() && $this->disput->seller_id !== Auth::id()) {
+    public function boot()
+    {
+        Log::debug('DisputShow component booted', [
+            'disputId' => $this->disputId ?? 'not set',
+            'auth_user_id' => Auth::id(),
+            'session_id' => session()->getId(),
+            'route' => request()->route()->getName(),
+        ]);
+
+        // Ініціалізуємо chatService, якщо воно null
+        if (!$this->chatService) {
+            $this->chatService = app(DisputChatService::class);
+            Log::debug('DisputShow: Initialized chatService in boot');
+        }
+    }
+
+    public function mount($disputId, DisputChatService $chatService)
+    {
+        Log::debug('DisputShow mount started', [
+            'disputId' => $disputId,
+            'auth_user_id' => Auth::id(),
+            'session_id' => session()->getId(),
+        ]);
+
+        $this->chatService = $chatService;
+        $this->disputId = $disputId;
+
+        $this->disput = Disput::withoutGlobalScopes()->find($disputId);
+        if (!$this->disput) {
+            Log::error('Disput not found', ['disputId' => $disputId]);
+            abort(404);
+        }
+        Log::debug('Disput loaded', ['disput' => $this->disput->toArray()]);
+
+        $seller_id = \App\Models\Seller::where('user_id', Auth::id())->value('id');
+        Log::debug('sellerId = ' . $seller_id);
+        if ($this->disput->user_id !== Auth::id() && $this->disput->seller_id !== $seller_id && !Auth::user()->hasRole('super_admin')) {
+            Log::debug('403 Unauthorized');
             abort(403, 'Unauthorized');
         }
 
@@ -28,58 +63,46 @@ class DisputShow extends Component
 
     public function loadMessages()
     {
-        $messages = $this->disput->messages()->with('sender')->latest()->get()->toArray();
-        $this->messages = array_reverse($messages);
-
-        \Log::info('Messages loaded', [
-            'disput_id' => $this->disputId,
-            'messages_type' => gettype($this->messages),
-            'messages_count' => count($this->messages),
-        ]);
+        try {
+            $this->messages = array_reverse($this->chatService->getMessages($this->disputId, $this->determineUserType())->toArray());
+        } catch (\Exception $e) {
+            Log::error('DisputShow: Error loading messages', [
+                'disputId' => $this->disputId,
+                'error' => $e->getMessage(),
+            ]);
+            $this->messages = [];
+        }
     }
 
     public function sendMessage()
     {
-        \Log::info('sendMessage called', [
-            'disput_id' => $this->disputId,
-            'messages_type' => gettype($this->messages),
-        ]);
-
         $this->validate([
             'newMessage' => 'required|string|max:1000',
         ]);
 
-        DisputMessage::create([
-            'disput_id' => $this->disputId,
-            'sender_id' => Auth::id(),
-            'message' => $this->newMessage,
-        ]);
-
-        $this->newMessage = '';
-        $this->loadMessages();
-
-        \Log::info('Messages after load', [
-            'disput_id' => $this->disputId,
-            'messages_type' => gettype($this->messages),
-            'messages_count' => count($this->messages),
-        ]);
+        try {
+            $this->chatService->sendMessage($this->disputId, $this->newMessage, $this->determineUserType());
+            $this->newMessage = '';
+            $this->loadMessages();
+        } catch (\Exception $e) {
+            Log::error('DisputShow: Error sending message', [
+                'disputId' => $this->disputId,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
-    public function hydrate()
+    protected function determineUserType()
     {
-        \Log::info('Component hydrated', [
-            'disput_id' => $this->disputId,
-            'disput_exists' => !is_null($this->disput),
-        ]);
+        if (Auth::user()->hasRole('super_admin')) {
+            return 'admin';
+        }
+        $seller_id = \App\Models\Seller::where('user_id', Auth::id())->value('id');
+        return $this->disput->seller_id === $seller_id ? 'seller' : 'user';
     }
 
     public function render()
     {
-        \Log::info('Rendering component', [
-            'disput_id' => $this->disputId,
-            'disput_exists' => !is_null($this->disput),
-        ]);
-
         return view('livewire.elegant.disputs.disput-show');
     }
 }

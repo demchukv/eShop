@@ -1,4 +1,4 @@
-@extends('seller/layout')
+@extends('admin/layout')
 
 @section('title')
     {{ labels('admin_labels.disput_details', 'Disput Details') }}
@@ -19,9 +19,9 @@
                         <ol class="breadcrumb">
                             <i class='bx bx-home-smile'></i>
                             <li class="breadcrumb-item"><a
-                                    href="{{ route('seller.home') }}">{{ labels('admin_labels.home', 'Home') }}</a></li>
+                                    href="{{ route('admin.home') }}">{{ labels('admin_labels.home', 'Home') }}</a></li>
                             <li class="breadcrumb-item"><a
-                                    href="{{ route('seller.return_requests.index') }}">{{ labels('admin_labels.manage_return_requests', 'Return Requests') }}</a>
+                                    href="{{ route('admin.return_requests.index') }}">{{ labels('admin_labels.manage_return_requests', 'Return Requests') }}</a>
                             </li>
                             <li class="breadcrumb-item active" aria-current="page">
                                 {{ labels('admin_labels.disput_details', 'Disput Details') }}
@@ -81,8 +81,8 @@
             initDisputChat
         } from '{{ asset('assets/admin/custom/disput-chat.js') }}';
         initDisputChat(
-            '{{ route('seller.disput.messages', $disput->id) }}',
-            '{{ route('seller.disput.send_message', $disput->id) }}'
+            '{{ route('admin.disput.messages', $disput->id) }}',
+            '{{ route('admin.disput.send_message', $disput->id) }}'
         );
     </script>
 @endsection

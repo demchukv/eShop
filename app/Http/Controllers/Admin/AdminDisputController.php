@@ -1,15 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\Seller;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Disput;
-use App\Models\Seller;
 use App\Services\DisputChatService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class SellerDisputController extends Controller
+class AdminDisputController extends Controller
 {
     protected $chatService;
 
@@ -20,22 +19,23 @@ class SellerDisputController extends Controller
 
     public function show($id)
     {
-        $seller_id = Seller::where('user_id', Auth::id())->value('id');
+        if (!Auth::user()->hasRole('super_admin')) {
+            abort(403, 'Unauthorized');
+        }
 
         $disput = Disput::where('id', $id)
-            ->where('seller_id', $seller_id)
             ->with(['returnRequest', 'returnRequest.orderItem', 'returnRequest.user'])
             ->firstOrFail();
 
         $currencyDetails = fetchDetails('currencies', ['is_default' => 1], 'symbol');
         $currency = !empty($currencyDetails) ? $currencyDetails[0]->symbol : '';
 
-        return view('seller.pages.disput.show', compact('disput', 'seller_id', 'currency'));
+        return view('admin.pages.disput.show', compact('disput', 'currency'));
     }
 
     public function messages($id)
     {
-        $messages = $this->chatService->getMessages($id, 'seller');
+        $messages = $this->chatService->getMessages($id, 'admin');
         return response()->json(['messages' => $messages]);
     }
 
@@ -45,7 +45,7 @@ class SellerDisputController extends Controller
             'message' => 'required|string|max:1000',
         ]);
 
-        $response = $this->chatService->sendMessage($id, $request->message, 'seller');
+        $response = $this->chatService->sendMessage($id, $request->message, 'admin');
         return response()->json($response);
     }
 }
