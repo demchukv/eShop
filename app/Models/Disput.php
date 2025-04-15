@@ -34,6 +34,6 @@ class Disput extends Model
     // Зв’язок із продавцем
     public function seller()
     {
-        return $this->belongsTo(User::class, 'seller_id');
+        return $this->belongsTo(Seller::class, 'seller_id', 'id');
     }
 }

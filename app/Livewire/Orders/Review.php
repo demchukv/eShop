@@ -81,7 +81,6 @@ class Review extends Component
         }
 
         // Завантажуємо відгуки про товари
-        // Завантажуємо відгуки про товари
         foreach ($this->orderItems as $item) {
             if (!$item->productVariant || !$item->productVariant->product) {
                 \Log::warning('Missing productVariant or product for item_id: ' . $item->id);
@@ -249,16 +248,36 @@ class Review extends Component
                 'relevance_price_availability' => $this->sellerPriceAvailability,
             ]);
 
-            // Оновлення рейтингу продавця
-            $seller = Seller::where('seller_id', $this->initialOrderItem->seller_id)
+
+            // Оновлення рейтингу продавця в таблиці seller_store
+            $averageRating = DB::table('seller_ratings')
+                ->where('seller_id', $this->initialOrderItem->seller_id)
                 ->where('store_id', $this->initialOrderItem->store_id)
-                ->first();
-            \Log::debug('Seller find result: ' . json_encode($seller));
-            if ($seller) {
-                $seller->updateRating();
-            } else {
-                \Log::error('Seller not found for seller_id: ' . $this->initialOrderItem->seller_id . ', store_id: ' . $this->initialOrderItem->store_id);
-            }
+                ->avg(DB::raw('(quality_of_service + on_time_delivery + relevance_price_availability) / 3'));
+
+            $noOfRatings = DB::table('seller_ratings')
+                ->where('seller_id', $this->initialOrderItem->seller_id)
+                ->where('store_id', $this->initialOrderItem->store_id)
+                ->count();
+
+            DB::table('seller_store')
+                ->where('seller_id', $this->initialOrderItem->seller_id)
+                ->where('store_id', $this->initialOrderItem->store_id)
+                ->update([
+                    'rating' => round($averageRating ?: 0, 2),
+                    'no_of_ratings' => $noOfRatings,
+                    'updated_at' => now(),
+                ]);
+
+            // $sellerStore = DB::table('seller_store')
+            //     ->where('seller_id', $this->initialOrderItem->seller_id)
+            //     ->where('store_id', $this->initialOrderItem->store_id)
+            //     ->first();
+
+            // \Log::debug('Seller store find result: ' . json_encode($sellerStore));
+            // if (!$sellerStore) {
+            //     \Log::error('Seller store not found for seller_id: ' . $this->initialOrderItem->seller_id . ', store_id: ' . $this->initialOrderItem->store_id);
+            // }
         }
 
         // Збереження відгуків про товари

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class SellerData extends Model
 {
     protected $table = 'seller_data';
+
     protected $fillable = [
         'user_id',
         'national_identity_card',

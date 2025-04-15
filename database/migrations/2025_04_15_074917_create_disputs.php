@@ -6,17 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up()
     {
         // Створюємо таблицю без foreign key constraints
         Schema::create('disputs', function (Blueprint $table) {
             $table->id();
-            $table->integer('return_request_id');
-            $table->integer('user_id');
-            $table->integer('seller_id');
+            $table->integer('return_request_id'); // Відповідає int(11) unsigned у return_requests
+            $table->integer('user_id'); // Для users(id)
+            $table->integer('seller_id'); // Для seller_data(id)
             $table->string('status')->default('open');
             $table->timestamps();
         });
@@ -33,7 +30,7 @@ return new class extends Migration
                 ->onDelete('cascade');
             $table->foreign('seller_id')
                 ->references('id')
-                ->on('users')
+                ->on('seller_data')
                 ->onDelete('cascade');
         });
     }

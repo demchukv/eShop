@@ -5890,6 +5890,7 @@ function setUserReturnRequest($data, $table = 'orders')
 
 function validateOrderStatus($order_ids, $status, $table = 'order_items', $user_id = null, $fromuser = false, $parcel_type = '')
 {
+    \Log::debug('params: ' . $order_ids . ', ' . $status . ', ' . $table);
     $error = 0;
     $cancelable_till = '';
     $returnable_till = '';
@@ -5910,7 +5911,7 @@ function validateOrderStatus($order_ids, $status, $table = 'order_items', $user_
 
         if ($table == 'order_items') {
             $activeStatus = OrderItems::whereIn('id', explode(',', $order_ids))->pluck('active_status')->toArray();
-
+            \Log::debug("active status: " . json_encode($activeStatus));
             if (in_array('cancelled', $activeStatus) || in_array('returned', $activeStatus)) {
                 $response = [
                     'error' => true,
@@ -5982,7 +5983,7 @@ function validateOrderStatus($order_ids, $status, $table = 'order_items', $user_
         }
 
         $productData = $query->get();
-
+        \Log::debug('ProductData: ' . json_encode($productData));
         $priority_status = [
             'received' => 0,
             'processed' => 1,
@@ -6136,7 +6137,7 @@ function validateOrderStatus($order_ids, $status, $table = 'order_items', $user_
         }
 
         for ($i = 0; $i < count($productData); $i++) {
-
+            \Log::debug('status: ' . $status . ', is_returnable: ' . $productData[$i]->is_returnable . ', error: ' . $error);
 
             if ($status == 'returned' && $productData[$i]->is_returnable == 1 && $error == 0) {
                 $error = 1;
@@ -6149,7 +6150,7 @@ function validateOrderStatus($order_ids, $status, $table = 'order_items', $user_
                     'is_returnable' => $is_returnable,
                     'is_cancelable' => $is_cancelable,
                 ];
-
+                \Log::debug('fromuser = ' . $fromuser);
                 if ($fromuser == true || $fromuser == 1) {
 
 

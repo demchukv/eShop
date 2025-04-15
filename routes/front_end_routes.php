@@ -108,7 +108,7 @@ Route::middleware(App\Http\Middleware\checkAuth::class)->group(function () {
     Route::post('/upload-temp', [ReviewController::class, 'uploadTemp']);
     Route::post('/delete-temp', [ReviewController::class, 'deleteTemp']);
     Route::get('/orders/return-options/{orderItemId}', ReturnOptions::class)->name('orders.return-options');
-    Route::get('/disput/{disputId}', \App\Livewire\Orders\DisputShow::class)->name('disput.show');
+    Route::get('/disput/{disputId}', \App\Livewire\Disputs\DisputShow::class)->name('disput.show');
 
     // MyAccount
     Route::get('/my-account', Dashboard::class)->name('my-account');

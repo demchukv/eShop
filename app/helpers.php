@@ -110,7 +110,6 @@ function validateOrderStatus($order_ids, $status, $table = 'order_items', $user_
 
     $roleIdsToCheck = [1, 3, 5];
 
-
     if (in_array(strtolower(trim($status)), $check_status)) {
 
         if ($table == 'order_items') {

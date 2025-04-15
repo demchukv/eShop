@@ -195,12 +195,12 @@ class ReturnOptions extends Component
         $disput = Disput::create([
             'return_request_id' => $returnRequest->id,
             'user_id' => $this->user->id,
-            'seller_id' => $this->orderItem->seller_id,
+            'seller_id' => $this->orderItem->seller_id, // Беремо seller_id із order_items
             'status' => 'open',
         ]);
 
         session()->flash('message', 'Return request submitted successfully!');
-        return redirect()->route('disput.show', $disput->id); // Перенаправлення на сторінку диспуту
+        return redirect()->route('disput.show', $disput->id);
     }
 
     private function handleUpload()

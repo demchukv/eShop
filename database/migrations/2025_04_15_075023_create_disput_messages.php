@@ -6,16 +6,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up()
     {
         // Створюємо таблицю без foreign key constraints
         Schema::create('disput_messages', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('disput_id')->unsigned();
-            $table->integer('sender_id');
+            $table->unsignedBigInteger('disput_id'); // Для disputs(id)
+            $table->integer('sender_id'); // Для users(id)
             $table->text('message');
             $table->timestamps();
         });

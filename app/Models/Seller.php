@@ -13,7 +13,7 @@ class Seller extends Model implements HasMedia
 {
     use InteractsWithMedia, HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'seller_store'; // Виправлено на 'seller_store'
+    protected $table = 'seller_data'; // Виправлено на 'seller_store'
 
     protected $fillable = [
         'seller_id',
@@ -50,25 +50,11 @@ class Seller extends Model implements HasMedia
         return $this->hasMany(SellerRating::class, 'seller_id', 'seller_id');
     }
 
-    /**
-     * Оновлення середнього рейтингу та кількості відгуків.
-     */
-    public function updateRating()
-    {
-        $averageRating = $this->ratings()
-            ->avg(\DB::raw('(quality_of_service + on_time_delivery + relevance_price_availability) / 3'));
 
-        $noOfRatings = $this->ratings()->count();
-
-        $this->update([
-            'rating' => round($averageRating ?: 0, 2),
-            'no_of_ratings' => $noOfRatings,
-        ]);
-    }
 
     public function order_items()
     {
-        return $this->hasMany(OrderItems::class, 'seller_id', 'seller_id');
+        return $this->hasMany(OrderItems::class, 'id', 'partner_id');
     }
 
     public function user()
@@ -78,12 +64,11 @@ class Seller extends Model implements HasMedia
 
     public function products()
     {
-        return $this->hasMany(Product::class, 'seller_id', 'seller_id');
+        return $this->hasMany(Product::class)->with('variants');
     }
-
     public function stores()
     {
-        return $this->belongsToMany(Store::class, 'seller_store', 'seller_id', 'store_id')->withPivot('store_name');
+        return $this->belongsToMany(Store::class)->withPivot('store_name');;
     }
 
     public function sellerData()
