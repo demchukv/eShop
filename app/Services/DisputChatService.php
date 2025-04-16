@@ -30,7 +30,8 @@ class DisputChatService
         }
 
         $messages = $disput->messages()->with('sender')->orderBy('created_at', 'asc')->get()->map(function ($message) use ($disput, $userType) {
-            $senderName = $message->sender ? $message->sender->name : 'Unknown';
+            // dd($message);
+            $senderName = $message->sender ? $message->sender->username : 'Unknown';
             $senderType = $message->sender && $message->sender->id === Auth::id() ? $userType : ($message->sender && $message->sender->id === $disput->seller->user_id ? 'seller' : 'user');
 
             return [

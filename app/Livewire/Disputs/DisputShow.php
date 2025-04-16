@@ -64,7 +64,7 @@ class DisputShow extends Component
     public function loadMessages()
     {
         try {
-            $this->messages = array_reverse($this->chatService->getMessages($this->disputId, $this->determineUserType())->toArray());
+            $this->messages = $this->chatService->getMessages($this->disputId, $this->determineUserType())->toArray();
         } catch (\Exception $e) {
             Log::error('DisputShow: Error loading messages', [
                 'disputId' => $this->disputId,
