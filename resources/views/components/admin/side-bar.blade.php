@@ -109,6 +109,12 @@
                                          class="nav-link-text ms-1">{{ labels('admin_labels.order_tracking', 'Order Tracking') }}</span>
                                  </a>
                              </li>
+                             <li class="nav-item {{ Request::is('admin/return-requests*') ? 'active' : '' }}">
+                                 <a class="nav-link" href="{{ route('admin.return_requests.index') }}">
+                                     <span
+                                         class="nav-link-text">{{ labels('admin_labels.return_requests', 'Return Requests') }}</span>
+                                 </a>
+                             </li>
                          </ul>
                      </div>
                  </li>

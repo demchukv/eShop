@@ -10952,11 +10952,15 @@ function curl($url, $method = 'GET', $data = [], $authorization = "")
     return $result;
 }
 
-function returnRequestsCount($status, $seller_id)
+function returnRequestsCount($status, $seller_id = null)
 {
-    return \App\Models\ReturnRequest::where('status', $status)
-        ->whereHas('orderItem', function ($query) use ($seller_id) {
+    $query = \App\Models\ReturnRequest::where('status', $status);
+
+    if ($seller_id !== null) {
+        $query->whereHas('orderItem', function ($query) use ($seller_id) {
             $query->where('seller_id', $seller_id);
-        })
-        ->count();
+        });
+    }
+
+    return $query->count();
 }
