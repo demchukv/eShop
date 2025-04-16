@@ -21,12 +21,14 @@ class DisputAdminNotification extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        return ['mail', 'database'];
+        // return ['mail', 'database'];
+        return ['database'];
     }
 
     public function toMail($notifiable)
     {
         return (new MailMessage)
+            ->from(config('mail.from.address', 'support@example.com'), config('mail.from.name', 'Your App Name'))
             ->subject('Admin Intervention Requested for Disput #' . $this->disput->id)
             ->line('A disput requires your attention.')
             ->line('Disput ID: ' . $this->disput->id)

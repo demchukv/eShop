@@ -89,7 +89,7 @@ class DisputShow extends Component
                     'refund_amount' => $msg->refund_amount,
                     'application_type' => $msg->application_type,
                     'refund_method' => $msg->refund_method,
-                    'evidence_path' => $msg->evidence_path, // Аксесор обробляє декодування
+                    'evidence_path' => $msg->evidence_path,
                     'proposal_status' => $msg->proposal_status,
                 ]);
             })->toArray();
@@ -189,7 +189,7 @@ class DisputShow extends Component
             'refund_amount' => $this->contrproposal['refund_amount'],
             'application_type' => $this->contrproposal['application_type'],
             'refund_method' => $this->contrproposal['refund_method'],
-            'evidence_path' => json_encode($evidencePaths), // Кодування в JSON
+            'evidence_path' => json_encode($evidencePaths),
             'proposal_status' => 'open',
         ]);
 
@@ -205,12 +205,24 @@ class DisputShow extends Component
         $this->selectedMessageId = null;
 
         $this->loadMessages();
+        $this->dispatch('closeContrproposalModal'); // Закриття модального вікна
         session()->flash('message', 'Counterproposal submitted successfully!');
     }
 
     public function openContrproposalModal($messageId)
     {
         $this->selectedMessageId = $messageId;
+        $message = DisputMessage::where('id', $messageId)->where('disput_id', $this->disputId)->firstOrFail();
+
+        // Ініціалізація contrproposal даними останньої пропозиції
+        $this->contrproposal = [
+            'refund_amount' => $message->refund_amount ?? null,
+            'application_type' => $message->application_type ?? null,
+            'refund_method' => $message->refund_method ?? null,
+            'message' => null,
+            'evidence' => [],
+        ];
+
         $this->dispatch('openContrproposalModal');
     }
 
@@ -222,28 +234,53 @@ class DisputShow extends Component
             return;
         }
 
-        $this->disput->update([
-            'status' => 'pending_admin',
-            'admin_requested_at' => now(),
-            'admin_requester_id' => Auth::id(),
-        ]);
+        try {
+            $this->disput->update([
+                'status' => 'pending_admin',
+                'admin_requested_at' => now(),
+                'admin_requester_id' => Auth::id(),
+            ]);
 
-        DisputMessage::create([
-            'disput_id' => $this->disputId,
-            'sender_id' => Auth::id(),
-            'message' => 'Admin intervention requested',
-            'proposal_status' => 'admin_call',
-        ]);
+            DisputMessage::create([
+                'disput_id' => $this->disputId,
+                'sender_id' => Auth::id(),
+                'message' => 'Admin intervention requested',
+                'proposal_status' => 'admin_call',
+            ]);
 
-        $message->update(['proposal_status' => 'admin_call']);
+            $message->update(['proposal_status' => 'admin_call']);
 
-        $admins = User::where('role_id', 1)->get();
-        foreach ($admins as $admin) {
-            $admin->notify(new DisputAdminNotification($this->disput));
+            $admins = User::where('role_id', 1)->get();
+            Log::debug('DisputShow: Sending notifications to admins', [
+                'disputId' => $this->disputId,
+                'admin_count' => $admins->count(),
+            ]);
+
+            foreach ($admins as $admin) {
+                try {
+                    $admin->notify(new DisputAdminNotification($this->disput));
+                    Log::debug('DisputShow: Notification sent to admin', [
+                        'admin_id' => $admin->id,
+                        'disputId' => $this->disputId,
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('DisputShow: Failed to send notification to admin', [
+                        'admin_id' => $admin->id,
+                        'disputId' => $this->disputId,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
+            $this->loadMessages();
+            session()->flash('message', 'Admin intervention requested successfully!');
+        } catch (\Exception $e) {
+            Log::error('DisputShow: Error in callAdmin', [
+                'disputId' => $this->disputId,
+                'error' => $e->getMessage(),
+            ]);
+            $this->addError('form', 'Failed to request admin intervention. Please try again.');
         }
-
-        $this->loadMessages();
-        session()->flash('message', 'Admin intervention requested successfully!');
     }
 
     protected function determineUserType()

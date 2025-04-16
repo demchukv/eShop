@@ -252,6 +252,13 @@
                     let modal = new bootstrap.Modal(document.getElementById('contrproposalModal'));
                     modal.show();
                 });
+
+                Livewire.on('closeContrproposalModal', () => {
+                    let modal = bootstrap.Modal.getInstance(document.getElementById('contrproposalModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                });
             });
         </script>
     @endpush
