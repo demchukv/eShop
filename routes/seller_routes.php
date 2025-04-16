@@ -388,9 +388,13 @@ Route::group(
         //Return request
         Route::get('seller/return-requests', [SellerReturnRequestController::class, 'index'])->name('seller.return_requests.index');
         Route::get('seller/return-requests/list', [SellerReturnRequestController::class, 'list'])->name('seller.return_requests.list');
-        Route::get('seller/disput/{id}', [SellerDisputController::class, 'show'])->name('seller.disput.show');
-        Route::get('seller/disput/{id}/messages', [SellerDisputController::class, 'messages'])->name('seller.disput.messages');
-        Route::post('seller/disput/{id}/send-message', [SellerDisputController::class, 'sendMessage'])->name('seller.disput.send_message');
+
+        Route::get('seller/disputs/{id}', [App\Http\Controllers\Seller\SellerDisputController::class, 'show'])->name('seller.disput.show');
+        Route::get('seller/disputs/{id}/messages', [App\Http\Controllers\Seller\SellerDisputController::class, 'messages'])->name('seller.disput.messages');
+        Route::post('seller/disputs/{id}/messages', [App\Http\Controllers\Seller\SellerDisputController::class, 'sendMessage'])->name('seller.disput.send_message');
+        Route::post('seller/disputs/{id}/messages/{messageId}/accept', [App\Http\Controllers\Seller\SellerDisputController::class, 'acceptProposal'])->name('seller.disput.accept_proposal');
+        Route::post('seller/disputs/{id}/messages/{messageId}/contrproposal', [App\Http\Controllers\Seller\SellerDisputController::class, 'submitContrproposal'])->name('seller.disput.submit_contrproposal');
+        Route::post('seller/disputs/{id}/messages/{messageId}/call-admin', [App\Http\Controllers\Seller\SellerDisputController::class, 'callAdmin'])->name('seller.disput.call_admin');
     }
 
 

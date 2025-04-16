@@ -34,6 +34,55 @@
 
         <section class="overview-data">
             <div class="card content-area p-4">
+                @if ($disput->status === 'pending_admin')
+                    <div class="mb-4">
+                        <h5>Resolve Disput</h5>
+                        <form method="POST" action="{{ route('admin.disput.resolve', $disput->id) }}">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="refundAmount" class="form-label">Refund Amount</label>
+                                <input type="number" class="form-control" id="refundAmount" name="refund_amount"
+                                    step="0.01" min="0" required>
+                                @error('refund_amount')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div class="mb-3">
+                                <label for="applicationType" class="form-label">Application Type</label>
+                                <select class="form-select" id="applicationType" name="application_type" required>
+                                    <option value="">Select an option...</option>
+                                    @foreach (config('application_types') as $key => $label)
+                                        <option value="{{ $key }}">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                                @error('application_type')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div class="mb-3">
+                                <label for="refundMethod" class="form-label">Refund Method</label>
+                                <select class="form-select" id="refundMethod" name="refund_method" required>
+                                    <option value="">Select an option...</option>
+                                    @foreach (config('refund_methods') as $key => $label)
+                                        <option value="{{ $key }}">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                                @error('refund_method')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div class="mb-3">
+                                <label for="comment" class="form-label">Comment</label>
+                                <textarea class="form-control" id="comment" name="comment" rows="4"></textarea>
+                                @error('comment')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <button type="submit" class="btn btn-primary">Resolve Disput</button>
+                        </form>
+                    </div>
+                @endif
+
                 <div class="row">
                     <div class="col-md-12">
                         <div class="disput-details mb-4 d-flex gap-4">
@@ -132,7 +181,10 @@
         } from '{{ asset('assets/admin/custom/disput-chat.js') }}';
         initDisputChat(
             '{{ route('admin.disput.messages', $disput->id) }}',
-            '{{ route('admin.disput.send_message', $disput->id) }}'
+            '{{ route('admin.disput.send_message', $disput->id) }}',
+            '', // Admin не має кнопок дій
+            '',
+            ''
         );
     </script>
 @endsection

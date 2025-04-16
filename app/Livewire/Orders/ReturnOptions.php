@@ -10,6 +10,8 @@ use App\Models\ReturnRequest;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\Disput;
+use App\Models\DisputMessage;
+use App\Models\Seller;
 
 class ReturnOptions extends Component
 {
@@ -24,8 +26,8 @@ class ReturnOptions extends Component
     public $refundAmount;
     public $refundMethod;
     public $description;
-    public $tempUploads = []; // Основний масив для файлів із унікальними ключами
-    public $newUploads; // Тимчасова властивість для нових файлів
+    public $tempUploads = [];
+    public $newUploads;
 
     public function mount($orderItemId)
     {
@@ -83,19 +85,16 @@ class ReturnOptions extends Component
         ]);
 
         if (!empty($value)) {
-            // Валідуємо нові файли
             $this->validate([
-                'newUploads.*' => 'file|mimes:jpeg,png,gif,mp4|max:20480', // 20MB
+                'newUploads.*' => 'file|mimes:jpeg,png,gif,mp4|max:20480',
             ]);
 
-            // Додаємо нові файли до tempUploads з унікальними ключами
             foreach ($value as $file) {
                 $key = Str::random(10);
                 $this->tempUploads[$key] = $file;
                 \Log::info('Added file with key', ['key' => $key, 'file' => $file->getFilename()]);
             }
 
-            // Очищаємо newUploads після додавання
             $this->newUploads = null;
         }
 
@@ -148,7 +147,7 @@ class ReturnOptions extends Component
                     'refundMethod' => 'required|in:' . $this->getConfigKeys('refund_methods'),
                     'description' => 'required|string|max:500',
                     'tempUploads' => 'nullable|array',
-                    'tempUploads.*' => 'file|mimes:jpeg,png,gif,mp4|max:10240', // 10MB
+                    'tempUploads.*' => 'file|mimes:jpeg,png,gif,mp4|max:10240',
                 ]);
             }
         }
@@ -191,13 +190,32 @@ class ReturnOptions extends Component
             'evidence_path' => $evidencePath,
         ]);
 
-        // Створюємо диспут
+        $sellerUserId = Seller::where('id', $this->orderItem->seller_id)->value('user_id');
+
+        if (!$sellerUserId) {
+            $this->addError('form', 'Seller user ID not found.');
+            return;
+        }
+
         $disput = Disput::create([
             'return_request_id' => $returnRequest->id,
             'user_id' => $this->user->id,
-            'seller_id' => $this->orderItem->seller_id,
+            'seller_id' => $sellerUserId,
             'status' => 'open',
         ]);
+
+        DisputMessage::create([
+            'disput_id' => $disput->id,
+            'sender_id' => $this->user->id,
+            'message' => 'Initial proposal from customer',
+            'refund_amount' => $this->refundAmount,
+            'application_type' => $this->applicationType,
+            'refund_method' => $this->refundMethod,
+            'evidence_path' => $evidencePath ?? [],
+            'proposal_status' => 'open',
+        ]);
+
+        \Log::info('Initial message created', ['disput_id' => $disput->id]);
 
         session()->flash('message', 'Return request submitted successfully!');
         return redirect()->route('disputs.show', $disput->id);

@@ -31,12 +31,8 @@
                 </div>
             </div>
         </div>
-        {{-- @php
-            dd($disput);
-        @endphp --}}
         <section class="overview-data">
             <div class="card content-area p-4">
-
                 <div class="row">
                     <div class="col-md-12">
                         <div class="disput-details mb-4 d-flex gap-4">
@@ -135,7 +131,10 @@
         } from '{{ asset('assets/admin/custom/disput-chat.js') }}';
         initDisputChat(
             '{{ route('seller.disput.messages', $disput->id) }}',
-            '{{ route('seller.disput.send_message', $disput->id) }}'
+            '{{ route('seller.disput.send_message', $disput->id) }}',
+            '{{ route('seller.disput.accept_proposal', ['id' => $disput->id, 'messageId' => ':messageId']) }}',
+            '{{ route('seller.disput.submit_contrproposal', ['id' => $disput->id, 'messageId' => ':messageId']) }}',
+            '{{ route('seller.disput.call_admin', ['id' => $disput->id, 'messageId' => ':messageId']) }}'
         );
     </script>
 @endsection

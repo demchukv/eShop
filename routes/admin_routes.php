@@ -1100,11 +1100,13 @@ Route::group(
         Route::get('/admin/balance/list', [BalanceController::class, 'list'])->name('admin.balance.list');
 
         //Return request and disputs
-        Route::get('admin/disput/{id}', [AdminDisputController::class, 'show'])->name('admin.disput.show');
-        Route::get('admin/disput/{id}/messages', [AdminDisputController::class, 'messages'])->name('admin.disput.messages');
-        Route::post('admin/disput/{id}/send-message', [AdminDisputController::class, 'sendMessage'])->name('admin.disput.send_message');
         Route::get('admin/return-requests', [App\Http\Controllers\Admin\AdminReturnRequestController::class, 'index'])->name('admin.return_requests.index');
         Route::get('admin/return-requests/list', [App\Http\Controllers\Admin\AdminReturnRequestController::class, 'list'])->name('admin.return_requests.list');
+
+        Route::get('admin/disputs/{id}', [App\Http\Controllers\Admin\AdminDisputController::class, 'show'])->name('admin.disput.show');
+        Route::get('admin/disputs/{id}/messages', [App\Http\Controllers\Admin\AdminDisputController::class, 'messages'])->name('admin.disput.messages');
+        Route::post('admin/disputs/{id}/messages', [App\Http\Controllers\Admin\AdminDisputController::class, 'sendMessage'])->name('admin.disput.send_message');
+        Route::post('admin/disputs/{id}/resolve', [App\Http\Controllers\Admin\AdminDisputController::class, 'resolve'])->name('admin.disput.resolve');
     }
 
 );
