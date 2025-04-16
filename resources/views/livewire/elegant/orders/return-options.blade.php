@@ -1,5 +1,4 @@
 @php
-    // dd($order_item);
     $bread_crumb['page_main_bread_crumb'] = labels('front_messages.returns_refunds', 'Returns/Refunds');
     $currency_symbol = $order_item->order['order_payment_currency_code'];
     $currency_details = fetchDetails('currencies', [
@@ -72,13 +71,9 @@
                                 <label for="reason" class="form-label">Select the reason from the list below</label>
                                 <select wire:model.live="reason" class="form-select" id="reason">
                                     <option value="">Select a reason...</option>
-                                    <option value="no_longer_needed">No longer needed</option>
-                                    <option value="mismatch_description">Item doesn't match the description</option>
-                                    <option value="defective">Item defective or doesn't work</option>
-                                    <option value="damaged">Damaged</option>
-                                    <option value="missing_items">Items are missing</option>
-                                    <option value="expire_date">Expire date issues</option>
-                                    <option value="wrong_item">Wrong item was sent</option>
+                                    @foreach (config('return_reasons') as $key => $label)
+                                        <option value="{{ $key }}">{{ $label }}</option>
+                                    @endforeach
                                 </select>
                                 @error('reason')
                                     <span class="text-danger">{{ $message }}</span>
@@ -91,8 +86,9 @@
                                     <label for="applicationType" class="form-label">Select your application type</label>
                                     <select wire:model.live="applicationType" class="form-select" id="applicationType">
                                         <option value="">Select an option...</option>
-                                        <option value="return_and_refund">Return and Refund</option>
-                                        <option value="refund_only">Refund Only</option>
+                                        @foreach (config('application_types') as $key => $label)
+                                            <option value="{{ $key }}">{{ $label }}</option>
+                                        @endforeach
                                     </select>
                                     @error('applicationType')
                                         <span class="text-danger">{{ $message }}</span>
@@ -121,8 +117,9 @@
                                     <label for="refundMethod" class="form-label">Refund Method</label>
                                     <select wire:model="refundMethod" class="form-select" id="refundMethod">
                                         <option value="">Select a method...</option>
-                                        <option value="wallet">To Wallet</option>
-                                        <option value="original_payment">To Original Payment Method</option>
+                                        @foreach (config('refund_methods') as $key => $label)
+                                            <option value="{{ $key }}">{{ $label }}</option>
+                                        @endforeach
                                     </select>
                                     @error('refundMethod')
                                         <span class="text-danger">{{ $message }}</span>

@@ -25,7 +25,7 @@ class DisputChatService
             if ($disput->seller_id !== $seller_id) {
                 abort(403, 'Unauthorized');
             }
-        } elseif ($userType === 'admin' && !Auth::user()->hasRole('super_admin')) {
+        } elseif ($userType === 'admin' && !Auth::user()->role_id == 1) {
             abort(403, 'Unauthorized');
         }
 
@@ -39,7 +39,7 @@ class DisputChatService
                 'disput_id' => $message->disput_id,
                 'sender_id' => $message->sender_id,
                 'sender_type' => $senderType,
-                'sender' => ['name' => $senderName], // Для сумісності з шаблоном
+                'sender_name' => $senderName,
                 'message' => $message->message,
                 'created_at' => $message->created_at->toIso8601String(),
             ];
@@ -67,7 +67,7 @@ class DisputChatService
             if ($disput->seller_id !== $seller_id) {
                 abort(403, 'Unauthorized');
             }
-        } elseif ($userType === 'admin' && !Auth::user()->hasRole('super_admin')) {
+        } elseif ($userType === 'admin' && !Auth::user()->role_id == 1) {
             abort(403, 'Unauthorized');
         }
 

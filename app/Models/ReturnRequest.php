@@ -49,4 +49,9 @@ class ReturnRequest extends Model
     {
         return $this->belongsTo(OrderItems::class, 'order_item_id');
     }
+
+    public function getEvidencePathAttribute($value)
+    {
+        return is_string($value) ? json_decode($value, true) ?? [] : ($value ?? []);
+    }
 }

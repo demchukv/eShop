@@ -27,6 +27,7 @@ class SellerDisputController extends Controller
             ->with(['returnRequest', 'returnRequest.orderItem', 'returnRequest.user'])
             ->firstOrFail();
 
+
         $currencyDetails = fetchDetails('currencies', ['is_default' => 1], 'symbol');
         $currency = !empty($currencyDetails) ? $currencyDetails[0]->symbol : '';
 

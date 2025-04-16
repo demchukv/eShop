@@ -143,6 +143,7 @@
                 await loadScript("{{ asset('js/datepicker/js/bootstrap-datepicker.min.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/swiper-bundle.min.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/shareon.iife.js') }}");
+                await loadScript("{{ asset('frontend/elegant/js/lightbox.js') }}");
                 await loadScript("https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js", true);
 
                 window.dispatchEvent(new Event('scripts:loaded'));

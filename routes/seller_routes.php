@@ -388,8 +388,6 @@ Route::group(
         //Return request
         Route::get('seller/return-requests', [SellerReturnRequestController::class, 'index'])->name('seller.return_requests.index');
         Route::get('seller/return-requests/list', [SellerReturnRequestController::class, 'list'])->name('seller.return_requests.list');
-        Route::post('seller/return-requests/{id}/approve', [SellerReturnRequestController::class, 'approve'])->name('seller.return_requests.approve');
-        Route::post('seller/return-requests/{id}/decline', [SellerReturnRequestController::class, 'decline'])->name('seller.return_requests.decline');
         Route::get('seller/disput/{id}', [SellerDisputController::class, 'show'])->name('seller.disput.show');
         Route::get('seller/disput/{id}/messages', [SellerDisputController::class, 'messages'])->name('seller.disput.messages');
         Route::post('seller/disput/{id}/send-message', [SellerDisputController::class, 'sendMessage'])->name('seller.disput.send_message');

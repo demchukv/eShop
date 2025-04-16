@@ -10,8 +10,8 @@ export function initDisputChat(messagesUrl, sendMessageUrl) {
                     $('#chat-messages').empty();
                     response.messages.forEach(function (msg) {
                         var messageClass = msg.sender_type === 'admin' || msg.sender_type === 'seller' ? 'text-end' : 'text-start';
-                        var messageBg = msg.sender_type === 'admin' ? 'bg-primary text-white' :
-                            (msg.sender_type === 'seller' ? 'bg-success text-white' : 'bg-light');
+                        var messageBg = msg.sender_type === 'admin' ? 'bg-primary' :
+                            (msg.sender_type === 'seller' ? 'bg-success' : 'bg-light');
                         $('#chat-messages').append(
                             '<div class="mb-2 ' + messageClass + '">' +
                             '<div class="p-2 rounded d-inline-block ' + messageBg + '">' +

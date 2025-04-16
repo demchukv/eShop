@@ -34,36 +34,86 @@
 
         <section class="overview-data">
             <div class="card content-area p-4">
-                <div class="row align-items-center d-flex heading mb-5">
-                    <div class="col-md-12">
-                        <h4>{{ labels('admin_labels.disput_conversation', 'Disput Conversation') }}</h4>
-                    </div>
-                </div>
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="disput-details mb-4">
-                            <h5>{{ labels('admin_labels.disput_information', 'Disput Information') }}</h5>
-                            <p><strong>{{ labels('admin_labels.disput_id', 'Disput ID') }}:</strong> {{ $disput->id }}
-                            </p>
-                            <p><strong>{{ labels('admin_labels.return_request_id', 'Return Request ID') }}:</strong>
-                                {{ $disput->return_request_id }}</p>
-                            <p><strong>{{ labels('admin_labels.order_id', 'Order ID') }}:</strong>
-                                {{ $disput->returnRequest->order_id }}</p>
-                            <p><strong>{{ labels('admin_labels.user_name', 'User Name') }}:</strong>
-                                {{ $disput->returnRequest->user->username }}</p>
-                            <p><strong>{{ labels('admin_labels.product_name', 'Product Name') }}:</strong>
-                                {{ $disput->returnRequest->orderItem->product->name }}</p>
-                            <p><strong>{{ labels('admin_labels.reason', 'Reason') }}:</strong>
-                                {{ config('return_reasons')[$disput->returnRequest->reason] ?? $disput->returnRequest->reason }}
-                            </p>
-                            <p><strong>{{ labels('admin_labels.refund_amount', 'Refund Amount') }}:</strong>
-                                {{ $currency . number_format($disput->returnRequest->refund_amount, 2) }}</p>
-                            <p><strong>{{ labels('admin_labels.status', 'Status') }}:</strong>
-                                <span
-                                    class="badge {{ $disput->returnRequest->status == 0 ? 'bg-secondary' : ($disput->returnRequest->status == 1 ? 'bg-success' : 'bg-danger') }}">
-                                    {{ $disput->returnRequest->status == 0 ? 'Pending' : ($disput->returnRequest->status == 1 ? 'Approved' : 'Declined') }}
-                                </span>
-                            </p>
+                        <div class="disput-details mb-4 d-flex gap-4">
+                            <div>
+                                <p class="mb-0"><strong>{{ labels('admin_labels.disput_id', 'Disput ID') }}:</strong>
+                                    {{ $disput->id }}
+                                </p>
+                                <p class="mb-0">
+                                    <strong>{{ labels('admin_labels.return_request_id', 'Return Request ID') }}:</strong>
+                                    {{ $disput->return_request_id }}
+                                </p>
+                                <p class="mb-0"><strong>{{ labels('admin_labels.order_id', 'Order ID') }}:</strong>
+                                    {{ $disput->returnRequest->order_id }}</p>
+                                <p class="mb-0"><strong>{{ labels('admin_labels.user_name', 'User Name') }}:</strong>
+                                    {{ $disput->returnRequest->user->username }}
+                                    ({{ $disput->returnRequest->user->first_name }}
+                                    {{ $disput->returnRequest->user->last_name }})</p>
+                                <p class="mb-0">
+                                    <strong>{{ labels('admin_labels.product_name', 'Product Name') }}:</strong>
+                                    {{ $disput->returnRequest->orderItem->product->name }}
+                                </p>
+                                <p class="mb-0"><strong>{{ labels('admin_labels.reason', 'Reason') }}:</strong>
+                                    {{ config('return_reasons')[$disput->returnRequest->reason] ?? $disput->returnRequest->reason }}
+                                </p>
+                                <p class="mb-0">
+                                    <strong>{{ labels('admin_labels.application_type', 'Application Type') }}:</strong>
+                                    {{ config('application_types')[$disput->returnRequest->application_type] ?? $disput->returnRequest->application_type }}
+                                </p>
+                                <p class="mb-0">
+                                    <strong>{{ labels('admin_labels.refund_amount', 'Refund Amount') }}:</strong>
+                                    {{ $currency . number_format($disput->returnRequest->refund_amount, 2) }}
+                                    ({{ config('refund_methods')[$disput->returnRequest->refund_method] ?? $disput->returnRequest->refund_method }})
+                                </p>
+                                <p class="mb-0 d-flex gap-2">
+                                    <strong>{{ labels('admin_labels.status', 'Status') }}:</strong>
+                                    <span
+                                        class="badge {{ $disput->returnRequest->status == 0 ? 'bg-secondary' : ($disput->returnRequest->status == 1 ? 'bg-success' : 'bg-danger') }}">
+                                        {{ $disput->returnRequest->status == 0 ? 'Pending' : ($disput->returnRequest->status == 1 ? 'Approved' : 'Declined') }}
+                                    </span>
+                                </p>
+                            </div>
+                            <div>
+                                @if (!empty($disput->returnRequest->evidence_path))
+                                    <p class="mb-0 mt-3">
+                                        <strong>{{ labels('admin_labels.evidence', 'Evidence') }}:</strong>
+                                    </p>
+                                    <div class="evidence-gallery d-flex flex-wrap gap-2 mt-2">
+                                        @foreach ($disput->returnRequest->evidence_path as $path)
+                                            @php
+                                                $extension = pathinfo($path, PATHINFO_EXTENSION);
+                                                $isImage = in_array(strtolower($extension), [
+                                                    'jpg',
+                                                    'jpeg',
+                                                    'png',
+                                                    'gif',
+                                                ]);
+                                                $isVideo = in_array(strtolower($extension), ['mp4', 'webm', 'ogg']);
+                                            @endphp
+                                            @if ($isImage)
+                                                <a href="{{ asset('storage/' . $path) }}"
+                                                    data-lightbox="evidence-{{ $disput->id }}">
+                                                    <img src="{{ asset('storage/' . $path) }}" alt="Evidence"
+                                                        style="max-width: 100px; max-height: 100px; object-fit: cover;">
+                                                </a>
+                                            @elseif ($isVideo)
+                                                <video width="200" controls>
+                                                    <source src="{{ asset('storage/' . $path) }}"
+                                                        type="video/{{ $extension }}">
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <p class="mb-0 mt-3">
+                                        <strong>{{ labels('admin_labels.evidence', 'Evidence') }}:</strong> No
+                                        evidence provided.
+                                    </p>
+                                @endif
+                            </div>
                         </div>
 
                         <x-disput-chat :disput="$disput" />

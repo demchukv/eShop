@@ -1105,8 +1105,6 @@ Route::group(
         Route::post('admin/disput/{id}/send-message', [AdminDisputController::class, 'sendMessage'])->name('admin.disput.send_message');
         Route::get('admin/return-requests', [App\Http\Controllers\Admin\AdminReturnRequestController::class, 'index'])->name('admin.return_requests.index');
         Route::get('admin/return-requests/list', [App\Http\Controllers\Admin\AdminReturnRequestController::class, 'list'])->name('admin.return_requests.list');
-        Route::post('admin/return-requests/{id}/approve', [App\Http\Controllers\Admin\AdminReturnRequestController::class, 'approve'])->name('admin.return_requests.approve');
-        Route::post('admin/return-requests/{id}/decline', [App\Http\Controllers\Admin\AdminReturnRequestController::class, 'decline'])->name('admin.return_requests.decline');
     }
 
 );

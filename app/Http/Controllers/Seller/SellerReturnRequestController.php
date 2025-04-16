@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
-use App\Models\ReturnRequest;
 use App\Models\Seller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +23,7 @@ class SellerReturnRequestController extends Controller
     public function list(Request $request)
     {
         $search = trim($request->input('search', ''));
-        $offset = $search || $request->input('pagination_offset') ? $request->input('pagination_offset', 0) : 0;
+        $offset = $request->input('pagination_offset', 0);
         $limit = $request->input('limit', 10);
         $sort = $request->input('sort', 'rr.id');
         $order = $request->input('order', 'DESC');
@@ -33,6 +32,10 @@ class SellerReturnRequestController extends Controller
         $status = $request->input('status') !== null ? $request->input('status') : null;
         $reason = $request->input('reason');
         $seller_id = Seller::where('user_id', Auth::id())->value('id');
+
+        // Валідація offset і limit
+        $offset = is_numeric($offset) && $offset >= 0 ? (int)$offset : 0;
+        $limit = is_numeric($limit) && $limit > 0 ? (int)$limit : 10;
 
         // Define $currency
         $currencyDetails = fetchDetails('currencies', ['is_default' => 1], 'symbol');
@@ -93,18 +96,9 @@ class SellerReturnRequestController extends Controller
                 'rr.order_id',
                 'rr.order_item_id',
                 'rr.user_id',
-                'rr.product_id',
-                'rr.product_variant_id',
                 'rr.reason',
                 'rr.status',
-                'rr.remarks',
-                'rr.delivery_status',
-                'rr.application_type',
                 'rr.refund_amount',
-                'rr.refund_method',
-                'rr.description',
-                'rr.evidence_path',
-                'rr.return_method',
                 'rr.created_at',
                 'u.username',
                 'p.name as product_name',
@@ -156,7 +150,6 @@ class SellerReturnRequestController extends Controller
             if ($row->disput_id) {
                 $action .= '<a href="' . route('seller.disput.show', $row->disput_id) . '" class="btn btn-sm btn-primary me-2" title="View Disput"><i class="fa fa-eye"></i></a>';
             }
-            $action .= '<a href="javascript:void(0)" class="btn btn-sm btn-info me-2 view-return" data-id="' . $row->id . '" data-order-id="' . $row->order_id . '" data-order-item-id="' . $row->order_item_id . '" data-username="' . $row->username . '" data-product-name="' . htmlspecialchars($row->product_name) . '" data-product-id="' . $row->product_id . '" data-product-variant-id="' . $row->product_variant_id . '" data-reason="' . htmlspecialchars($row->reason) . '" data-status="' . $row->status . '" data-remarks="' . htmlspecialchars($row->remarks ?? '') . '" data-delivery-status="' . ($row->delivery_status ?? '') . '" data-application-type="' . ($row->application_type ?? '') . '" data-refund-amount="' . $row->refund_amount . '" data-refund-method="' . ($row->refund_method ?? '') . '" data-description="' . htmlspecialchars($row->description ?? '') . '" data-evidence-path=\'' . ($row->evidence_path ?? '') . '\' data-return-method="' . ($row->return_method ?? '') . '" data-bs-toggle="modal" data-bs-target="#view_return_request_modal"><i class="fa fa-info-circle"></i></a>';
             $action .= '</div>';
 
             $rows[] = [
@@ -180,23 +173,5 @@ class SellerReturnRequestController extends Controller
         $bulkData['rows'] = $rows;
 
         return response()->json($bulkData);
-    }
-
-    public function approve(Request $request, $id)
-    {
-        $returnRequest = ReturnRequest::whereHas('orderItem', function ($query) {
-            $query->where('seller_id', Seller::where('user_id', Auth::id())->value('id'));
-        })->findOrFail($id);
-        $returnRequest->update(['status' => 1]);
-        return response()->json(['error' => false, 'message' => 'Return request approved.']);
-    }
-
-    public function decline(Request $request, $id)
-    {
-        $returnRequest = ReturnRequest::whereHas('orderItem', function ($query) {
-            $query->where('seller_id', Seller::where('user_id', Auth::id())->value('id'));
-        })->findOrFail($id);
-        $returnRequest->update(['status' => 2]);
-        return response()->json(['error' => false, 'message' => 'Return request declined.']);
     }
 }

@@ -138,14 +138,14 @@ class ReturnOptions extends Component
 
         if ($this->deliveryStatus === 'received') {
             $rules = array_merge($rules, [
-                'reason' => 'required|in:no_longer_needed,mismatch_description,defective,damaged,missing_items,expire_date,wrong_item',
-                'applicationType' => 'required|in:return_and_refund,refund_only',
+                'reason' => 'required|in:' . $this->getConfigKeys('return_reasons'),
+                'applicationType' => 'required|in:' . $this->getConfigKeys('application_types'),
             ]);
 
             if ($this->applicationType) {
                 $rules = array_merge($rules, [
                     'refundAmount' => 'required|numeric|min:0|max:' . $this->orderItem->price * $this->orderItem->quantity,
-                    'refundMethod' => 'required|in:wallet,original_payment',
+                    'refundMethod' => 'required|in:' . $this->getConfigKeys('refund_methods'),
                     'description' => 'required|string|max:500',
                     'tempUploads' => 'nullable|array',
                     'tempUploads.*' => 'file|mimes:jpeg,png,gif,mp4|max:10240', // 10MB
@@ -195,12 +195,17 @@ class ReturnOptions extends Component
         $disput = Disput::create([
             'return_request_id' => $returnRequest->id,
             'user_id' => $this->user->id,
-            'seller_id' => $this->orderItem->seller_id, // Беремо seller_id із order_items
+            'seller_id' => $this->orderItem->seller_id,
             'status' => 'open',
         ]);
 
         session()->flash('message', 'Return request submitted successfully!');
         return redirect()->route('disputs.show', $disput->id);
+    }
+
+    private function getConfigKeys($configName)
+    {
+        return implode(',', array_keys(config($configName)));
     }
 
     private function handleUpload()

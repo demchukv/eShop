@@ -14,18 +14,22 @@ class AdminDisputController extends Controller
 
     public function __construct(DisputChatService $chatService)
     {
+        \Log::debug('start admin disput controller');
         $this->chatService = $chatService;
     }
 
     public function show($id)
     {
-        if (!Auth::user()->hasRole('super_admin')) {
+        \Log::debug('USER: ' . json_encode(Auth::user()));
+        if (!Auth::user()->role_id == 1) {
+            \Log::debug("User haven't access");
             abort(403, 'Unauthorized');
         }
 
         $disput = Disput::where('id', $id)
             ->with(['returnRequest', 'returnRequest.orderItem', 'returnRequest.user'])
             ->firstOrFail();
+
 
         $currencyDetails = fetchDetails('currencies', ['is_default' => 1], 'symbol');
         $currency = !empty($currencyDetails) ? $currencyDetails[0]->symbol : '';

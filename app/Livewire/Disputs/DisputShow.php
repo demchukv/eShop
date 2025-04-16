@@ -14,6 +14,7 @@ class DisputShow extends Component
     public $disput;
     public $messages;
     public $newMessage;
+    public $currency;
 
     protected $chatService;
 
@@ -57,6 +58,9 @@ class DisputShow extends Component
             Log::debug('403 Unauthorized');
             abort(403, 'Unauthorized');
         }
+
+        $currencyDetails = fetchDetails('currencies', ['is_default' => 1], 'symbol');
+        $this->currency = !empty($currencyDetails) ? $currencyDetails[0]->symbol : '';
 
         $this->loadMessages();
     }
