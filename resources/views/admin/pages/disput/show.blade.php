@@ -163,6 +163,15 @@
                                     </p>
                                 @endif
                             </div>
+                            <div id="final-decision" data-disput-id="{{ $disput->id }}"
+                                data-currency="{{ $currency }}" class="bg-light p-2">
+                                <p class="mb-0 mt-3">
+                                    <strong>{{ labels('admin_labels.final_decision', 'Final decision') }}:</strong>
+                                </p>
+                                <div id="final-decision-content">
+                                    <!-- Контент буде заповнено через JavaScript -->
+                                </div>
+                            </div>
                         </div>
 
                         <x-disput-chat :disput="$disput" />

@@ -10,7 +10,8 @@
                             {{ $disput->id }}</p>
                         <p class="mb-0">
                             <strong>{{ labels('admin_labels.return_request_id', 'Return Request ID') }}:</strong>
-                            {{ $disput->return_request_id }}</p>
+                            {{ $disput->return_request_id }}
+                        </p>
                         <p class="mb-0"><strong>{{ labels('admin_labels.order_id', 'Order ID') }}:</strong>
                             {{ $disput->returnRequest->order_id }}</p>
                         <p class="mb-0"><strong>{{ labels('admin_labels.user_name', 'User Name') }}:</strong>
@@ -67,6 +68,26 @@
                                 evidence provided.</p>
                         @endif
                     </div>
+                    @php
+                        $acceptedMessage = collect($messages)->firstWhere('proposal_status', 'accepted');
+                    @endphp
+                    @if ($acceptedMessage)
+                        <div class="bg-light p-2">
+                            <p class="mb-0 mt-3">
+                                <strong>{{ labels('admin_labels.final_decision', 'Final Decision') }}:</strong>
+                            </p>
+                            <p class="mb-0"><strong>Refund Amount:</strong>
+                                {{ $currency . number_format($acceptedMessage['refund_amount'], 2) }}</p>
+                            <p class="mb-0"><strong>Application Type:</strong>
+                                {{ config('application_types')[$acceptedMessage['application_type']] ?? $acceptedMessage['application_type'] }}
+                            </p>
+                            <p class="mb-0"><strong>Refund Method:</strong>
+                                {{ config('refund_methods')[$acceptedMessage['refund_method']] ?? $acceptedMessage['refund_method'] }}
+                            </p>
+                            <p class="mb-0"><strong>Accepted At:</strong>
+                                {{ \Carbon\Carbon::parse($acceptedMessage['created_at'])->toDateTimeString() }}</p>
+                        </div>
+                    @endif
                 </div>
 
                 <div class="disput-chat">

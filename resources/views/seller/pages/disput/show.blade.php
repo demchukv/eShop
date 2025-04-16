@@ -113,6 +113,15 @@
                                     </p>
                                 @endif
                             </div>
+                            <div id="final-decision" data-disput-id="{{ $disput->id }}"
+                                data-currency="{{ $currency }}" class="bg-light p-2">
+                                <p class="mb-0 mt-3">
+                                    <strong>{{ labels('admin_labels.final_decision', 'Final decision') }}:</strong>
+                                </p>
+                                <div id="final-decision-content">
+                                    <!-- Контент буде заповнено через JavaScript -->
+                                </div>
+                            </div>
                         </div>
 
                         <x-disput-chat :disput="$disput" />
@@ -136,5 +145,33 @@
             '{{ route('seller.disput.submit_contrproposal', ['id' => $disput->id, 'messageId' => ':messageId']) }}',
             '{{ route('seller.disput.call_admin', ['id' => $disput->id, 'messageId' => ':messageId']) }}'
         );
+
+        // Функція для завантаження та відображення остаточного рішення
+        document.addEventListener('DOMContentLoaded', () => {
+            const finalDecisionDiv = document.getElementById('final-decision');
+            const finalDecisionContent = document.getElementById('final-decision-content');
+            const disputId = finalDecisionDiv.dataset.disputId;
+            const currency = finalDecisionDiv.dataset.currency;
+
+            fetch('{{ route('seller.disput.messages', $disput->id) }}')
+                .then(response => response.json())
+                .then(data => {
+                    const acceptedMessage = data.messages.find(msg => msg.proposal_status === 'accepted');
+                    if (acceptedMessage) {
+                        finalDecisionContent.innerHTML = `
+                            <p class="mb-0"><strong>Refund Amount::</strong> ${currency}${parseFloat(acceptedMessage.refund_amount).toFixed(2)}</p>
+                            <p class="mb-0"><strong>Application Type:</strong> ${data.application_types[acceptedMessage.application_type] || acceptedMessage.application_type}</p>
+                            <p class="mb-0"><strong>Refund method:</strong> ${data.refund_methods[acceptedMessage.refund_method] || acceptedMessage.refund_method}</p>
+                            <p class="mb-0"><strong>Accepted:</strong> ${new Date(acceptedMessage.created_at).toLocaleString()}</p>
+                        `;
+                    } else {
+                        finalDecisionContent.innerHTML = '<p class="mb-0">Остаточне рішення відсутнє.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Помилка при завантаженні повідомлень:', error);
+                    finalDecisionContent.innerHTML = '<p class="mb-0">Помилка завантаження даних.</p>';
+                });
+        });
     </script>
 @endsection

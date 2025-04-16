@@ -1,5 +1,27 @@
 export function initDisputChat(messagesUrl, sendMessageUrl, acceptUrl, contrproposalUrl, callAdminUrl) {
     $(document).ready(function () {
+        // Function to display final decision
+        function displayFinalDecision(response) {
+            const finalDecisionDiv = $('#final-decision');
+            const finalDecisionContent = $('#final-decision-content');
+            if (!finalDecisionDiv.length || !finalDecisionContent.length) {
+                return; // Exit if elements are not found
+            }
+
+            const currency = finalDecisionDiv.data('currency');
+            const acceptedMessage = response.messages.find(msg => msg.proposal_status === 'accepted');
+
+            if (acceptedMessage) {
+                finalDecisionContent.html(`
+                    <p class="mb-0"><strong>Refund Amount:</strong> ${currency}${parseFloat(acceptedMessage.refund_amount).toFixed(2)}</p>
+                    <p class="mb-0"><strong>Application Type:</strong> ${response.application_types[acceptedMessage.application_type] || acceptedMessage.application_type}</p>
+                    <p class="mb-0"><strong>Refund Method:</strong> ${response.refund_methods[acceptedMessage.refund_method] || acceptedMessage.refund_method}</p>
+                    <p class="mb-0"><strong>Accepted:</strong> ${new Date(acceptedMessage.created_at).toLocaleString()}</p>
+                `);
+            } else {
+                finalDecisionContent.html('<p class="mb-0">Остаточне рішення відсутнє.</p>');
+            }
+        }
         // Load messages
         function loadMessages() {
             $.ajax({
@@ -91,6 +113,8 @@ export function initDisputChat(messagesUrl, sendMessageUrl, acceptUrl, contrprop
                         );
                     });
                     $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+                    // Call displayFinalDecision after loading messages
+                    displayFinalDecision(response);
                 }
             });
         }
@@ -197,4 +221,6 @@ export function initDisputChat(messagesUrl, sendMessageUrl, acceptUrl, contrprop
         // Refresh messages every 10 seconds
         setInterval(loadMessages, 10000);
     });
+
+
 }
