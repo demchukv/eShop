@@ -395,6 +395,8 @@ Route::group(
         Route::post('seller/disputs/{id}/messages/{messageId}/accept', [App\Http\Controllers\Seller\SellerDisputController::class, 'acceptProposal'])->name('seller.disput.accept_proposal');
         Route::post('seller/disputs/{id}/messages/{messageId}/contrproposal', [App\Http\Controllers\Seller\SellerDisputController::class, 'submitContrproposal'])->name('seller.disput.submit_contrproposal');
         Route::post('seller/disputs/{id}/messages/{messageId}/call-admin', [App\Http\Controllers\Seller\SellerDisputController::class, 'callAdmin'])->name('seller.disput.call_admin');
+        Route::post('seller/disputs/{id}/submit-tracking', [App\Http\Controllers\Seller\SellerDisputController::class, 'submitTracking'])->name('seller.disput.submitTracking');
+        Route::post('seller/disputs/{id}/updateReturnStatus', [App\Http\Controllers\Seller\SellerDisputController::class, 'updateReturnStatus'])->name('seller.disput.updateReturnStatus');
     }
 
 

@@ -1,4 +1,7 @@
-@props(['disput', 'messages', 'currency'])
+<?php
+// Note: Blade templates are primarily HTML with PHP directives, so contentType is text/html
+?>
+@props(['disput', 'messages', 'currency', 'couriers'])
 
 <div>
     <div class="card content-area p-4">
@@ -32,8 +35,8 @@
                         </p>
                         <p class="mb-0 d-flex gap-2"><strong>{{ labels('admin_labels.status', 'Status') }}:</strong>
                             <span
-                                class="badge {{ $disput->returnRequest->status == 0 ? 'bg-secondary' : ($disput->returnRequest->status == 1 ? 'bg-success' : 'bg-danger') }}">
-                                {{ $disput->returnRequest->status == 0 ? 'Pending' : ($disput->returnRequest->status == 1 ? 'Approved' : 'Declined') }}
+                                class="badge {{ $disput->returnRequest->status == 0 ? 'bg-secondary' : ($disput->returnRequest->status == 1 ? 'bg-danger' : ($disput->returnRequest->status == 2 ? 'bg-success' : ($disput->returnRequest->status == 3 ? 'bg-info' : 'bg-primary'))) }}">
+                                {{ $disput->returnRequest->status == 0 ? 'Pending' : ($disput->returnRequest->status == 1 ? 'Rejected' : ($disput->returnRequest->status == 2 ? 'Approved' : ($disput->returnRequest->status == 3 ? 'Return Picked Up' : 'Returned'))) }}
                             </span>
                         </p>
                     </div>
@@ -68,26 +71,79 @@
                                 evidence provided.</p>
                         @endif
                     </div>
-                    @php
-                        $acceptedMessage = collect($messages)->firstWhere('proposal_status', 'accepted');
-                    @endphp
-                    @if ($acceptedMessage)
-                        <div class="bg-light p-2">
-                            <p class="mb-0 mt-3">
-                                <strong>{{ labels('admin_labels.final_decision', 'Final Decision') }}:</strong>
-                            </p>
-                            <p class="mb-0"><strong>Refund Amount:</strong>
-                                {{ $currency . number_format($acceptedMessage['refund_amount'], 2) }}</p>
-                            <p class="mb-0"><strong>Application Type:</strong>
-                                {{ config('application_types')[$acceptedMessage['application_type']] ?? $acceptedMessage['application_type'] }}
-                            </p>
-                            <p class="mb-0"><strong>Refund Method:</strong>
-                                {{ config('refund_methods')[$acceptedMessage['refund_method']] ?? $acceptedMessage['refund_method'] }}
-                            </p>
-                            <p class="mb-0"><strong>Accepted At:</strong>
-                                {{ \Carbon\Carbon::parse($acceptedMessage['created_at'])->toDateTimeString() }}</p>
-                        </div>
-                    @endif
+                    <div>
+                        {{-- @php
+                            dd($disput->ReturnRequest);
+                        @endphp --}}
+                        @if ($disput->returnRequest->status > 1)
+                            <div class="bg-light p-2 mt-3" id="final-decision">
+                                <p class="mb-0">
+                                    <strong>{{ labels('admin_labels.final_decision', 'Final Decision') }}:</strong>
+                                </p>
+                                <p class="mb-0"><strong>Refund Amount:</strong>
+                                    {{ $currency . number_format($disput->returnRequest->refund_amount, 2) }}</p>
+                                <p class="mb-0"><strong>Application Type:</strong>
+                                    {{ config('application_types')[$disput->returnRequest->application_type] ?? $disput->returnRequest->application_type }}
+                                </p>
+                                <p class="mb-0"><strong>Refund Method:</strong>
+                                    {{ config('refund_methods')[$disput->returnRequest->refund_method] ?? $disput->returnRequest->refund_method }}
+                                </p>
+                                @if ($disput->returnRequest->status == 2)
+                                    <p class="mb-0"><strong>Accepted At:</strong>
+                                        {{ \Carbon\Carbon::parse($disput->returnRequest->updated_at)->toDateTimeString() }}
+                                    </p>
+                                @endif
+                                @if ($disput->returnRequest->orderTracking)
+                                    <p class="mb-0"><strong>Tracking Number:</strong>
+                                        {{ $disput->returnRequest->orderTracking->tracking_number }}</p>
+                                    <p class="mb-0"><strong>Courier Service:</strong>
+                                        {{ $disput->returnRequest->orderTracking->courier_agency }}</p>
+                                    @if ($disput->returnRequest->orderTracking->url)
+                                        <p class="mb-0"><strong>Tracking URL:</strong>
+                                            <a href="{{ $disput->returnRequest->orderTracking->url }}"
+                                                target="_blank">Track</a>
+                                        </p>
+                                    @endif
+                                    {{-- <p class="mb-0"><strong>Status:</strong>
+                                        {{ ucfirst(str_replace('_', ' ', $disput->returnRequest->orderTracking->status)) }}
+                                    </p> --}}
+                                @endif
+                                @if (
+                                    $disput->user_id === Auth::id() &&
+                                        $disput->returnRequest->application_type === 'return_and_refund' &&
+                                        $disput->returnRequest->status == 2)
+                                    <form wire:submit.prevent="submitTracking" class="mt-3">
+                                        <div class="mb-3">
+                                            <label for="trackingNumber" class="form-label">Tracking Number</label>
+                                            <input type="text" class="form-control" id="trackingNumber"
+                                                wire:model="tracking.tracking_number" required>
+                                            @error('tracking.tracking_number')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="courierService" class="form-label">Courier Service</label>
+                                            <select class="form-select select2" id="courierService"
+                                                wire:model="tracking.courier_service" required>
+                                                <option value="">Select a courier...</option>
+                                                @foreach ($couriers as $courier)
+                                                    <option value="{{ $courier['slug'] }}">{{ $courier['name'] }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('tracking.courier_service')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Submit Tracking</button>
+                                        @error('form')
+                                            <span class="text-danger d-block mt-2">{{ $message }}</span>
+                                        @enderror
+                                    </form>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
                 </div>
 
                 <div class="disput-chat">
@@ -153,9 +209,17 @@
                                             </div>
                                         @endif
                                     @elseif ($message['proposal_status'] === 'accepted')
+                                        <p><strong>Proposed:</strong>
+                                            {{ config('application_types')[$message['application_type']] ?? $message['application_type'] }}
+                                            for {{ $currency }}{{ number_format($message['refund_amount'], 2) }}
+                                            to
+                                            {{ config('refund_methods')[$message['refund_method']] ?? $message['refund_method'] }}
+                                        </p>
                                         <p>Proposal accepted.</p>
                                     @elseif ($message['proposal_status'] === 'admin_call')
                                         <p>Admin intervention requested.</p>
+                                    @elseif ($message['proposal_status'] === 'tracking_submitted')
+                                        <p>{{ $message['message'] }}</p>
                                     @else
                                         <p>{{ $message['message'] }}</p>
                                     @endif
@@ -217,8 +281,8 @@
                         </div>
                         <div class="mb-3">
                             <label for="applicationType" class="form-label">Application Type</label>
-                            <select class="form-select" id="applicationType" wire:model="contrproposal.application_type"
-                                required>
+                            <select class="form-select" id="applicationType"
+                                wire:model="contrproposal.application_type" required>
                                 <option value="">Select an option...</option>
                                 @foreach (config('application_types') as $key => $label)
                                     <option value="{{ $key }}">{{ $label }}</option>
@@ -267,8 +331,21 @@
     </div>
 
     @push('scripts')
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script>
             document.addEventListener('livewire:initialized', () => {
+                // Ініціалізація Select2
+                $('#courierService').select2({
+                    placeholder: "Select a courier...",
+                    allowClear: true
+                });
+
+                // Синхронізація Select2 із Livewire
+                $('#courierService').on('change', function(e) {
+                    @this.set('tracking.courier_service', e.target.value);
+                });
+
                 Livewire.on('openContrproposalModal', () => {
                     let modal = new bootstrap.Modal(document.getElementById('contrproposalModal'));
                     modal.show();
@@ -280,6 +357,56 @@
                         modal.hide();
                     }
                 });
+
+                // Резервний асинхронний запит до /aftership/couriers
+                async function loadCouriers() {
+                    try {
+                        const response = await fetch('/aftership/couriers', {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            },
+                        });
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        const data = await response.json();
+                        console.log('Couriers response:', data);
+                        const select = document.getElementById('courierService');
+                        if (select && data && data.couriers) {
+                            console.log(data.couriers);
+                            select.innerHTML = '<option value="">Select a courier...</option>';
+                            data.couriers.forEach(courier => {
+                                const option = document.createElement('option');
+                                option.value = courier.slug;
+                                option.textContent = courier.name;
+                                select.appendChild(option);
+                            });
+                            // Оновити Select2 після зміни опцій
+                            $(select).trigger('change');
+                        } else {
+                            console.warn('No couriers found or select element missing', {
+                                selectExists: !!select,
+                                hasData: !!data,
+                                hasCouriers: !!(data && data.couriers)
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error loading couriers:', error.message);
+                        if (error.message.includes('404')) {
+                            console.error('Route /aftership/couriers not found. Please check routes/web.php.');
+                        }
+                    }
+                }
+
+                if (document.getElementById('courierService')) {
+                    const select = document.getElementById('courierService');
+                    if (select.options.length <= 1) {
+                        console.log('No server-side couriers, loading via fetch');
+                        loadCouriers();
+                    }
+                }
             });
         </script>
     @endpush

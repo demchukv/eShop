@@ -28,6 +28,7 @@ class ReturnRequest extends Model
         'description',
         'evidence_path',
         'return_method',
+        'order_tracking_id',
     ];
 
     public function user()
@@ -48,6 +49,11 @@ class ReturnRequest extends Model
     public function orderItem()
     {
         return $this->belongsTo(OrderItems::class, 'order_item_id');
+    }
+
+    public function orderTracking()
+    {
+        return $this->belongsTo(OrderTracking::class);
     }
 
     public function getEvidencePathAttribute($value)

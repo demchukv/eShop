@@ -62,6 +62,7 @@ Route::get('get_zones', [ApiController::class, 'get_zones'])->name('get_zones');
 Route::get('test', [ApiController::class, 'test'])->name('test');
 
 Route::post('/aftership/webhook', [AfterShipApiController::class, 'handleWebhook'])->name('aftership.webhook');
+
 // -------------------------------------------------------------------------------------
 
 Route::group(['middleware' => ['check_token', 'auth:sanctum']], function () {

@@ -1,3 +1,6 @@
+<?php
+// Note: Blade templates are primarily HTML with PHP directives, so contentType is text/html
+?>
 @extends('seller/layout')
 
 @section('title')
@@ -68,11 +71,38 @@
                                 </p>
                                 <p class="mb-0 d-flex gap-2">
                                     <strong>{{ labels('admin_labels.status', 'Status') }}:</strong>
-                                    <span
-                                        class="badge {{ $disput->returnRequest->status == 0 ? 'bg-secondary' : ($disput->returnRequest->status == 1 ? 'bg-success' : 'bg-danger') }}">
-                                        {{ $disput->returnRequest->status == 0 ? 'Pending' : ($disput->returnRequest->status == 1 ? 'Approved' : 'Declined') }}
+                                    @php
+                                        $statusConfig = config('return_requests.statuses')[
+                                            $disput->returnRequest->status
+                                        ] ?? ['label' => 'Unknown', 'badge' => 'bg-warning'];
+                                    @endphp
+                                    <span class="badge {{ $statusConfig['badge'] }}">
+                                        {{ $statusConfig['label'] }}
                                     </span>
                                 </p>
+                                <!-- Форма зміни статусу -->
+                                @if ($disput->seller_id === Auth::id())
+                                    <form action="{{ route('seller.disput.updateReturnStatus', $disput->id) }}"
+                                        method="POST" class="mt-3">
+                                        @csrf
+                                        <div class="mb-3">
+                                            <label for="status" class="form-label">Change Return Status</label>
+                                            <select class="form-select select2" id="status" name="status" required>
+                                                <option value="">Select a status...</option>
+                                                @foreach (['2' => 'Approved', '3' => 'Return Picked Up', '4' => 'Returned'] as $key => $label)
+                                                    <option value="{{ $key }}"
+                                                        {{ $disput->returnRequest->status == $key ? 'selected' : '' }}>
+                                                        {{ $label }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('status')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Save Status</button>
+                                    </form>
+                                @endif
                             </div>
                             <div>
                                 @if (!empty($disput->returnRequest->evidence_path))
@@ -121,6 +151,45 @@
                                 <div id="final-decision-content">
                                     <!-- Контент буде заповнено через JavaScript -->
                                 </div>
+                                @if (
+                                    $disput->seller_id === Auth::id() &&
+                                        $disput->returnRequest->application_type === 'return_and_refund' &&
+                                        ($disput->returnRequest->status == 2 ||
+                                            ($disput->returnRequest->status == 3 &&
+                                                $disput->returnRequest->orderTracking &&
+                                                $disput->returnRequest->orderTracking->sender_id === Auth::id())))
+                                    <form action="{{ route('seller.disput.submitTracking', $disput->id) }}" method="POST"
+                                        class="mt-3">
+                                        @csrf
+                                        <div class="mb-3">
+                                            <label for="trackingNumber" class="form-label">Tracking Number</label>
+                                            <input type="text" class="form-control" id="trackingNumber"
+                                                name="tracking_number"
+                                                value="{{ old('tracking_number', $disput->returnRequest->orderTracking->tracking_number ?? '') }}"
+                                                required>
+                                            @error('tracking_number')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="courierService" class="form-label">Courier Service</label>
+                                            <select class="form-select select2" id="courierService" name="courier_service"
+                                                required>
+                                                <option value="">Select a courier...</option>
+                                                @foreach ($couriers as $courier)
+                                                    <option value="{{ $courier['slug'] }}"
+                                                        {{ old('courier_service', $disput->returnRequest->orderTracking->courier_agency ?? '') === $courier['slug'] ? 'selected' : '' }}>
+                                                        {{ $courier['name'] }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('courier_service')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Submit Tracking</button>
+                                    </form>
+                                @endif
                             </div>
                         </div>
 
@@ -146,32 +215,15 @@
             '{{ route('seller.disput.call_admin', ['id' => $disput->id, 'messageId' => ':messageId']) }}'
         );
 
-        // Функція для завантаження та відображення остаточного рішення
-        document.addEventListener('DOMContentLoaded', () => {
-            const finalDecisionDiv = document.getElementById('final-decision');
-            const finalDecisionContent = document.getElementById('final-decision-content');
-            const disputId = finalDecisionDiv.dataset.disputId;
-            const currency = finalDecisionDiv.dataset.currency;
-
-            fetch('{{ route('seller.disput.messages', $disput->id) }}')
-                .then(response => response.json())
-                .then(data => {
-                    const acceptedMessage = data.messages.find(msg => msg.proposal_status === 'accepted');
-                    if (acceptedMessage) {
-                        finalDecisionContent.innerHTML = `
-                            <p class="mb-0"><strong>Refund Amount::</strong> ${currency}${parseFloat(acceptedMessage.refund_amount).toFixed(2)}</p>
-                            <p class="mb-0"><strong>Application Type:</strong> ${data.application_types[acceptedMessage.application_type] || acceptedMessage.application_type}</p>
-                            <p class="mb-0"><strong>Refund method:</strong> ${data.refund_methods[acceptedMessage.refund_method] || acceptedMessage.refund_method}</p>
-                            <p class="mb-0"><strong>Accepted:</strong> ${new Date(acceptedMessage.created_at).toLocaleString()}</p>
-                        `;
-                    } else {
-                        finalDecisionContent.innerHTML = '<p class="mb-0">Остаточне рішення відсутнє.</p>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Помилка при завантаженні повідомлень:', error);
-                    finalDecisionContent.innerHTML = '<p class="mb-0">Помилка завантаження даних.</p>';
-                });
+        // Ініціалізація Select2 для форми трекінгу та статусу
+        $(document).ready(function() {
+            $('.select2').select2({
+                placeholder: function() {
+                    return $(this).attr('id') === 'courierService' ? "Select a courier..." :
+                        "Select a status...";
+                },
+                allowClear: true
+            });
         });
     </script>
 @endsection

@@ -1,3 +1,6 @@
+<?php
+// Note: Blade templates are primarily HTML with PHP directives, so contentType is text/html
+?>
 @extends('admin/layout')
 
 @section('title')
@@ -118,11 +121,38 @@
                                 </p>
                                 <p class="mb-0 d-flex gap-2">
                                     <strong>{{ labels('admin_labels.status', 'Status') }}:</strong>
-                                    <span
-                                        class="badge {{ $disput->returnRequest->status == 0 ? 'bg-secondary' : ($disput->returnRequest->status == 1 ? 'bg-success' : 'bg-danger') }}">
-                                        {{ $disput->returnRequest->status == 0 ? 'Pending' : ($disput->returnRequest->status == 1 ? 'Approved' : 'Declined') }}
+                                    @php
+                                        $statusConfig = config('return_requests.statuses')[
+                                            $disput->returnRequest->status
+                                        ] ?? ['label' => 'Unknown', 'badge' => 'bg-warning'];
+                                    @endphp
+                                    <span class="badge {{ $statusConfig['badge'] }}">
+                                        {{ $statusConfig['label'] }}
                                     </span>
                                 </p>
+                                <!-- Форма зміни статусу -->
+                                @if (Auth::user()->role_id === 1)
+                                    <form action="{{ route('admin.disput.updateReturnStatus', $disput->id) }}"
+                                        method="POST" class="mt-3">
+                                        @csrf
+                                        <div class="mb-3">
+                                            <label for="status" class="form-label">Change Return Status</label>
+                                            <select class="form-select select2" id="status" name="status" required>
+                                                <option value="">Select a status...</option>
+                                                @foreach (config('return_requests.statuses') as $key => $status)
+                                                    <option value="{{ $key }}"
+                                                        {{ $disput->returnRequest->status == $key ? 'selected' : '' }}>
+                                                        {{ $status['label'] }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('status')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Save Status</button>
+                                    </form>
+                                @endif
                             </div>
                             <div>
                                 @if (!empty($disput->returnRequest->evidence_path))
@@ -171,6 +201,41 @@
                                 <div id="final-decision-content">
                                     <!-- Контент буде заповнено через JavaScript -->
                                 </div>
+                                @if (Auth::user()->role_id === 1 &&
+                                        $disput->returnRequest->application_type === 'return_and_refund' &&
+                                        ($disput->returnRequest->status == 2 || $disput->returnRequest->status == 3))
+                                    <form action="{{ route('admin.disput.submitTracking', $disput->id) }}" method="POST"
+                                        class="mt-3">
+                                        @csrf
+                                        <div class="mb-3">
+                                            <label for="trackingNumber" class="form-label">Tracking Number</label>
+                                            <input type="text" class="form-control" id="trackingNumber"
+                                                name="tracking_number"
+                                                value="{{ old('tracking_number', $disput->returnRequest->orderTracking->tracking_number ?? '') }}"
+                                                required>
+                                            @error('tracking_number')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="courierService" class="form-label">Courier Service</label>
+                                            <select class="form-select select2" id="courierService"
+                                                name="courier_service" required>
+                                                <option value="">Select a courier...</option>
+                                                @foreach ($couriers as $courier)
+                                                    <option value="{{ $courier['slug'] }}"
+                                                        {{ old('courier_service', $disput->returnRequest->orderTracking->courier_agency ?? '') === $courier['slug'] ? 'selected' : '' }}>
+                                                        {{ $courier['name'] }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('courier_service')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Submit Tracking</button>
+                                    </form>
+                                @endif
                             </div>
                         </div>
 
@@ -195,5 +260,16 @@
             '',
             ''
         );
+
+        // Ініціалізація Select2 для форми трекінгу та статусу
+        $(document).ready(function() {
+            $('.select2').select2({
+                placeholder: function() {
+                    return $(this).attr('id') === 'courierService' ? "Select a courier..." :
+                        "Select a status...";
+                },
+                allowClear: true
+            });
+        });
     </script>
 @endsection

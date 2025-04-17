@@ -57,6 +57,7 @@ use App\Livewire\MyAccount\ReferralStats;
 use App\Livewire\Orders\Review;
 use App\Livewire\Orders\ReturnOptions;
 use App\Http\Controllers\Orders\ReviewController;
+use App\Http\Controllers\AfterShipApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -109,6 +110,7 @@ Route::middleware(App\Http\Middleware\checkAuth::class)->group(function () {
     Route::post('/delete-temp', [ReviewController::class, 'deleteTemp']);
     Route::get('/orders/return-options/{orderItemId}', ReturnOptions::class)->name('orders.return-options');
     Route::get('/disputs/{disputId}', \App\Livewire\Disputs\DisputShow::class)->name('disputs.show');
+    Route::get('/aftership/couriers', [AfterShipApiController::class, 'getCouriersList'])->name('aftership.couriers');
 
     // MyAccount
     Route::get('/my-account', Dashboard::class)->name('my-account');

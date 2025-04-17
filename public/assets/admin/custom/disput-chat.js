@@ -13,15 +13,16 @@ export function initDisputChat(messagesUrl, sendMessageUrl, acceptUrl, contrprop
 
             if (acceptedMessage) {
                 finalDecisionContent.html(`
-                    <p class="mb-0"><strong>Refund Amount:</strong> ${currency}${parseFloat(acceptedMessage.refund_amount).toFixed(2)}</p>
-                    <p class="mb-0"><strong>Application Type:</strong> ${response.application_types[acceptedMessage.application_type] || acceptedMessage.application_type}</p>
-                    <p class="mb-0"><strong>Refund Method:</strong> ${response.refund_methods[acceptedMessage.refund_method] || acceptedMessage.refund_method}</p>
-                    <p class="mb-0"><strong>Accepted:</strong> ${new Date(acceptedMessage.created_at).toLocaleString()}</p>
-                `);
+                       <p class="mb-0"><strong>Refund Amount:</strong> ${currency}${parseFloat(acceptedMessage.refund_amount).toFixed(2)}</p>
+                       <p class="mb-0"><strong>Application Type:</strong> ${response.application_types[acceptedMessage.application_type] || acceptedMessage.application_type}</p>
+                       <p class="mb-0"><strong>Refund Method:</strong> ${response.refund_methods[acceptedMessage.refund_method] || acceptedMessage.refund_method}</p>
+                       <p class="mb-0"><strong>Accepted:</strong> ${new Date(acceptedMessage.created_at).toLocaleString()}</p>
+                   `);
             } else {
                 finalDecisionContent.html('<p class="mb-0">Остаточне рішення відсутнє.</p>');
             }
         }
+
         // Load messages
         function loadMessages() {
             $.ajax({
@@ -38,10 +39,10 @@ export function initDisputChat(messagesUrl, sendMessageUrl, acceptUrl, contrprop
                         var messageContent = '';
                         if (msg.proposal_status === 'open' || msg.proposal_status === 'counter') {
                             messageContent = `
-                                <p><strong>Proposed:</strong> ${msg.application_type ? response.application_types[msg.application_type] : ''}
-                                for ${response.currency}${parseFloat(msg.refund_amount).toFixed(2)}
-                                to ${msg.refund_method ? response.refund_methods[msg.refund_method] : ''}</p>
-                            `;
+                                   <p><strong>Proposed:</strong> ${msg.application_type ? response.application_types[msg.application_type] : ''}
+                                   for ${response.currency}${parseFloat(msg.refund_amount).toFixed(2)}
+                                   to ${msg.refund_method ? response.refund_methods[msg.refund_method] : ''}</p>
+                               `;
                             if (msg.message) {
                                 messageContent += `<p><strong>Message:</strong> ${msg.message}</p>`;
                             }
@@ -66,15 +67,15 @@ export function initDisputChat(messagesUrl, sendMessageUrl, acceptUrl, contrprop
                                     var isVideo = ['mp4', 'webm', 'ogg'].includes(extension);
                                     if (isImage) {
                                         messageContent += `
-                                            <a href="/storage/${path}" data-lightbox="evidence-${msg.id}">
-                                                <img src="/storage/${path}" alt="Evidence" style="max-width: 100px; max-height: 100px; object-fit: cover;">
-                                            </a>`;
+                                               <a href="/storage/${path}" data-lightbox="evidence-${msg.id}">
+                                                   <img src="/storage/${path}" alt="Evidence" style="max-width: 100px; max-height: 100px; object-fit: cover;">
+                                               </a>`;
                                     } else if (isVideo) {
                                         messageContent += `
-                                            <video width="200" controls>
-                                                <source src="/storage/${path}" type="video/${extension}">
-                                                Your browser does not support the video tag.
-                                            </video>`;
+                                               <video width="200" controls>
+                                                   <source src="/storage/${path}" type="video/${extension}">
+                                                   Your browser does not support the video tag.
+                                               </video>`;
                                     }
                                 });
                                 messageContent += '</div>';
@@ -83,6 +84,10 @@ export function initDisputChat(messagesUrl, sendMessageUrl, acceptUrl, contrprop
                             messageContent = '<p>Proposal accepted.</p>';
                         } else if (msg.proposal_status === 'admin_call') {
                             messageContent = '<p>Admin intervention requested.</p>';
+                        } else if (msg.proposal_status === 'tracking_submitted') {
+                            messageContent = `<p>${msg.message}</p>`;
+                        } else if (msg.proposal_status === 'status_updated') {
+                            messageContent = `<p>${msg.message}</p>`;
                         } else {
                             messageContent = `<p>${msg.message}</p>`;
                         }
@@ -90,26 +95,26 @@ export function initDisputChat(messagesUrl, sendMessageUrl, acceptUrl, contrprop
                         var buttons = '';
                         if (msg.proposal_status === 'open' && response.can_respond && response.disput_status === 'open') {
                             buttons = `
-                                <div class="mt-2">
-                                    <button type="button" class="btn btn-sm btn-success me-2 accept-btn" data-message-id="${msg.id}">Accept</button>
-                                    <button type="button" class="btn btn-sm btn-primary me-2 contrproposal-btn"
-                                        data-message-id="${msg.id}"
-                                        data-refund-amount="${msg.refund_amount}"
-                                        data-application-type="${msg.application_type}"
-                                        data-refund-method="${msg.refund_method}">Contrproposal</button>
-                                    <button type="button" class="btn btn-sm btn-warning call-admin-btn" data-message-id="${msg.id}">Call Admin</button>
-                                </div>`;
+                                   <div class="mt-2">
+                                       <button type="button" class="btn btn-sm btn-success me-2 accept-btn" data-message-id="${msg.id}">Accept</button>
+                                       <button type="button" class="btn btn-sm btn-primary me-2 contrproposal-btn"
+                                           data-message-id="${msg.id}"
+                                           data-refund-amount="${msg.refund_amount}"
+                                           data-application-type="${msg.application_type}"
+                                           data-refund-method="${msg.refund_method}">Contrproposal</button>
+                                       <button type="button" class="btn btn-sm btn-warning call-admin-btn" data-message-id="${msg.id}">Call Admin</button>
+                                   </div>`;
                         }
 
                         $('#chat-messages').append(
                             `<div class="mb-2 ${messageClass}">
-                                <div class="p-2 rounded d-inline-block ${messageBg}">
-                                    <strong>${msg.sender_name}:</strong>
-                                    ${messageContent}
-                                    <small>${new Date(msg.created_at).toLocaleString()}</small>
-                                    ${buttons}
-                                </div>
-                            </div>`
+                                   <div class="p-2 rounded d-inline-block ${messageBg}">
+                                       <strong>${msg.sender_name}:</strong>
+                                       ${messageContent}
+                                       <small>${new Date(msg.created_at).toLocaleString()}</small>
+                                       ${buttons}
+                                   </div>
+                               </div>`
                         );
                     });
                     $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
@@ -221,6 +226,4 @@ export function initDisputChat(messagesUrl, sendMessageUrl, acceptUrl, contrprop
         // Refresh messages every 10 seconds
         setInterval(loadMessages, 10000);
     });
-
-
 }

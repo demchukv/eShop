@@ -7,12 +7,15 @@ use Livewire\WithFileUploads;
 use App\Models\Disput;
 use App\Models\DisputMessage;
 use App\Models\ReturnRequest;
+use App\Models\OrderTracking;
 use App\Models\User;
 use App\Services\DisputChatService;
 use App\Notifications\DisputAdminNotification;
+use App\Http\Controllers\AfterShipApiController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class DisputShow extends Component
 {
@@ -31,6 +34,11 @@ class DisputShow extends Component
         'evidence' => [],
     ];
     public $selectedMessageId;
+    public $tracking = [
+        'tracking_number' => null,
+        'courier_service' => null,
+    ];
+    public $couriers = [];
 
     protected $chatService;
 
@@ -75,7 +83,36 @@ class DisputShow extends Component
         $currencyDetails = fetchDetails('currencies', ['is_default' => 1], 'symbol');
         $this->currency = !empty($currencyDetails) ? $currencyDetails[0]->symbol : '';
 
+        $this->loadCouriers();
         $this->loadMessages();
+    }
+
+    protected function loadCouriers()
+    {
+        try {
+            $afterShipController = app(AfterShipApiController::class);
+            $response = $afterShipController->getCouriersList();
+            $data = json_decode($response->getContent(), true);
+            if (isset($data['couriers'])) {
+                // Фільтрація за країною (наприклад, країна користувача)
+                // $userCountry = Auth::user()->country ?? 'HKG'; // Замініть на реальне поле
+                // $this->couriers = array_filter($data['couriers'], function ($courier) use ($userCountry) {
+                //     return in_array($userCountry, $courier['service_from_country_regions']);
+                // });
+                // Log::debug('Couriers loaded', ['couriers_count' => count($this->couriers), 'filtered_by' => $userCountry]);
+                $this->couriers = $data['couriers'];
+            } else {
+                Log::warning('No couriers found in response', ['response' => $data]);
+                $this->couriers = [];
+            }
+        } catch (\Exception $e) {
+            Log::error('DisputShow: Error loading couriers', [
+                'disputId' => $this->disputId,
+                'error' => $e->getMessage(),
+            ]);
+            $this->couriers = [];
+            $this->addError('form', 'Failed to load couriers. Please try again.');
+        }
     }
 
     public function loadMessages()
@@ -134,6 +171,9 @@ class DisputShow extends Component
             'sender_id' => Auth::id(),
             'message' => 'Proposal accepted',
             'proposal_status' => 'accepted',
+            'refund_amount' => $message->refund_amount,
+            'application_type' => $message->application_type,
+            'refund_method' => $message->refund_method,
         ]);
 
         $message->update(['proposal_status' => 'accepted']);
@@ -143,12 +183,63 @@ class DisputShow extends Component
             'refund_amount' => $message->refund_amount,
             'application_type' => $message->application_type,
             'refund_method' => $message->refund_method,
+            'status' => 2, // approved
         ]);
 
         $this->disput->update(['status' => 'accepted']);
 
         $this->loadMessages();
         session()->flash('message', 'Proposal accepted successfully!');
+    }
+
+    public function resolveDisput($refundAmount, $applicationType, $refundMethod)
+    {
+        if (Auth::user()->role_id !== 1) {
+            Log::debug('403 Unauthorized: Only admins can resolve disputes');
+            abort(403, 'Unauthorized');
+        }
+
+        $this->validate([
+            'refundAmount' => 'required|numeric|min:0|max:' . ($this->disput->returnRequest->orderItem->price * $this->disput->returnRequest->orderItem->quantity),
+            'applicationType' => 'required|in:' . implode(',', array_keys(config('application_types'))),
+            'refundMethod' => 'required|in:' . implode(',', array_keys(config('refund_methods'))),
+        ], [
+            'refundAmount' => $refundAmount,
+            'applicationType' => $applicationType,
+            'refundMethod' => $refundMethod,
+        ]);
+
+        try {
+            DisputMessage::create([
+                'disput_id' => $this->disputId,
+                'sender_id' => Auth::id(),
+                'sender_type' => 'admin',
+                'message' => 'Admin resolved the dispute',
+                'proposal_status' => 'accepted',
+                'refund_amount' => $refundAmount,
+                'application_type' => $applicationType,
+                'refund_method' => $refundMethod,
+            ]);
+
+            $returnRequest = ReturnRequest::find($this->disput->return_request_id);
+            $returnRequest->update([
+                'refund_amount' => $refundAmount,
+                'application_type' => $applicationType,
+                'refund_method' => $refundMethod,
+                'status' => 2, // approved
+            ]);
+
+            $this->disput->update(['status' => 'accepted']);
+
+            $this->loadMessages();
+            session()->flash('message', 'Dispute resolved successfully!');
+        } catch (\Exception $e) {
+            Log::error('DisputShow: Error resolving dispute', [
+                'disputId' => $this->disputId,
+                'error' => $e->getMessage(),
+            ]);
+            $this->addError('form', 'Failed to resolve dispute. Please try again.');
+        }
     }
 
     public function submitContrproposal()
@@ -205,7 +296,7 @@ class DisputShow extends Component
         $this->selectedMessageId = null;
 
         $this->loadMessages();
-        $this->dispatch('closeContrproposalModal'); // Закриття модального вікна
+        $this->dispatch('closeContrproposalModal');
         session()->flash('message', 'Counterproposal submitted successfully!');
     }
 
@@ -214,7 +305,6 @@ class DisputShow extends Component
         $this->selectedMessageId = $messageId;
         $message = DisputMessage::where('id', $messageId)->where('disput_id', $this->disputId)->firstOrFail();
 
-        // Ініціалізація contrproposal даними останньої пропозиції
         $this->contrproposal = [
             'refund_amount' => $message->refund_amount ?? null,
             'application_type' => $message->application_type ?? null,
@@ -283,6 +373,114 @@ class DisputShow extends Component
         }
     }
 
+    public function submitTracking()
+    {
+        if ($this->disput->user_id !== Auth::id()) {
+            Log::debug('403 Unauthorized: Only the client can submit tracking');
+            $this->addError('form', 'Only the client can submit tracking information.');
+            return;
+        }
+
+        $this->validate([
+            'tracking.tracking_number' => 'required|string|max:255',
+            'tracking.courier_service' => 'required|string|max:255',
+        ]);
+
+        try {
+            $returnRequest = ReturnRequest::find($this->disput->return_request_id);
+            if (!$returnRequest) {
+                Log::error('DisputShow: ReturnRequest not found', [
+                    'disputId' => $this->disputId,
+                    'return_request_id' => $this->disput->return_request_id,
+                ]);
+                $this->addError('form', 'Return request not found.');
+                return;
+            }
+
+            // Використовуємо транзакцію для консистентності
+            DB::transaction(function () use ($returnRequest) {
+                // Створюємо OrderTracking незалежно від AfterShip
+                $orderTracking = OrderTracking::create([
+                    'order_id' => $returnRequest->order_id,
+                    'order_item_id' => $returnRequest->order_item_id,
+                    'tracking_number' => $this->tracking['tracking_number'],
+                    'courier_agency' => $this->tracking['courier_service'],
+                    'carrier_id' => $this->tracking['courier_service'],
+                    'tracking_id' => $this->tracking['tracking_number'],
+                    'parcel_id' => null, // Позначаємо як повернення
+                    'status' => 'pending',
+                    'date' => now(),
+                    'aftership_tracking_id' => null,
+                    'aftership_data' => null,
+                    'url' => '',
+                ]);
+
+                // Спробуємо зареєструвати трекінг у AfterShip
+                $afterShipController = app(AfterShipApiController::class);
+                $response = $afterShipController->createTracking(new \Illuminate\Http\Request([
+                    'order_id' => $returnRequest->order_id,
+                    'parcel_id' => null,
+                    'courier_agency' => $this->tracking['courier_service'],
+                    'tracking_id' => $this->tracking['tracking_number'],
+                ]));
+
+                $responseData = json_decode($response->getContent(), true);
+                $afterShipSuccess = $response->getStatusCode() === 201 && isset($responseData['tracking']['id']);
+
+                if ($afterShipSuccess) {
+                    // Оновлюємо OrderTracking при успіху
+                    $orderTracking->update([
+                        'aftership_tracking_id' => $responseData['tracking']['id'],
+                        'aftership_data' => json_encode($responseData['tracking']),
+                        'url' => $responseData['tracking']['tracking_url'] ?? null,
+                    ]);
+                } else {
+                    // Логуємо помилку, але зберігаємо OrderTracking
+                    Log::warning('DisputShow: Failed to create AfterShip tracking, saving OrderTracking anyway', [
+                        'disputId' => $this->disputId,
+                        'tracking_number' => $this->tracking['tracking_number'],
+                        'courier_service' => $this->tracking['courier_service'],
+                        'response' => $responseData,
+                    ]);
+                }
+
+                // Оновлюємо ReturnRequest
+                $returnRequest->update([
+                    'order_tracking_id' => $orderTracking->id,
+                    'status' => 3, // return_pickedup
+                ]);
+
+                // Додаємо повідомлення в чат
+                $message = 'Tracking information submitted: ' . $this->tracking['tracking_number'] . ' (' . $this->tracking['courier_service'] . ')';
+                if (!$afterShipSuccess) {
+                    $message .= ' (Failed to register with AfterShip, please contact support)';
+                }
+                DisputMessage::create([
+                    'disput_id' => $this->disputId,
+                    'sender_id' => Auth::id(),
+                    'message' => $message,
+                    'proposal_status' => 'tracking_submitted',
+                ]);
+            });
+
+            $this->tracking = [
+                'tracking_number' => null,
+                'courier_service' => null,
+            ];
+
+            $this->loadMessages();
+            session()->flash('message', 'Tracking information submitted successfully' . ($afterShipSuccess ? '' : ', but AfterShip registration failed. Contact support for retry.'));
+        } catch (\Exception $e) {
+            Log::error('DisputShow: Error submitting tracking', [
+                'disputId' => $this->disputId,
+                'tracking_number' => $this->tracking['tracking_number'],
+                'courier_service' => $this->tracking['courier_service'],
+                'error' => $e->getMessage(),
+            ]);
+            $this->addError('form', 'Failed to submit tracking information: ' . $e->getMessage());
+        }
+    }
+
     protected function determineUserType()
     {
         if (Auth::user()->role_id === 1) {
@@ -293,6 +491,8 @@ class DisputShow extends Component
 
     public function render()
     {
-        return view('livewire.elegant.disputs.disput-show');
+        return view('livewire.elegant.disputs.disput-show', [
+            'couriers' => $this->couriers,
+        ]);
     }
 }

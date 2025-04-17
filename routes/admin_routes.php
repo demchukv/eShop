@@ -1107,6 +1107,8 @@ Route::group(
         Route::get('admin/disputs/{id}/messages', [App\Http\Controllers\Admin\AdminDisputController::class, 'messages'])->name('admin.disput.messages');
         Route::post('admin/disputs/{id}/messages', [App\Http\Controllers\Admin\AdminDisputController::class, 'sendMessage'])->name('admin.disput.send_message');
         Route::post('admin/disputs/{id}/resolve', [App\Http\Controllers\Admin\AdminDisputController::class, 'resolve'])->name('admin.disput.resolve');
+        Route::post('admin/disputs/{id}/submit-tracking', [App\Http\Controllers\Admin\AdminDisputController::class, 'submitTracking'])->name('admin.disput.submitTracking');
+        Route::post('admin/disputs/{id}/updateReturnStatus', [App\Http\Controllers\Admin\AdminDisputController::class, 'updateReturnStatus'])->name('admin.disput.updateReturnStatus');
     }
 
 );
