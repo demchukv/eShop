@@ -19,7 +19,7 @@ export function initDisputChat(messagesUrl, sendMessageUrl, acceptUrl, contrprop
                        <p class="mb-0"><strong>Accepted:</strong> ${new Date(acceptedMessage.created_at).toLocaleString()}</p>
                    `);
             } else {
-                finalDecisionContent.html('<p class="mb-0">Остаточне рішення відсутнє.</p>');
+                finalDecisionContent.html('<p class="mb-0">There is no final solution.</p>');
             }
         }
 
@@ -95,7 +95,7 @@ export function initDisputChat(messagesUrl, sendMessageUrl, acceptUrl, contrprop
                         var buttons = '';
                         if (msg.proposal_status === 'open' && response.can_respond && response.disput_status === 'open') {
                             buttons = `
-                                   <div class="mt-2">
+                                   <div class="d-flex gap-2 mt-2">
                                        <button type="button" class="btn btn-sm btn-success me-2 accept-btn" data-message-id="${msg.id}">Accept</button>
                                        <button type="button" class="btn btn-sm btn-primary me-2 contrproposal-btn"
                                            data-message-id="${msg.id}"
@@ -108,7 +108,7 @@ export function initDisputChat(messagesUrl, sendMessageUrl, acceptUrl, contrprop
 
                         $('#chat-messages').append(
                             `<div class="mb-2 ${messageClass}">
-                                   <div class="p-2 rounded d-inline-block ${messageBg}">
+                                   <div class="p-2 rounded d-inline-block ${messageBg}" style="height:100%;">
                                        <strong>${msg.sender_name}:</strong>
                                        ${messageContent}
                                        <small>${new Date(msg.created_at).toLocaleString()}</small>
@@ -140,7 +140,10 @@ export function initDisputChat(messagesUrl, sendMessageUrl, acceptUrl, contrprop
                     loadMessages();
                 },
                 error: function (xhr) {
-                    alert('Error sending message: ' + xhr.responseJSON.message);
+                    iziToast.error({
+                        position: "topRight",
+                        message: xhr.responseJSON.message,
+                    });
                 }
             });
         });
@@ -161,10 +164,16 @@ export function initDisputChat(messagesUrl, sendMessageUrl, acceptUrl, contrprop
                 success: function (response) {
                     $('#acceptModal').modal('hide');
                     loadMessages();
-                    alert(response.message);
+                    iziToast.success({
+                        position: "topRight",
+                        message: response.message,
+                    });
                 },
                 error: function (xhr) {
-                    alert('Error: ' + xhr.responseJSON.message);
+                    iziToast.error({
+                        position: "topRight",
+                        message: xhr.responseJSON.message,
+                    });
                 }
             });
         });
@@ -191,10 +200,16 @@ export function initDisputChat(messagesUrl, sendMessageUrl, acceptUrl, contrprop
                     $('#contrproposalModal').modal('hide');
                     $('#contrproposalForm')[0].reset();
                     loadMessages();
-                    alert(response.message);
+                    iziToast.success({
+                        position: "topRight",
+                        message: response.message
+                    })
                 },
                 error: function (xhr) {
-                    alert('Error: ' + xhr.responseJSON.message);
+                    iziToast.error({
+                        position: "topRight",
+                        message: xhr.responseJSON.message,
+                    });
                 }
             });
         });
@@ -215,10 +230,16 @@ export function initDisputChat(messagesUrl, sendMessageUrl, acceptUrl, contrprop
                 success: function (response) {
                     $('#callAdminModal').modal('hide');
                     loadMessages();
-                    alert(response.message);
+                    iziToast.success({
+                        position: "topRight",
+                        message: response.message,
+                    });
                 },
                 error: function (xhr) {
-                    alert('Error: ' + xhr.responseJSON.message);
+                    iziToast.error({
+                        position: "topRight",
+                        message: xhr.responseJSON.message,
+                    });
                 }
             });
         });

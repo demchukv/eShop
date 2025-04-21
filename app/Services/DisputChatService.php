@@ -17,11 +17,6 @@ class DisputChatService
 {
     public function getMessages($disputId, $userType = 'user')
     {
-        \Log::debug('DisputChatService getMessages', [
-            'disputId' => $disputId,
-            'userType' => $userType,
-            'auth_user_id' => Auth::id(),
-        ]);
 
         $disput = Disput::where('id', $disputId)->with('seller')->firstOrFail();
 
@@ -35,7 +30,16 @@ class DisputChatService
 
         $messages = $disput->messages()->with('sender')->orderBy('created_at', 'asc')->get()->map(function ($message) use ($disput, $userType) {
             $senderName = $message->sender ? $message->sender->username : 'Unknown';
-            $senderType = $message->sender && $message->sender->id === Auth::id() ? $userType : ($message->sender && $message->sender->id === $disput->seller_id ? 'seller' : ($message->sender && $message->sender->role_id === 1 ? 'admin' : 'user'));
+            $senderType = 'user'; // Значення за замовчуванням
+            if ($message->sender) {
+                if ($message->sender->id === Auth::id()) {
+                    $senderType = $userType;
+                } elseif ($message->sender->id === $disput->seller_id) {
+                    $senderType = 'seller';
+                } elseif ($message->sender->role_id === 1) {
+                    $senderType = 'admin';
+                }
+            }
 
             return [
                 'id' => $message->id,
@@ -61,12 +65,6 @@ class DisputChatService
         $disput = Disput::where('id', $disputId)->firstOrFail();
 
         if ($userType === 'user' && $disput->user_id !== Auth::id()) {
-            \Log::info('Disput access check', [
-                'userType' => $userType,
-                'user_id' => Auth::id(),
-                'disput_user_id' => $disput->user_id,
-                'disput_seller_id' => $disput->seller_id,
-            ]);
             abort(403, 'Unauthorized');
         } elseif ($userType === 'seller' && $disput->seller_id !== Auth::id()) {
             abort(403, 'Unauthorized');
@@ -85,6 +83,7 @@ class DisputChatService
     public function acceptProposal($disputId, $messageId, $userType)
     {
         $disput = Disput::where('id', $disputId)->firstOrFail();
+
         $message = DisputMessage::where('id', $messageId)->where('disput_id', $disputId)->firstOrFail();
 
         if ($userType === 'user' && $disput->user_id !== Auth::id()) {
@@ -102,6 +101,9 @@ class DisputChatService
             'sender_id' => Auth::id(),
             'message' => 'Proposal accepted',
             'proposal_status' => 'accepted',
+            'refund_amount' => $message->refund_amount,
+            'application_type' => $message->application_type,
+            'refund_method' => $message->refund_method,
         ]);
 
         $message->update(['proposal_status' => 'accepted']);
@@ -111,6 +113,12 @@ class DisputChatService
             'refund_amount' => $message->refund_amount,
             'application_type' => $message->application_type,
             'refund_method' => $message->refund_method,
+        ]);
+        $returnRequest->update([
+            'refund_amount' => $message->refund_amount,
+            'application_type' => $message->application_type,
+            'refund_method' => $message->refund_method,
+            'status' => 2, // approved
         ]);
 
         $disput->update(['status' => 'accepted']);
@@ -187,10 +195,10 @@ class DisputChatService
 
         $message->update(['proposal_status' => 'admin_call']);
 
-        $admins = User::where('role_id', 1)->get();
-        foreach ($admins as $admin) {
-            $admin->notify(new DisputAdminNotification($disput));
-        }
+        // $admins = User::where('role_id', 1)->get();
+        // foreach ($admins as $admin) {
+        //     $admin->notify(new DisputAdminNotification($disput));
+        // }
 
         return ['message' => 'Admin intervention requested successfully'];
     }

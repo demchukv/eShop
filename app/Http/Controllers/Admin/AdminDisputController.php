@@ -20,13 +20,11 @@ class AdminDisputController extends Controller
 
     public function __construct(DisputChatService $chatService)
     {
-        Log::debug('start admin disput controller');
         $this->chatService = $chatService;
     }
 
     public function show($id)
     {
-        Log::debug('USER: ' . json_encode(Auth::user()));
         if (Auth::user()->role_id !== 1) {
             Log::debug("User haven't access");
             abort(403, 'Unauthorized');
@@ -44,7 +42,6 @@ class AdminDisputController extends Controller
         $userCountry = Auth::user()->country ?? 'HKG';
         $response = $afterShipController->getCouriersList(new \Illuminate\Http\Request(['country' => $userCountry]));
         $data = json_decode($response->getContent(), true);
-        Log::debug('AfterShip couriers response', ['data' => $data]);
         $couriers = $data['data']['couriers'] ?? $data['couriers'] ?? [];
         if (empty($couriers)) {
             $couriers = [

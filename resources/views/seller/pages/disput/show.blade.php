@@ -154,10 +154,7 @@
                                 @if (
                                     $disput->seller_id === Auth::id() &&
                                         $disput->returnRequest->application_type === 'return_and_refund' &&
-                                        ($disput->returnRequest->status == 2 ||
-                                            ($disput->returnRequest->status == 3 &&
-                                                $disput->returnRequest->orderTracking &&
-                                                $disput->returnRequest->orderTracking->sender_id === Auth::id())))
+                                        ($disput->returnRequest->status == 2 || $disput->returnRequest->status == 3))
                                     <form action="{{ route('seller.disput.submitTracking', $disput->id) }}" method="POST"
                                         class="mt-3">
                                         @csrf

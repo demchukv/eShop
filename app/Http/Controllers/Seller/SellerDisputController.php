@@ -38,7 +38,6 @@ class SellerDisputController extends Controller
         $userCountry = Auth::user()->country ?? 'HKG';
         $response = $afterShipController->getCouriersList(new \Illuminate\Http\Request(['country' => $userCountry]));
         $data = json_decode($response->getContent(), true);
-        Log::debug('AfterShip couriers response', ['data' => $data]);
         $couriers = $data['data']['couriers'] ?? $data['couriers'] ?? [];
         if (empty($couriers)) {
             $couriers = [
@@ -134,10 +133,19 @@ class SellerDisputController extends Controller
 
     public function updateReturnStatus(Request $request, $id)
     {
+
         $disput = Disput::where('id', $id)
             ->where('seller_id', Auth::id())
             ->firstOrFail();
         $returnRequest = ReturnRequest::findOrFail($disput->return_request_id);
+
+        // debug - DELETE after ----
+        // $returnRequest->status = 4;
+        // $refundService = new \App\Services\RefundService();
+        // $refundService->processReturnRefund($returnRequest);
+        // return redirect()->route('seller.disput.show', $id)
+        //     ->withErrors(['form' => 'It\'s test messages']);
+        // -------------------------------------------
 
         $request->validate([
             'status' => 'required|in:2,3,4',

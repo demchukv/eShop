@@ -44,26 +44,14 @@ class DisputShow extends Component
 
     public function boot()
     {
-        Log::debug('DisputShow component booted', [
-            'disputId' => $this->disputId ?? 'not set',
-            'auth_user_id' => Auth::id(),
-            'session_id' => session()->getId(),
-            'route' => request()->route()->getName(),
-        ]);
 
         if (!$this->chatService) {
             $this->chatService = app(DisputChatService::class);
-            Log::debug('DisputShow: Initialized chatService in boot');
         }
     }
 
     public function mount($disputId, DisputChatService $chatService)
     {
-        Log::debug('DisputShow mount started', [
-            'disputId' => $disputId,
-            'auth_user_id' => Auth::id(),
-            'session_id' => session()->getId(),
-        ]);
 
         $this->chatService = $chatService;
         $this->disputId = $disputId;
@@ -73,7 +61,6 @@ class DisputShow extends Component
             Log::error('Disput not found', ['disputId' => $disputId]);
             abort(404);
         }
-        Log::debug('Disput loaded', ['disput' => $this->disput->toArray()]);
 
         if ($this->disput->user_id !== Auth::id() && $this->disput->seller_id !== Auth::id() && Auth::user()->role_id !== 1) {
             Log::debug('403 Unauthorized');
@@ -106,10 +93,6 @@ class DisputShow extends Component
                 $this->couriers = [];
             }
         } catch (\Exception $e) {
-            Log::error('DisputShow: Error loading couriers', [
-                'disputId' => $this->disputId,
-                'error' => $e->getMessage(),
-            ]);
             $this->couriers = [];
             $this->addError('form', 'Failed to load couriers. Please try again.');
         }
@@ -130,7 +113,6 @@ class DisputShow extends Component
                     'proposal_status' => $msg->proposal_status,
                 ]);
             })->toArray();
-            Log::debug('Messages loaded', ['messages' => $this->messages]);
         } catch (\Exception $e) {
             Log::error('DisputShow: Error loading messages', [
                 'disputId' => $this->disputId,
@@ -160,7 +142,10 @@ class DisputShow extends Component
 
     public function acceptProposal($messageId)
     {
+        // $this->chatService->acceptProposal($this->disputId, $messageId, 'user');
+
         $message = DisputMessage::where('id', $messageId)->where('disput_id', $this->disputId)->firstOrFail();
+
         if ($message->proposal_status !== 'open') {
             $this->addError('form', 'This proposal is no longer open.');
             return;
@@ -186,7 +171,7 @@ class DisputShow extends Component
             'status' => 2, // approved
         ]);
 
-        $this->disput->update(['status' => 'accepted']);
+        // $this->disput->update(['status' => 'accepted']);
 
         $this->loadMessages();
         session()->flash('message', 'Proposal accepted successfully!');
@@ -318,59 +303,47 @@ class DisputShow extends Component
 
     public function callAdmin($messageId)
     {
-        $message = DisputMessage::where('id', $messageId)->where('disput_id', $this->disputId)->firstOrFail();
-        if ($message->proposal_status !== 'open') {
-            $this->addError('form', 'This proposal is no longer open.');
-            return;
-        }
 
-        try {
-            $this->disput->update([
-                'status' => 'pending_admin',
-                'admin_requested_at' => now(),
-                'admin_requester_id' => Auth::id(),
-            ]);
+        $this->chatService->callAdmin($this->disputId, $messageId, 'user');
+        $this->loadMessages();
+        session()->flash('message', 'Admin intervention requested successfully!');
 
-            DisputMessage::create([
-                'disput_id' => $this->disputId,
-                'sender_id' => Auth::id(),
-                'message' => 'Admin intervention requested',
-                'proposal_status' => 'admin_call',
-            ]);
+        // $message = DisputMessage::where('id', $messageId)->where('disput_id', $this->disputId)->firstOrFail();
+        // if ($message->proposal_status !== 'open') {
+        //     $this->addError('form', 'This proposal is no longer open.');
+        //     return;
+        // }
 
-            $message->update(['proposal_status' => 'admin_call']);
+        // try {
+        //     $this->disput->update([
+        //         'status' => 'pending_admin',
+        //         'admin_requested_at' => now(),
+        //         'admin_requester_id' => Auth::id(),
+        //     ]);
 
-            $admins = User::where('role_id', 1)->get();
-            Log::debug('DisputShow: Sending notifications to admins', [
-                'disputId' => $this->disputId,
-                'admin_count' => $admins->count(),
-            ]);
+        //     DisputMessage::create([
+        //         'disput_id' => $this->disputId,
+        //         'sender_id' => Auth::id(),
+        //         'message' => 'Admin intervention requested',
+        //         'proposal_status' => 'admin_call',
+        //     ]);
 
-            foreach ($admins as $admin) {
-                try {
-                    $admin->notify(new DisputAdminNotification($this->disput));
-                    Log::debug('DisputShow: Notification sent to admin', [
-                        'admin_id' => $admin->id,
-                        'disputId' => $this->disputId,
-                    ]);
-                } catch (\Exception $e) {
-                    Log::error('DisputShow: Failed to send notification to admin', [
-                        'admin_id' => $admin->id,
-                        'disputId' => $this->disputId,
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-            }
+        //     $message->update(['proposal_status' => 'admin_call']);
 
-            $this->loadMessages();
-            session()->flash('message', 'Admin intervention requested successfully!');
-        } catch (\Exception $e) {
-            Log::error('DisputShow: Error in callAdmin', [
-                'disputId' => $this->disputId,
-                'error' => $e->getMessage(),
-            ]);
-            $this->addError('form', 'Failed to request admin intervention. Please try again.');
-        }
+        //     $admins = User::where('role_id', 1)->get();
+
+        //     foreach ($admins as $admin) {
+        //         try {
+        //             $admin->notify(new DisputAdminNotification($this->disput));
+        //         } catch (\Exception $e) {
+        //         }
+        //     }
+
+        //     $this->loadMessages();
+        //     session()->flash('message', 'Admin intervention requested successfully!');
+        // } catch (\Exception $e) {
+        //     $this->addError('form', 'Failed to request admin intervention. Please try again.');
+        // }
     }
 
     public function submitTracking()
@@ -387,6 +360,7 @@ class DisputShow extends Component
         ]);
 
         try {
+            $afterShipSuccess = false;
             $returnRequest = ReturnRequest::find($this->disput->return_request_id);
             if (!$returnRequest) {
                 Log::error('DisputShow: ReturnRequest not found', [
@@ -461,6 +435,7 @@ class DisputShow extends Component
                     'message' => $message,
                     'proposal_status' => 'tracking_submitted',
                 ]);
+                $afterShipSuccess = $response->getStatusCode() === 201 && isset($responseData['tracking']['id']);
             });
 
             $this->tracking = [

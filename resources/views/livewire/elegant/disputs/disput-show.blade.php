@@ -163,7 +163,8 @@
                             @endphp
 
                             <div class="mb-2 {{ $messageClass }}">
-                                <div class="p-2 rounded d-inline-block {{ $messageBg }}">
+                                <div class="p-2 rounded d-inline-block {{ $messageBg }}"
+                                    style="--bs-bg-opacity: .2;">
                                     <strong>{{ $message['sender_name'] }}:</strong>
                                     @if ($message['proposal_status'] === 'open' || $message['proposal_status'] === 'counter')
                                         <p><strong>Proposed:</strong>
@@ -228,11 +229,11 @@
                                     @if ($message['proposal_status'] === 'open' && $disput->status === 'open' && $canRespond)
                                         <div class="mt-2">
                                             <button wire:click="acceptProposal({{ $message['id'] }})"
-                                                class="btn btn-sm btn-success me-2">Accept</button>
+                                                class=" btn-sm btn-success me-2">Accept</button>
                                             <button wire:click="openContrproposalModal({{ $message['id'] }})"
-                                                class="btn btn-sm btn-primary me-2">Contrproposal</button>
+                                                class=" btn-sm btn-primary me-2">Contrproposal</button>
                                             <button wire:click="callAdmin({{ $message['id'] }})"
-                                                class="btn btn-sm btn-warning">Call Admin</button>
+                                                class=" btn-sm btn-warning">Call Admin</button>
                                         </div>
                                     @endif
                                 </div>

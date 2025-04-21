@@ -132,12 +132,15 @@ class AdminReturnRequestController extends Controller
         $count = 1;
 
         foreach ($returnRequests as $row) {
-            $statusLabel = match ($row->status) {
-                0 => '<label class="badge bg-secondary">Pending</label>',
-                1 => '<label class="badge bg-success">Approved</label>',
-                2 => '<label class="badge bg-danger">Declined</label>',
-                default => '<label class="badge bg-dark">Unknown</label>',
-            };
+            $statusConfig = config('return_requests.statuses')[$row->status] ?? [
+                'label' => 'Unknown',
+                'badge' => 'bg-dark'
+            ];
+            $statusLabel = sprintf(
+                '<label class="badge %s">%s</label>',
+                $statusConfig['badge'],
+                $statusConfig['label']
+            );
 
             $action = '<div class="d-flex align-items-center">';
             if ($row->disput_id) {

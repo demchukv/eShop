@@ -14,6 +14,7 @@ class RefundService
 {
     public function processReturnRefund(ReturnRequest $returnRequest)
     {
+        \Log::debug('return request status: ' . json_encode($returnRequest->all()));
         if ($returnRequest->status != 4) {
             throw new \Exception('Return request must be in "Returned" status.');
         }
@@ -50,9 +51,9 @@ class RefundService
             $proportional_fee = $transaction->fee * $refund_ratio;
             $refund_amount += $proportional_fee;
         }
-
+        Log::info("Wallet refund processed for order_item_id: {$orderItem->id}");
         if ($refund_method === 'wallet') {
-            process_refund($orderItem->id, 'returned');
+            process_refund($orderItem->id, 'returned', 'order_items');
             Log::info("Wallet refund processed for order_item_id: {$orderItem->id}");
         } elseif ($refund_method === 'original_payment' && $transaction->type === 'stripe') {
             $this->processStripeRefund($orderItem, $transaction, $refund_amount);
