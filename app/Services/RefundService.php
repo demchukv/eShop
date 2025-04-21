@@ -51,7 +51,7 @@ class RefundService
             $proportional_fee = $transaction->fee * $refund_ratio;
             $refund_amount += $proportional_fee;
         }
-        Log::info("Wallet refund processed for order_item_id: {$orderItem->id}");
+
         if ($refund_method === 'wallet') {
             process_refund($orderItem->id, 'returned', 'order_items');
             Log::info("Wallet refund processed for order_item_id: {$orderItem->id}");
@@ -60,7 +60,10 @@ class RefundService
             Log::info("Stripe refund processed for order_item_id: {$orderItem->id}");
         }
 
-        update_order_item($orderItem->id, 'returned', 0);
+        // update_order_item($orderItem->id, 'returned', 1, false);
+        if (updateOrder(['status' => 'returned'], ['id' => $returnRequest->order_item_id], true, 'order_items')) {
+            updateOrder(['active_status' => 'returned'], ['id' => $returnRequest->order_item_id], false, 'order_items');
+        }
 
         $commissionController = new CommissionController();
         $orderItems = $orderItem->order->orderItems;

@@ -5804,7 +5804,7 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
                 $today = date('Y-m-d');
                 $return_till = date('Y-m-d', strtotime($delivery_date . ' + ' . $settings['max_days_to_return_item'] . ' days'));
 
-                $orderItemData[$k]->is_returnable = isset($delivery_date) && !empty($delivery_date) && ($today < $return_till) ? 1 : 0;
+                $orderItemData[$k]->is_returnable = $orderItemData[$k]->is_returnable == 1 && isset($delivery_date) && !empty($delivery_date) && ($today < $return_till) ? 1 : 0;
             }
         }
 
@@ -6206,6 +6206,7 @@ function update_order_item($id, $status, $return_request = 0, $fromapp = false)
 {
     if ($return_request == 0) {
         $res = validateOrderStatus($id, $status, 'order_items', '', true);
+        \Log::debug('validation result: ' . json_encode($res));
 
         if ($res['error']) {
             $response['error'] = (isset($res['return_request_flag'])) ? false : true;
@@ -6222,6 +6223,11 @@ function update_order_item($id, $status, $return_request = 0, $fromapp = false)
     $order_item_details = fetchDetails('order_items', ['id' => $id], ['order_id', 'seller_id']);
     $order_details = fetchOrders($order_item_details[0]->order_id);
     $order_tracking_data = getShipmentId($id, $order_item_details[0]->order_id);
+
+    \Log::debug('order_item_details: ' . json_encode($order_item_details));
+    \Log::debug('order_details: ' . json_encode($order_details));
+    \Log::debug('order_tracking_data: ' . json_encode($order_tracking_data));
+
     if (!empty($order_details) && !empty($order_item_details)) {
         $order_details = $order_details['order_data'];
         $order_items_details = $order_details[0]->order_items;

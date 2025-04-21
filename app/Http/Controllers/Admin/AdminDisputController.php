@@ -154,6 +154,12 @@ class AdminDisputController extends Controller
             'status' => 'required|in:0,1,2,3,4',
         ]);
 
+        // if ($request->status == 2) {
+        //     if (updateOrder(['status' => 'return_request_approved'], ['id' => $returnRequest->order_item_id], true, 'order_items')) {
+        //         updateOrder(['active_status' => 'return_request_approved'], ['id' => $returnRequest->order_item_id], false, 'order_items');
+        //     }
+        // }
+
         try {
             $oldStatus = $returnRequest->status;
             $returnRequest->update(['status' => $request->status]);

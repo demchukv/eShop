@@ -24,7 +24,7 @@ class Details extends Component
         $user = Auth::user();
 
         $user_orders = fetchOrders(order_id: $order_id, user_id: $user->id, store_id: $store_id);
-
+        // dd($user_orders);
         if (count($user_orders['order_data']) < 1) {
             abort(404);
         }

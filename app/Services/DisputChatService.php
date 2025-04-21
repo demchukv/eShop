@@ -122,6 +122,8 @@ class DisputChatService
         ]);
 
         $disput->update(['status' => 'accepted']);
+        // update_order_item($returnRequest->id, 'returned', 1, false);
+
 
         return ['message' => 'Proposal accepted successfully'];
     }
