@@ -2,7 +2,7 @@
     <div class="footer-top clearfix">
         <div class="container-fluid">
             <div class="row justify-content-around">
-                <div class="col-12 col-sm-12 col-md-3 col-lg-3 footer-links">
+                <div class="col-12 col-sm-12 col-md-2 col-lg-2 footer-links">
                     <h4 class="h4">{{ labels('front_messages.informations', 'Informations') }}</h4>
                     <ul>
                         @auth
@@ -25,7 +25,7 @@
                         </li>
                     </ul>
                 </div>
-                <div class="col-12 col-sm-12 col-md-3 col-lg-3 footer-links">
+                <div class="col-12 col-sm-12 col-md-2 col-lg-2 footer-links">
                     <h4 class="h4">{{ labels('front_messages.customer_services', 'Customer Services') }}</h4>
                     <ul>
                         <li><a href="{{ customUrl('faqs') }}"
@@ -42,7 +42,15 @@
                         </li>
                     </ul>
                 </div>
-                <div class="col-12 col-sm-12 col-md-3 col-lg-3 footer-contact">
+                <div
+                    class="col-12 col-sm-12 col-md-4 col-lg-4 footer-links d-flex justify-content-center align-items-center">
+                    <a href="{{ customUrl('home') }}" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Go to home page">
+                        <img src="{{ asset('assets/img/logos/alny-logo-footer.png') }}" alt="ALNY" width="202"
+                            height="116">
+                    </a>
+                </div>
+                <div class="col-12 col-sm-12 col-md-4 col-lg-4 footer-contact">
                     <h4 class="h4">{{ labels('front_messages.contact_us', 'Contact Us') }}</h4>
                     <p class="address d-flex"><ion-icon class="fs-2 me-2" name="location-outline"></ion-icon>
                         {{ $settings->address }}</p>

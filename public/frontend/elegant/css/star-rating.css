@@ -71,7 +71,7 @@
     left: 0;
     top: 0;
     margin: auto;
-    color: #fde16d;
+    color: #ff804c;
     white-space: nowrap;
     overflow: hidden;
     -webkit-text-stroke: 1px #777;
@@ -171,15 +171,19 @@
 .rating-xl {
     font-size: 48px;
 }
+
 .rating-lg {
     font-size: 40px;
 }
+
 .rating-md {
     font-size: 32px;
 }
+
 .rating-sm {
     font-size: 24px;
 }
+
 .rating-xs {
     font-size: 16px;
 }

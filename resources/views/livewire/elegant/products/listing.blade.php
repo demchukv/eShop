@@ -52,9 +52,9 @@
                     </div>
                     <div class="sidebar-tags sidebar-sticky clearfix">
                         <!--Filter By-->
-                        <div class="sidebar-widget filterBox filter-widget border-0 p-0">
+                        <div class="sidebar-widget filterBox filter-widget border-0">
                             <div class="d-flex justify-content-between align-items-center gap-2">
-                                <h2>{{ labels('front_messages.filter_by', 'Filter By') }}</h2>
+                                <h2 class="upper">{{ labels('front_messages.filter_by', 'Filter By') }}</h2>
                                 <p class="cursor-pointer toggle-filter-tab show_tabs m-0">
                                     {{ labels('front_messages.close_all_tabs', 'Close All Tabs') }}</p>
                                 <p class="cursor-pointer toggle-filter-tab close_tabs d-none m-0">
@@ -123,10 +123,11 @@
                                                             {{ $brand->is_checked == true ? 'checked' : '' }}>
                                                         <label for="{{ $brand->slug }}"
                                                             class="d-flex align-items-center"><span></span>
-                                                            <div class="filter-brand-img"><img
-                                                                    src="{{ dynamic_image(getMediaImageUrl($brand->image),40) }}"
-                                                                    alt="{{ $brand->name }}" srcset=""></div>
                                                             {{ $brand->name }}
+                                                            {{-- <div class="filter-brand-img"><img
+                                                                    src="{{ dynamic_image(getMediaImageUrl($brand->image), 40) }}"
+                                                                    alt="{{ $brand->name }}" srcset=""></div> --}}
+
                                                         </label>
                                                     </li>
                                                 @endforeach
@@ -136,11 +137,11 @@
                                 </div>
                             @endif
                         @endif
-                        <div class="text-right">
+                        <div class="text-right move-bottom">
                             <a wire:navigate href="{{ customUrl(url()->current()) }}"
                                 class="btn btn-sm btn-secondary">{{ labels('front_messages.clear', 'Clear') }}</a>
                             <button
-                                class="btn btn-sm product-filter-btn">{{ labels('front_messages.filter', 'filter') }}</button>
+                                class="btn btn-sm btn-secondary product-filter-btn">{{ labels('front_messages.filter', 'filter') }}</button>
                         </div>
                     </div>
                 </div>
@@ -187,8 +188,9 @@
                                 @if (count($products_listing) >= 1)
                                     <span
                                         class="toolbar-product-count">{{ labels('front_messages.showing', 'Showing') }}:
-                                        {{ count($products_listing) }} {{ labels('front_messages.out_of', 'Out of') }} {{ $total_products }} {{ labels('front_messages.products', 'products') }}</span>
-
+                                        {{ count($products_listing) }} {{ labels('front_messages.out_of', 'Out of') }}
+                                        {{ $total_products }}
+                                        {{ labels('front_messages.products', 'products') }}</span>
                                 @endif
                             </div>
                             <div

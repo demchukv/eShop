@@ -395,6 +395,32 @@ document.addEventListener('livewire:navigated', () => {
             });
         }
         home_slider();
+        var swiper = new Swiper(".free-mySwiper", {
+            // effect: "cube",
+            effect: "flip",
+            // grabCursor: true,
+            // cubeEffect: {
+            //     shadow: false,
+            //     slideShadows: false,
+            //     shadowOffset: 20,
+            //     shadowScale: 0.94,
+            // },
+
+            slidesPerView: 1,
+            spaceBetween: 130,
+            freeMode: true,
+            clickable: true,
+            pagination: {
+                el: ".swiper-pagination",
+                dynamicBullets: true,
+            },
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+            },
+            loop: true,
+        });
         var swiper = new Swiper(".home-mySwiper", {
             pagination: {
                 el: ".swiper-pagination",
@@ -432,28 +458,32 @@ document.addEventListener('livewire:navigated', () => {
         });
 
         var swiper = new Swiper(".category-mySwiper", {
-            slidesPerView: 12,
+            slidesPerView: 1,
             spaceBetween: 30,
+            autoHeigth: true,
             navigation: {
                 nextEl: ".swiper-button-next",
                 prevEl: ".swiper-button-prev",
             },
             breakpoints: {
                 200: {
-                    slidesPerView: 3,
+                    slidesPerView: 2,
                 },
                 440: {
-                    slidesPerView: 4,
+                    slidesPerView: 3,
                 },
                 540: {
-                    slidesPerView: 5,
+                    slidesPerView: 4,
                 },
                 768: {
-                    slidesPerView: 6,
+                    slidesPerView: 5,
                 },
                 1200: {
-                    slidesPerView: 12,
+                    slidesPerView: 6,
                 },
+                1440: {
+                    slidesPerView: 8,
+                }
             }
         });
         var swiper = new Swiper(".style1-mySwiper", {
@@ -1478,7 +1508,7 @@ document.addEventListener('livewire:navigated', () => {
         function product_thumb() {
             $('.product-thumb-vertical').slick({
                 infinite: true,
-                slidesToShow: 5,
+                slidesToShow: 3,
                 vertical: true,
                 verticalSwiping: true,
                 centerPadding: '0',

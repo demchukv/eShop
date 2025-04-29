@@ -93,29 +93,36 @@
                     <nav class="navigation" id="AccessibleNav">
                         <ul id="siteNav" class="site-nav medium center">
                             <li class="lvl1 parent dropdown"><a wire:navigate
+                                    class="{{ request()->is('/') ? 'active' : '' }}"
                                     href="{{ customUrl('home') }}">{{ labels('front_messages.home', 'Home') }}</a>
                             </li>
                             <li class="lvl1 parent megamenu"><a wire:navigate
+                                    class="{{ request()->is('products*') ? 'active' : '' }}"
                                     href="{{ customUrl('products') }}">{{ labels('front_messages.products', 'Products') }}
                                 </a>
                             </li>
                             <li class="lvl1 parent megamenu"><a wire:navigate
+                                    class="{{ request()->is('combo-products*') ? 'active' : '' }}"
                                     href="{{ customUrl('combo-products') }}">{{ labels('front_messages.combo_products', 'Combo Products') }}
                                 </a>
                             </li>
                             <li class="lvl1 parent megamenu"><a wire:navigate
+                                    class="{{ request()->is('offers*') ? 'active' : '' }}"
                                     href="{{ customUrl('offers') }}">{{ labels('front_messages.offers', 'Offers') }}
                                 </a>
                             </li>
                             <li class="lvl1 parent megamenu"><a wire:navigate
+                                    class="{{ request()->is('sellers*') ? 'active' : '' }}"
                                     href="{{ customUrl('sellers') }}">{{ labels('front_messages.sellers', 'Sellers') }}
                                 </a>
                             </li>
                             <li class="lvl1 parent dropdown"><a wire:navigate
+                                    class="{{ request()->is('compare*') ? 'active' : '' }}"
                                     href="{{ customUrl('compare') }}">{{ labels('front_messages.compare', 'Compare') }}
                                 </a>
                             </li>
                             <li class="lvl1 parent dropdown"><a wire:navigate
+                                    class="{{ request()->is('blogs*') ? 'active' : '' }}"
                                     href="{{ customUrl('blogs') }}">{{ labels('front_messages.blogs', 'Blogs') }} </a>
                             </li>
                         </ul>
@@ -374,7 +381,8 @@
                                                         <div class="zoom-scal zoom-scal-nopb brands-image">
                                                             <img class="blur-up lazyload w-100"
                                                                 data-src="{{ $store_img }}"
-                                                                src="{{ $store_img }}" alt="{{ $store->name }}"
+                                                                src="{{ $store_img }}"
+                                                                alt="{{ $store->name }}"
                                                                 title="{{ $store->name }}" />
                                                         </div>
                                                         <div

@@ -1,6 +1,6 @@
-<div>
+<div class="mt-3">
     <div class="row">
-        <div class="col-12 col-sm-12 col-md-12 col-lg-6 mb-4">
+        <div class="col-12">
             <div class="ratings-main" wire:ignore>
                 <div class="avg-rating d-flex-center mb-3">
                     <h4 class="avg-mark">{{ $product_details->rating }}</h4>
@@ -123,7 +123,8 @@
                     </div>
                 </div>
             </div>
-            @if ($customer_reviews != [])
+
+            {{-- @if ($customer_reviews != [])
                 <hr class="light-hr" />
                 <div class="spr-reviews">
                     <h3 class="spr-form-title">{{ labels('front_messages.customer_reviews', 'Customer Reviews') }}
@@ -136,9 +137,10 @@
                             {{ labels('front_messages.reviews', 'Reviews...') }}</a>
                     @endif
                 </div>
-            @endif
+            @endif --}}
         </div>
-        @auth
+
+        {{-- @auth
             @if ($product_details->is_purchased == true)
                 <div class="col-12 col-sm-12 col-md-12 col-lg-6 mb-4" wire:ignore>
                     <form wire:submit="save_review" class="product-review-form new-review-form"
@@ -192,6 +194,6 @@
                     </form>
                 </div>
             @endauth
-        @endif
+        @endif --}}
     </div>
 </div>

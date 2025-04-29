@@ -1,8 +1,15 @@
 @php
     $store_settings = getStoreSettings();
 @endphp
+
+
 <div wire:ignore id="page-content" class="index-demo1">
-    <section class="slideshow slideshow-wrapper slideshow-medium">
+
+
+    <x-utility.categories.sliders.freeSliderV1 />
+
+
+    {{-- <section class="slideshow slideshow-wrapper slideshow-medium">
         <div class="swiper mySwiper home-mySwiper">
             <div class="swiper-wrapper">
                 @foreach ($sliders as $slider)
@@ -20,7 +27,7 @@
             </div>
             <div class="swiper-pagination"></div>
         </div>
-    </section>
+    </section> --}}
     <!--Popular Categories-->
     @php
         $categories = $categories['categories'];
@@ -29,7 +36,7 @@
         <section class="section collection-slider">
             <div class="container-fluid">
                 <div class="section-header style2 d-flex-center justify-content-between">
-                    <div class="section-header-left text-start">
+                    <div class="section-header-left text-start d-flex gap-4 align-items-end">
                         @if ($store_settings['category_section_title'] != null)
                             <h2>{{ $store_settings['category_section_title'] }}</h2>
                         @else
@@ -54,7 +61,7 @@
             <section class="section collection-slider">
                 <div class="container-fluid">
                     <div class="section-header style2 d-flex-center justify-content-between">
-                        <div class="section-header-left text-start">
+                        <div class="section-header-left text-start d-flex gap-4 align-items-end">
                             <h2>{{ $category_section->title }}</h2>
                             <p>{{ labels('front_messages.explore_categories', 'Explore top picks in our Categories!') }}
                             </p>
@@ -80,7 +87,7 @@
         <section class="section collection-slider">
             <div class="container-fluid">
                 <div class="section-header style2 d-flex-center justify-content-between">
-                    <div class="section-header-left text-start">
+                    <div class="section-header-left text-start d-flex gap-4 align-items-end">
                         <h2>{{ labels('front_messages.popular_brands', 'Popular Brands') }}</h2>
                         <p>{{ labels('front_messages.explore_brands', 'Explore top picks in our Brands!') }}</p>
                     </div>
@@ -95,21 +102,25 @@
                 <div class="swiper category-mySwiper">
                     <div class="swiper-wrapper">
                         @foreach ($brands['brands'] as $brand)
-                            <div class="swiper-slide slider-brand zoomscal-hov rounded-4">
-                                <a wire:navigate href="{{ customUrl('products/?brand=' . $brand['brand_slug']) }}"
-                                    class="category-link clr-none bg-body brand-box slider-link"
-                                    data-link="{{ customUrl('products/?brand=' . $brand['brand_slug']) }}">
-                                    <div class="zoom-scal zoom-scal-nopb img-box-h140"><img class="blur-up lazyload"
-                                            data-src="{{ $brand['brand_img'] }}" src="{{ $brand['brand_img'] }}"
-                                            alt="collection" title="" /></div>
-                                    @if (($store_settings['brand_style'] ?? null) == 'brands_style_1')
-                                        <div class="details text-center bg-body">
-                                            <h4 class="category-title mb-0 fs-6 fw-600 text-capitalize">
-                                                {!! $brand['brand_name'] !!}
-                                            </h4>
+                            <div class="swiper-slide slider-brand zoomscal-hov">
+                                <div class="light-bg brand-slider-paddings">
+                                    <a wire:navigate href="{{ customUrl('products/?brand=' . $brand['brand_slug']) }}"
+                                        class="category-link brand-box slider-link"
+                                        data-link="{{ customUrl('products/?brand=' . $brand['brand_slug']) }}">
+                                        <div class="zoom-scal zoom-scal-nopb  img-box-rounded">
+                                            <img class="blur-up lazyload" data-src="{{ $brand['brand_img'] }}"
+                                                src="{{ $brand['brand_img'] }}" alt="collection" title=""
+                                                style="border-radius:100%; overflow:hidden;" />
                                         </div>
-                                    @endif
-                                </a>
+                                        @if (($store_settings['brand_style'] ?? null) == 'brands_style_1')
+                                            <div class="details text-center bg-body">
+                                                <h4 class="category-title mb-0 fs-6 fw-600 text-capitalize">
+                                                    {!! $brand['brand_name'] !!}
+                                                </h4>
+                                            </div>
+                                        @endif
+                                    </a>
+                                </div>
                             </div>
                         @endforeach
                     </div>
