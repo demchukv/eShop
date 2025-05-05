@@ -32,14 +32,14 @@
             <div class="minicart-content">
                 <ul class="m-0 clearfix">
                     @foreach ($cart_data['cart_items'] as $items)
-                    @php
-                        $pro_image =  dynamic_image($items['image'],70);
-                    @endphp
+                        @php
+                            $pro_image = dynamic_image($items['image'], 70);
+                        @endphp
                         <li class="item d-flex justify-content-center align-items-center">
                             <a class="product-image rounded-3" wire:navigate
-                                href="{{ customUrl((($items['cart_product_type'] == "combo") ? "combo-" : ""). 'products/' . $items['slug']) }}">
-                                <img class="blur-up lazyload" data-src="{{ $pro_image }}"
-                                    src="{{ $pro_image }}" alt="{{ $items['name'] }}" title="{{ $items['name'] }}"/>
+                                href="{{ customUrl(($items['cart_product_type'] == 'combo' ? 'combo-' : '') . 'products/' . $items['slug']) }}">
+                                <img class="blur-up lazyload" data-src="{{ $pro_image }}" src="{{ $pro_image }}"
+                                    alt="{{ $items['name'] }}" title="{{ $items['name'] }}" />
                             </a>
                             <div class="product-details">
                                 <a class="product-title" wire:navigate
@@ -53,12 +53,13 @@
                                     <div class="product-price">
                                         @php
                                             $price = currentCurrencyPrice($items['price'], true);
-                                            $special_price = isset($items['special_price']) && $items['special_price'] > 0
-                                                             ? currentCurrencyPrice($items['special_price'], true)
-                                                             : $price;
+                                            $special_price =
+                                                isset($items['special_price']) && $items['special_price'] > 0
+                                                    ? currentCurrencyPrice($items['special_price'], true)
+                                                    : $price;
                                         @endphp
                                         @if ($special_price !== $price)
-                                            <span class="price old-price">{{ $price }}</span>
+                                            <span class="old-price">{{ $price }}</span>
                                         @endif
                                         <span class="price">{{ $special_price }}</span>
                                     </div>
@@ -67,15 +68,13 @@
                             </div>
                             <div class="qtyDetail text-end cart-qtyDetail">
                                 <div class="qtyField">
-                                    <button wire:ignore class="qtyBtn minus" href="#;"><ion-icon
-                                            name="remove-outline"></ion-icon></button>
+                                    <button wire:ignore class="qtyBtn minus" href="#;">-</button>
                                     <input type="number" name="quantity" value="{{ $items['qty'] }}" class="qty"
-                                        max='{{ ($items['total_allowed_quantity'] == 0) ? 'Infinity' : $items['total_allowed_quantity'] }}'
+                                        max='{{ $items['total_allowed_quantity'] == 0 ? 'Infinity' : $items['total_allowed_quantity'] }}'
                                         step='{{ $items['quantity_step_size'] }}'
                                         min='{{ $items['minimum_order_quantity'] }}'
                                         data-variant-id='{{ $items['id'] }}'>
-                                    <button wire:ignore class="qtyBtn plus" href="#;"><ion-icon
-                                            name="add-outline"></ion-icon></button>
+                                    <button wire:ignore class="qtyBtn plus" href="#;">+</button>
                                 </div>
                                 <a wire:click="remove_from_cart({{ $items['id'] }})"
                                     class="remove_from_cart remove pointer" data-variant-id="{{ $items['id'] }}">
@@ -95,10 +94,14 @@
                 </div>
                 <div class="agree-check customCheckbox">
                     <input id="prTearm" name="tearm" type="checkbox" value="tearm" required />
-                    <label for="prTearm">{{ labels('front_messages.i_agree_with_the', 'I agree with the') }}  </label><a wire:navigate
-                        href="{{ url('term-and-conditions') }}" class="ms-1 text-link">{{ labels('front_messages.terms_and_conditions', 'Terms
-                        &amp;
-                        conditions') }}</a>
+                    <label for="prTearm">{{ labels('front_messages.i_agree_with_the', 'I agree with the') }}
+                    </label><a wire:navigate href="{{ url('term-and-conditions') }}"
+                        class="ms-1 text-link">{{ labels(
+                            'front_messages.terms_and_conditions',
+                            'Terms
+                                                                        &amp;
+                                                                        conditions',
+                        ) }}</a>
                 </div>
                 <div class="minicart-action d-flex mt-3">
                     <a href="/cart/checkout" wire:navigate

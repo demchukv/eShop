@@ -1100,6 +1100,7 @@ function initialize() {
     bootstrap_table_initialize();
     add_cart();
 }
+
 function bootstrap_table_initialize() {
     $("#user_wallet_transactions").bootstrapTable({
         formatLoadingMessage: function () {

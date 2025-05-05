@@ -187,7 +187,7 @@ class ComboProductListing extends Component
         }
         // product filter by attributes
 
-        $bread_crumb['page_main_bread_crumb'] = '<a href="' . customUrl('combo-products') . '">' .labels('front_messages.combo_products', 'Combo Products') .'</a>';
+        $bread_crumb['page_main_bread_crumb'] = '<a href="' . customUrl('combo-products') . '">' . labels('front_messages.combo_products', 'Combo Products') . '</a>';
 
         if (count($right_breadcrumb) >= 1) {
             $bread_crumb['right_breadcrumb'] = $right_breadcrumb;

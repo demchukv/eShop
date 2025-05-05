@@ -112,7 +112,9 @@ class LanguageController extends Controller
             $label_key = $key;
             $langstr .= "'" . $label_key . "' => '$label_data'," . "\n";
         }
+
         $langstr_final = "<?php return [" . "\n\n\n" . $langstr . "];";
+
         $root = base_path("/resources/lang");
         $dir = $root . '/' . $request->langcode;
         if (!file_exists($dir)) {
@@ -121,6 +123,7 @@ class LanguageController extends Controller
         $filename = $dir . '/admin_labels.php';
         // dd($filename);
         file_put_contents($filename, $langstr_final);
+
         return response()->json(['error' => false, 'message' => labels('admin_labels.language_labels_added_successfully', 'Language labels added successfully')]);
     }
 

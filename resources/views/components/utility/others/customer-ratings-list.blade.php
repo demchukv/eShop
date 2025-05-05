@@ -16,7 +16,7 @@
                     <x-utility.others.ratingCard :$customer_reviews />
                     @if ($product_details->no_of_ratings >= 4)
                         <a href="/products/{{ $product_details->slug }}/reviews" wire:navigate
-                            class="d-flex justify-content-center align-content-center pt-3 fw-500 fs-6 text-danger">{{ labels('front_messages.view_all', 'View All') }}
+                            class="d-flex justify-content-center align-content-center pt-3 fw-500 fs-6 ">{{ labels('front_messages.view_all', 'View All') }}
                             {{ $product_details->no_of_ratings }}
                             {{ labels('front_messages.reviews', 'Reviews...') }}</a>
                     @endif

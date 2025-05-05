@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Traits\ReferralCodeTrait;
 use Illuminate\Support\Facades\Cookie;
+use Chatify\Facades\ChatifyMessenger as Chatify; // Додаємо фасад Chatify
+use Pusher\Pusher; // Додаємо Pusher
+use App\Models\UserFcm; // Для FCM-повідомлень
+use App\Models\ChFavorite; // Для роботи з Favorites
 
 
 class Register extends Component
@@ -101,6 +105,12 @@ class Register extends Component
             $user = User::create($data);
 
             auth()->login($user);
+
+            // Додаємо адміністратора до обраних контактів
+            $this->addAdminToFavorites($user);
+            // Відправка повідомлення від імені адміністратора
+            $this->sendWelcomeMessage($user);
+
             $response = [
                 'error' => false,
                 'message' => "Welcome " . $request['username'],
@@ -161,6 +171,8 @@ class Register extends Component
                 'type' => "google",
             ]);
             Auth::login($newUser);
+            $this->addAdminToFavorites($newUser); // Додаємо адміністратора до обраних
+            $this->sendWelcomeMessage($newUser); // Додаємо відправку повідомлення
             redirect("/")->with('message', 'Registered Successfully');
             try {
                 sendMailTemplate(to: $newUser['email'], template_key: "welcome", data: [
@@ -193,6 +205,8 @@ class Register extends Component
                 'type' => "facebook",
             ]);
             Auth::login($newUser);
+            $this->addAdminToFavorites($newUser); // Додаємо адміністратора до обраних
+            $this->sendWelcomeMessage($newUser); // Додаємо відправку повідомлення
             redirect("/")->with('message', 'Registered Successfully');
             try {
                 sendMailTemplate(to: $newUser['email'], template_key: "welcome", data: [
@@ -250,5 +264,133 @@ class Register extends Component
         }
 
         return response()->json(['error' => false, 'message' => 'Telegram validation success', 'user' => $auth_data]);
+    }
+
+    /**
+     * Додає адміністратора до списку обраних контактів користувача
+     *
+     * @param User|null $user Новий зареєстрований користувач
+     * @return void
+     */
+    private function addAdminToFavorites($user)
+    {
+        try {
+            if (!$user || !isset($user->id)) {
+                Log::error('Invalid user object in addAdminToFavorites', ['user' => $user]);
+                return;
+            }
+
+            Log::debug('User object in addAdminToFavorites', (array)$user);
+
+            $adminId = config('app.admin_id'); // ID адміністратора
+            $admin = User::find($adminId);
+            if (!$admin) {
+                Log::error('Admin user not found', ['admin_id' => $adminId]);
+                return;
+            }
+
+            // Перевіряємо, чи адміністратор уже в обраних
+            $isFavorite = ChFavorite::where('user_id', $user->id)
+                ->where('favorite_id', $adminId)
+                ->exists();
+
+            if (!$isFavorite) {
+                // Додаємо адміністратора до обраних напряму
+                ChFavorite::create([
+                    'user_id' => $user->id,
+                    'favorite_id' => $adminId
+                ]);
+                Log::info('Admin added to favorites for user', ['user_id' => $user->id, 'admin_id' => $adminId]);
+            } else {
+                Log::info('Admin already in favorites for user', ['user_id' => $user->id, 'admin_id' => $adminId]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to add admin to favorites: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Відправка привітального повідомлення від імені адміністратора
+     *
+     * @param User|null $user Новий зареєстрований користувач
+     * @return void
+     */
+    private function sendWelcomeMessage($user)
+    {
+        try {
+            if (!$user || !isset($user->id)) {
+                Log::error('Invalid user object in sendWelcomeMessage', ['user' => $user]);
+                return;
+            }
+
+            $adminId = config('app.admin_id'); // ID адміністратора
+            $admin = User::find($adminId);
+            if (!$admin) {
+                Log::error('Admin user not found', ['admin_id' => $adminId]);
+                return;
+            }
+
+            $messageText = 'Вітаємо з реєстрацією на нашому сайті!';
+
+            // Створюємо повідомлення
+            $message = Chatify::newMessage([
+                'from_id' => $adminId,
+                'to_id' => $user->id,
+                'body' => htmlentities(trim($messageText), ENT_QUOTES, 'UTF-8'),
+                'attachment' => null,
+            ]);
+
+            // Парсимо повідомлення для відображення
+            $messageData = Chatify::parseMessage($message);
+
+            // Налаштування Pusher
+            $settings = getSettings('pusher_settings', true);
+            $settings = json_decode($settings, true);
+            $pusher_channel_name = $settings['pusher_channel_name'] ?? '';
+
+            if (empty($settings['pusher_app_key']) || empty($settings['pusher_app_secret']) || empty($settings['pusher_app_id'])) {
+                Log::warning('Pusher settings are incomplete, skipping Pusher notification', $settings);
+            } else {
+                $pusher = new Pusher(
+                    $settings['pusher_app_key'],
+                    $settings['pusher_app_secret'],
+                    $settings['pusher_app_id'],
+                    ['cluster' => $settings['pusher_app_cluster'] ?? '']
+                );
+
+                // Відправляємо повідомлення через Pusher
+                $pusher->trigger($pusher_channel_name . '.' . $user->id, 'messaging', [
+                    'from_id' => $adminId,
+                    'to_id' => $user->id,
+                    'formatted_message' => Chatify::messageCard($messageData, true),
+                    'message' => $messageData,
+                ]);
+                Log::info('Pusher notification sent', ['user_id' => $user->id, 'admin_id' => $adminId]);
+            }
+
+            // Відправка push-повідомлення через FCM
+            $fcm_ids = UserFcm::join('users', 'user_fcm.user_id', '=', 'users.id')
+                ->where('user_fcm.user_id', $user->id)
+                ->where('users.is_notification_on', 1)
+                ->pluck('user_fcm.fcm_id')
+                ->toArray();
+
+            if (!empty($fcm_ids)) {
+                $fcmMsg = [
+                    'title' => 'New Message From ' . ($admin->username ?? 'Administrator'),
+                    'body' => $messageText,
+                    'image' => '',
+                    'type' => 'message',
+                    'user_id' => (string) $adminId,
+                ];
+                $registrationIDs_chunks = array_chunk($fcm_ids, 1000);
+                sendNotification('', $registrationIDs_chunks, $fcmMsg);
+                Log::info('FCM notification sent', ['user_id' => $user->id, 'admin_id' => $adminId]);
+            }
+
+            Log::info('Welcome message sent to user', ['user_id' => $user->id, 'admin_id' => $adminId]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send welcome message: ' . $e->getMessage());
+        }
     }
 }

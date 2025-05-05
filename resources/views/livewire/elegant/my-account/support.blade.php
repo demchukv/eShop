@@ -62,9 +62,15 @@
                                             </td>
                                             <td>{{ $ticket->created_at }}</td>
                                             <td>{{ $ticket->updated_at }}</td>
-                                            <td><ion-icon wire:ignore class="fs-5 AddNewTicket cursor-pointer"
+                                            {{-- <td><ion-icon wire:ignore class="fs-5 AddNewTicket cursor-pointer"
                                                     data-ticket-id='{{ $ticket->id }}' name="pencil-sharp"
                                                     data-bs-toggle="modal" data-bs-target="#AddNewTicket"></ion-icon>
+                                            </td> --}}
+                                            <td>
+                                                <a href="{{ route('my-account.ticket-details', $ticket->id) }}">
+                                                    <ion-icon class="fs-5 cursor-pointer"
+                                                        name="pencil-sharp"></ion-icon>
+                                                </a>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -80,6 +86,7 @@
             </div>
         </div>
     </div>
+
     <div wire:ignore.self class="modal fade" id="AddNewTicket" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog">

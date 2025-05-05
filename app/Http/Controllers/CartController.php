@@ -207,6 +207,7 @@ class CartController extends Controller
         }
 
         $product_variant_id = $request->input('product_variant_id');
+
         $qty = $request->input('qty');
 
         $is_saved_for_later = $request->input('is_saved_for_later');
@@ -330,6 +331,7 @@ class CartController extends Controller
             return response()->json(['error' => true, 'message' => 'Something went wrong'], 400);
         }
     }
+
     public function cart($user_id = '')
     {
         // add dynamic user id here

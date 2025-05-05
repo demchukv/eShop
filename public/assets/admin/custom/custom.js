@@ -239,7 +239,6 @@ $(".submit_form").on("submit", function (e) {
     formData.append("_token", csrfToken);
     // Clear previous error messages
     $(".text-danger").text("");
-
     $.ajax({
         url: url,
         method: method,

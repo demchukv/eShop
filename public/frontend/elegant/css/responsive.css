@@ -1295,9 +1295,10 @@
         width: 285px;
         height: 100%;
         padding: 0 !important;
-        background-color: #ffffff;
+        background-color: var(--primary-color);
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
         position: fixed;
+        border-radius: 0;
         top: 0;
         left: -290px;
         z-index: 9999;
@@ -1313,7 +1314,7 @@
     .filterbar .sidebar-tags {
         position: relative;
         z-index: 9;
-        background: #f8f9fa;
+        background: var(--primary-color);
         padding: 20px;
         height: 100%;
         overflow: auto;
@@ -1331,7 +1332,7 @@
 
     .filterbar.active .closeFilter {
         color: #ffffff;
-        background-color: #333333;
+        background-color: var(--primary-color);
         font-size: 15px;
         line-height: 36px;
         height: 30px;
@@ -1339,9 +1340,11 @@
         text-align: center;
         cursor: pointer;
         position: absolute;
+        border-bottom-right-radius: 5px;
+        border-top-right-radius: 5px;
         top: 10px;
         left: 100%;
-        box-shadow: 0 0 5px #ddd;
+        box-shadow: 0 0 5px #333;
         -ms-transition: all 0.4s ease-in-out;
         -webkit-transition: all 0.4s ease-in-out;
         transition: all 0.4s ease-in-out;

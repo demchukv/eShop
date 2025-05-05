@@ -83,13 +83,13 @@
                      <span class="nav-link-text ">{{ labels('admin_labels.stock_manage', 'Stock Manage') }}</span>
                  </a>
              </li>
-             <li class="nav-item ms-3">
+             {{-- <li class="nav-item ms-3">
                  <a class="nav-link {{ Request::is('seller/manage_combo_stock') || Request::is('seller/manage_combo_stock/*') ? 'active' : '' }}"
                      href="{{ route('seller.manage_combo_stock.index') }}">
                      <span
                          class="nav-link-text ms-1">{{ labels('admin_labels.combo_stock_manage', 'Combo Stock Manage') }}</span>
                  </a>
-             </li>
+             </li> --}}
              <li class="sidebar-title "><i class='bx bx-cart-alt'></i>
                  {{ labels('admin_labels.products', ' Products') }}
              </li>
@@ -140,7 +140,7 @@
                  </div>
              </li>
 
-             <li class="sidebar-title"><i class='bx bx-package'></i>
+             {{-- <li class="sidebar-title"><i class='bx bx-package'></i>
                  {{ labels('admin_labels.combo_products_manage', 'Combo Products Manage') }}
              </li>
              <li class="nav-item ">
@@ -148,8 +148,8 @@
                      href="{{ route('seller.combo_product_attributes.index') }}">
                      <span class="sidenav-normal"> {{ labels('admin_labels.attributes', 'Attributes') }} </span>
                  </a>
-             </li>
-             <li class="nav-item ">
+             </li> --}}
+             {{-- <li class="nav-item ">
                  <a class="nav-link {{ Request::is('seller/combo_products') ? 'active' : '' }}"
                      href="{{ route('seller.combo_products.index') }}">
                      <span class="sidenav-normal">
@@ -168,7 +168,7 @@
                      href="{{ route('seller.combo_product_faqs.index') }}">
                      <span class="sidenav-normal">{{ labels('admin_labels.product_faqs', 'Product FAQs') }} </span>
                  </a>
-             </li>
+             </li> --}}
              <li class="sidebar-title"><i class='bx bx-image-add'></i>
                  {{ labels('admin_labels.media_management', 'Media Management') }}
              </li>

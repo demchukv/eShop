@@ -62,7 +62,7 @@
                 @if ($for_checkout != 1)
                     <div class="qtyField">
                         <button type="button" wire:ignore class="qtyBtn minus">
-                            <ion-icon name="remove-outline"></ion-icon>
+                            -
                         </button>
 
                         <input class="cart-qty-input qty" type="text" name="updates[]"
@@ -73,9 +73,9 @@
                             data-product-type="regular" />
 
 
-                            <button type="button" wire:ignore class="qtyBtn plus">
-                                <ion-icon name="add-outline"></ion-icon>
-                            </button>
+                        <button type="button" wire:ignore class="qtyBtn plus">
+                            +
+                        </button>
                     </div>
                 @else
                     {{ $cartItem['qty'] }}

@@ -177,10 +177,10 @@ class ComboProductController extends Controller
 
             $product_data['has_similar_product'] = '1';
 
-            $product_data['similar_product_ids'] = isset($request->similar_product_id) && !empty ($request->similar_product_id) ? implode(',', (array)$request->similar_product_id) : '';
-
+            $product_data['similar_product_ids'] = isset($request->similar_product_id) && !empty($request->similar_product_id) ? implode(',', (array)$request->similar_product_id) : '';
         }
         $product_data['other_images'] = isset($request->other_images) ? json_encode($request->other_images, 1) : '';
+
 
         $product =  ComboProduct::create($product_data);
         $product_data = fetchComboProduct('', '', $product->id);

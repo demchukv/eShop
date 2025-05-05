@@ -2,6 +2,7 @@
     <x-utility.breadcrumbs.breadcrumbTwo :$bread_crumb />
     <div class="container-fluid">
 
+
         <div class="product-single">
             <div class="row">
                 <div class="col-lg-6 col-md-6 col-sm-12 col-12 product-layout-img mb-4 mb-md-0">
@@ -52,9 +53,10 @@
                         <div class="product-price d-flex-center">
                             @php
                                 $price = currentCurrencyPrice($product_details->price, true);
-                                $special_price = $product_details->special_price && $product_details->special_price > 0
-                                                 ? currentCurrencyPrice($product_details->special_price, true)
-                                                 : $price;
+                                $special_price =
+                                    $product_details->special_price && $product_details->special_price > 0
+                                        ? currentCurrencyPrice($product_details->special_price, true)
+                                        : $price;
                             @endphp
                             <span class="price product_price" id="price">
                                 @if ($special_price !== $price)
@@ -90,7 +92,8 @@
                             <div class="product-availability p-0 mb-10px position-static col-lg-9">
                                 <div class="lh-1 d-flex justify-content-between">
                                     <div class="text-sold fw-600">{{ labels('front_messages.currently', 'Currently') }}
-                                        , <strong class="text-link"></strong> {{ labels('front_messages.items_in_stock', 'Items are in stock!') }}
+                                        , <strong class="text-link"></strong>
+                                        {{ labels('front_messages.items_in_stock', 'Items are in stock!') }}
                                     </div>
                                 </div>
                             </div>
@@ -297,7 +300,8 @@
                                         </div>
                                     @else
                                         <div class="col-md-10">
-                                            <label for="pincode" class="d-none">{{ labels('front_messages.pincode', 'Pincode') }} <span
+                                            <label for="pincode"
+                                                class="d-none">{{ labels('front_messages.pincode', 'Pincode') }} <span
                                                     class="required-f">*</span></label>
                                             <input name="pincode" placeholder="Enter Pincode" value=""
                                                 id="pincode" type="text">
@@ -308,7 +312,9 @@
                                             class="btn rounded w-100 check-product-deliverability"><span>{{ labels('front_messages.check', 'Check') }}</span></button>
                                     </div>
                                     @if ($deliverabilitySettings[0]->product_deliverability_type == 'city_wise_deliverability')
-                                        <p class="fw-400 text-danger text-small">{{ labels('front_messages.city_not_on_list', 'If your city is not on the list') }} {{ labels('front_messages.cannot_deliver', 'we cannot deliver the product there') }}.
+                                        <p class="fw-400 text-danger text-small">
+                                            {{ labels('front_messages.city_not_on_list', 'If your city is not on the list') }}
+                                            {{ labels('front_messages.cannot_deliver', 'we cannot deliver the product there') }}.
                                         </p>
                                     @endif
                                     <p class="featureText deliverability-res"></p>
@@ -518,9 +524,10 @@
                     <div class="selectedOpt product_price">
                         @php
                             $price = currentCurrencyPrice($product_details->price, true);
-                            $special_price = isset($product_details->special_price) && $product_details->special_price > 0
-                                             ? currentCurrencyPrice($product_details->special_price, true)
-                                             : $price;
+                            $special_price =
+                                isset($product_details->special_price) && $product_details->special_price > 0
+                                    ? currentCurrencyPrice($product_details->special_price, true)
+                                    : $price;
                         @endphp
 
                         @if ($special_price !== $price)

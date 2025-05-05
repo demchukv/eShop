@@ -101,7 +101,8 @@ class TicketController extends Controller
         if ($ticket) {
             $ticket->delete();
             return response()->json([
-                'error' => false, 'message' => labels('admin_labels.ticket_type_deleted_successfully', 'Ticket Type deleted successfully!')
+                'error' => false,
+                'message' => labels('admin_labels.ticket_type_deleted_successfully', 'Ticket Type deleted successfully!')
             ]);
         } else {
             return response()->json(['error' => labels('admin_labels.data_not_found', 'Data Not Found')]);
@@ -246,7 +247,7 @@ class TicketController extends Controller
     {
         $ticket_id = request()->input('ticket_id', '');
         $user_id = request()->input('user_id', '');
-        $search = trim(request()->input('search',''));
+        $search = trim(request()->input('search', ''));
         $offset = request()->input('offset', 0);
 
         $limit = request()->input('limit', 10);
@@ -511,7 +512,8 @@ class TicketController extends Controller
         if ($ticket) {
             $ticket->delete();
             return response()->json([
-                'error' => false, 'message' => labels('admin_labels.ticket_deleted_successfully', 'Ticket deleted successfully!')
+                'error' => false,
+                'message' => labels('admin_labels.ticket_deleted_successfully', 'Ticket deleted successfully!')
             ]);
         } else {
             return response()->json(['error' => labels('admin_labels.data_not_found', 'Data Not Found')]);
@@ -533,6 +535,7 @@ class TicketController extends Controller
             }
             return redirect()->back()->withErrors($errors)->withInput();
         }
+
 
         $user_id = auth()->id();
         $ticket_id = $request->input('ticket_id');

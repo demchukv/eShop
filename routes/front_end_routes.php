@@ -58,6 +58,7 @@ use App\Livewire\Orders\Review;
 use App\Livewire\Orders\ReturnOptions;
 use App\Http\Controllers\Orders\ReviewController;
 use App\Http\Controllers\AfterShipApiController;
+use App\Livewire\MyAccount\TicketDetails;
 
 /*
 |--------------------------------------------------------------------------
@@ -147,6 +148,8 @@ Route::middleware(App\Http\Middleware\checkAuth::class)->group(function () {
     Route::post('/my-account/support/add-ticket', [Support::class, 'add_ticket'])->name('my-account.support.add-ticket');
     Route::post('/my-account/support/get-ticket', [Support::class, 'get_ticket_by_id'])->name('my-account.support.get-ticket');
     Route::get('/my-account/referral-stats', ReferralStats::class)->name('my-account.referral-stats');
+
+    Route::get('/my-account/ticket-details/{ticketId}', TicketDetails::class)->name('my-account.ticket-details');
 
     Route::get('/login/logout', [UserController::class, 'logout'])->name('logout');
 });

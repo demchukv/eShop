@@ -101,11 +101,11 @@
                                     href="{{ customUrl('products') }}">{{ labels('front_messages.products', 'Products') }}
                                 </a>
                             </li>
-                            <li class="lvl1 parent megamenu"><a wire:navigate
+                            {{-- <li class="lvl1 parent megamenu"><a wire:navigate
                                     class="{{ request()->is('combo-products*') ? 'active' : '' }}"
                                     href="{{ customUrl('combo-products') }}">{{ labels('front_messages.combo_products', 'Combo Products') }}
                                 </a>
-                            </li>
+                            </li> --}}
                             <li class="lvl1 parent megamenu"><a wire:navigate
                                     class="{{ request()->is('offers*') ? 'active' : '' }}"
                                     href="{{ customUrl('offers') }}">{{ labels('front_messages.offers', 'Offers') }}
@@ -226,10 +226,10 @@
             <li class="lvl1 parent megamenu"><a wire:navigate
                     href="{{ customUrl('products') }}">{{ labels('front_messages.products', 'Products') }} </a>
             </li>
-            <li class="lvl1 parent megamenu"><a wire:navigate
+            {{-- <li class="lvl1 parent megamenu"><a wire:navigate
                     href="{{ customUrl('combo-products') }}">{{ labels('front_messages.combo_products', 'Combo Products') }}
                 </a>
-            </li>
+            </li> --}}
             <li class="lvl1 parent megamenu"><a wire:navigate
                     href="{{ customUrl('compare') }}">{{ labels('front_messages.compare', 'Compare') }}
                 </a>
@@ -381,8 +381,7 @@
                                                         <div class="zoom-scal zoom-scal-nopb brands-image">
                                                             <img class="blur-up lazyload w-100"
                                                                 data-src="{{ $store_img }}"
-                                                                src="{{ $store_img }}"
-                                                                alt="{{ $store->name }}"
+                                                                src="{{ $store_img }}" alt="{{ $store->name }}"
                                                                 title="{{ $store->name }}" />
                                                         </div>
                                                         <div

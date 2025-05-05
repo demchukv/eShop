@@ -1,13 +1,13 @@
 <?php return [
 
 
-'langcode' => 'en',
+'langcode' => 'ru',
 'dashboard' => 'admin_labels.dashboard',
-'stores' => 'admin_labels.stores',
+'stores' => 'Магазины',
 'manage' => 'admin_labels.manage',
-'add_store' => 'admin_labels.add_store',
+'add_store' => 'Добавить магазин',
 'orders_manage' => 'admin_labels.orders_manage',
-'orders' => 'admin_labels.orders',
+'orders' => 'Заказы',
 'order_tracking' => 'admin_labels.order_tracking',
 'categories' => 'admin_labels.categories',
 'category_order' => 'admin_labels.category_order',

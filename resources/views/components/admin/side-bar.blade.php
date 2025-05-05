@@ -165,7 +165,7 @@
                      </a>
                  </li>
              @endif
-             @if ($user_role == 'super_admin' || $user->hasPermissionTo('view combo_stock'))
+             {{-- @if ($user_role == 'super_admin' || $user->hasPermissionTo('view combo_stock'))
                  <li class="nav-item ms-3">
                      <a class="nav-link {{ Request::is('admin/manage_combo_stock') || Request::is('admin/manage_combo_stock/*') ? 'active' : '' }}"
                          href="{{ route('admin.manage_combo_stock.index') }}">
@@ -174,7 +174,7 @@
                              class="nav-link-text ms-1">{{ labels('admin_labels.combo_stock_manage', 'Combo Stock Manage') }}</span>
                      </a>
                  </li>
-             @endif
+             @endif --}}
              <li class="sidebar-title ms-3"><i class='bx bx-card'></i></i>
                  {{ labels('admin_labels.brand', 'Brand') }}
              </li>
@@ -277,7 +277,7 @@
                      </ul>
                  </div>
              </li>
-             <li class="sidebar-title ms-3"><i class='bx bx-package'></i>
+             {{-- <li class="sidebar-title ms-3"><i class='bx bx-package'></i>
                  {{ labels('admin_labels.combo_products_manage', 'Combo Products Manage') }}
              </li>
              <li class="nav-item ms-3">
@@ -286,8 +286,8 @@
                      <span class="sidenav-normal">
                          {{ labels('admin_labels.attributes_manage', 'Attributes Manage') }}</span>
                  </a>
-             </li>
-             <li class="nav-item ms-3">
+             </li> --}}
+             {{-- <li class="nav-item ms-3">
                  <a data-bs-toggle="collapse" href="#combo_products_dropdown"
                      class="nav-link {{ Request::is('admin/combo_products') || Request::is('admin/combo_products*') || Request::is('admin/combo_product_faqs') ? '' : 'collapsed' }} {{ Request::is('admin/combo_products') || Request::is('admin/combo_products*') || Request::is('admin/combo_product_faqs') ? 'active' : '' }}"
                      aria-controls="combo_products_dropdown" role="button" aria-expanded="false">
@@ -328,7 +328,7 @@
                          </li>
                      </ul>
                  </div>
-             </li>
+             </li> --}}
 
              <li class="sidebar-title ms-3"><i class='bx bx-card'></i>
                  {{ labels('admin_labels.blogs', 'Blogs') }}
