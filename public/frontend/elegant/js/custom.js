@@ -2719,8 +2719,17 @@ document.addEventListener("livewire:navigated", () => {
         }
     });
 
-    $(".chat-btn-popup").on("click", function () {
-        $("#chat-iframe").toggleClass("chat-iframe-show");
+    $(".chat-btn-popup").on("click", function (e) {
+        const iframeSrc = e.currentTarget.dataset.href;
+        if (iframeSrc) {
+            $("#chat-iframe").attr("src", iframeSrc);
+            const tm = setTimeout(() => {
+                console.log("Delayed for 1 second.");
+                $("#chat-iframe").toggleClass("chat-iframe-show");
+            }, 500);
+        } else {
+            $("#chat-iframe").toggleClass("chat-iframe-show");
+        }
     });
 
     $(function () {

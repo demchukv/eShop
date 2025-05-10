@@ -30,6 +30,9 @@
                             @endphp
                             @foreach ($order_transaction as $user_order)
                                 @foreach ($user_order['order_items'] as $user_order_item)
+                                    {{-- @php
+                                        dd($user_order_item);
+                                    @endphp --}}
                                     <div class="row mt-3">
                                         <div class="col-lg-2 col-md-3 col-sm-4">
                                             <div class="product-img mb-3 mb-sm-0 order-image-box">
@@ -55,7 +58,7 @@
                                                         <div class="left">
                                                             <span>{{ labels('front_messages.seller', 'Seller') }}</span>
                                                         </div>
-                                                        <div class="right">
+                                                        <div class="right ">
                                                             <a wire:navigate
                                                                 href="{{ customUrl('sellers/' . $user_order_item['store_slug']) }}"
                                                                 class="all-product-img product-img rounded-3 slider-link"
@@ -63,6 +66,7 @@
                                                                 <span>{{ $user_order_item['store_name'] }}</span>
 
                                                             </a>
+                                                            <x-chat-button :userId="$user_order_item['main_seller_id']" />
                                                         </div>
                                                     </li>
                                                     <li>
@@ -753,13 +757,13 @@
                     </div>
                     <div class="collapse mb-0" id="allInTransit">
                         ${group.slice(0, -1).reverse().map(cp => `
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <div class="mb-3">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    `).join('')}
+                                                                                            <div class="mb-3">
+                                                                        <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
+                                                                        <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
+                                                                        <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
+                                                                        <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
+                                                                        </div>
+                                                                        `).join('')}
                     </div>
                     <p class="mb-3 mt-0">
                         <a href="#" class="text-primary fs-6" data-bs-target="#allInTransit"

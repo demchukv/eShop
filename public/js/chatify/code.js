@@ -76,8 +76,8 @@ function updateSelectedContact(user_id) {
     $(document)
         .find(
             ".messenger-list-item[data-contact=" +
-                (user_id || getMessengerId()) +
-                "]"
+            (user_id || getMessengerId()) +
+            "]"
         )
         .addClass("m-list-active");
 }
@@ -299,28 +299,30 @@ function scrollToBottom(container) {
  */
 function hScroller(scroller) {
     const slider = document.querySelector(scroller);
-    let isDown = false;
-    let startX;
-    let scrollLeft;
+    if (slider) {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
 
-    slider.addEventListener("mousedown", (e) => {
-        isDown = true;
-        startX = e.pageX - slider.offsetLeft;
-        scrollLeft = slider.scrollLeft;
-    });
-    slider.addEventListener("mouseleave", () => {
-        isDown = false;
-    });
-    slider.addEventListener("mouseup", () => {
-        isDown = false;
-    });
-    slider.addEventListener("mousemove", (e) => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.pageX - slider.offsetLeft;
-        const walk = (x - startX) * 1;
-        slider.scrollLeft = scrollLeft - walk;
-    });
+        slider.addEventListener("mousedown", (e) => {
+            isDown = true;
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        });
+        slider.addEventListener("mouseleave", () => {
+            isDown = false;
+        });
+        slider.addEventListener("mouseup", () => {
+            isDown = false;
+        });
+        slider.addEventListener("mousemove", (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offsetLeft;
+            const walk = (x - startX) * 1;
+            slider.scrollLeft = scrollLeft - walk;
+        });
+    }
 }
 
 /**

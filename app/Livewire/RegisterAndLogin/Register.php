@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Cookie;
 use Chatify\Facades\ChatifyMessenger as Chatify; // Додаємо фасад Chatify
 use Pusher\Pusher; // Додаємо Pusher
 use App\Models\UserFcm; // Для FCM-повідомлень
-use App\Models\ChFavorite; // Для роботи з Favorites
 
 
 class Register extends Component
@@ -79,10 +78,6 @@ class Register extends Component
                 $friend = User::where('referral_code', $friends_code)->first();
                 if (!$friend) {
                     $friends_code = null;
-                    // return [
-                    //     'error' => true,
-                    //     'message' => 'Invalid friend code! Please enter the correct referrer referral code'
-                    // ];
                 }
             }
 
@@ -106,8 +101,6 @@ class Register extends Component
 
             auth()->login($user);
 
-            // Додаємо адміністратора до обраних контактів
-            $this->addAdminToFavorites($user);
             // Відправка повідомлення від імені адміністратора
             $this->sendWelcomeMessage($user);
 
@@ -171,7 +164,6 @@ class Register extends Component
                 'type' => "google",
             ]);
             Auth::login($newUser);
-            $this->addAdminToFavorites($newUser); // Додаємо адміністратора до обраних
             $this->sendWelcomeMessage($newUser); // Додаємо відправку повідомлення
             redirect("/")->with('message', 'Registered Successfully');
             try {
@@ -205,7 +197,6 @@ class Register extends Component
                 'type' => "facebook",
             ]);
             Auth::login($newUser);
-            $this->addAdminToFavorites($newUser); // Додаємо адміністратора до обраних
             $this->sendWelcomeMessage($newUser); // Додаємо відправку повідомлення
             redirect("/")->with('message', 'Registered Successfully');
             try {
@@ -266,48 +257,7 @@ class Register extends Component
         return response()->json(['error' => false, 'message' => 'Telegram validation success', 'user' => $auth_data]);
     }
 
-    /**
-     * Додає адміністратора до списку обраних контактів користувача
-     *
-     * @param User|null $user Новий зареєстрований користувач
-     * @return void
-     */
-    private function addAdminToFavorites($user)
-    {
-        try {
-            if (!$user || !isset($user->id)) {
-                Log::error('Invalid user object in addAdminToFavorites', ['user' => $user]);
-                return;
-            }
 
-            Log::debug('User object in addAdminToFavorites', (array)$user);
-
-            $adminId = config('app.admin_id'); // ID адміністратора
-            $admin = User::find($adminId);
-            if (!$admin) {
-                Log::error('Admin user not found', ['admin_id' => $adminId]);
-                return;
-            }
-
-            // Перевіряємо, чи адміністратор уже в обраних
-            $isFavorite = ChFavorite::where('user_id', $user->id)
-                ->where('favorite_id', $adminId)
-                ->exists();
-
-            if (!$isFavorite) {
-                // Додаємо адміністратора до обраних напряму
-                ChFavorite::create([
-                    'user_id' => $user->id,
-                    'favorite_id' => $adminId
-                ]);
-                Log::info('Admin added to favorites for user', ['user_id' => $user->id, 'admin_id' => $adminId]);
-            } else {
-                Log::info('Admin already in favorites for user', ['user_id' => $user->id, 'admin_id' => $adminId]);
-            }
-        } catch (\Exception $e) {
-            Log::error('Failed to add admin to favorites: ' . $e->getMessage());
-        }
-    }
 
     /**
      * Відправка привітального повідомлення від імені адміністратора
@@ -330,7 +280,7 @@ class Register extends Component
                 return;
             }
 
-            $messageText = 'Вітаємо з реєстрацією на нашому сайті!';
+            $messageText = 'Congratulations on registering on our site! If you have any questions, you can always contact our support team.';
 
             // Створюємо повідомлення
             $message = Chatify::newMessage([

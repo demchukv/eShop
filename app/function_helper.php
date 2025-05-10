@@ -5356,7 +5356,7 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
     $regularOrderSearchRes->groupBy('o.id');
     $regularOrderSearchRes->orderBy($sort, $order);
     $regularOrderSearchRes = $regularOrderSearchRes->get();
-
+    // dd($regularOrderSearchRes);
     $comboOrderSearchRes = DB::table('orders AS o')
         ->select(
             'o.*',
@@ -5486,6 +5486,7 @@ function fetchOrders($order_id = NULL, $user_id = NULL, $status = NULL, $deliver
                 'u.address AS seller_address',
                 'u.latitude AS seller_latitude',
                 DB::raw('(SELECT username FROM users WHERE id = oi.delivery_boy_id) AS delivery_boy_name'),
+                'ss.user_id as main_seller_id',
                 'ss.store_description',
                 'ss.rating AS seller_rating',
                 'ss.logo AS seller_profile',

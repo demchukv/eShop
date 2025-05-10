@@ -31,6 +31,7 @@ class Transaction extends Model
         'refund_id',        // Додано
     ];
 
+
     protected $attributes = [
         'fee' => 0,
         'refund_amount' => 0,    // За замовчуванням 0

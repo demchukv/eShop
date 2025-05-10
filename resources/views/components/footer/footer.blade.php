@@ -140,8 +140,9 @@
             <a wire:navigate href="{{ customUrl('my-account/live-customer-support') }}"
                 class="chat-btn chat-btn-redirect d-flex justify-content-center align-items-center"><ion-icon
                     name="chatbubbles-outline" class="icon fs-5"></ion-icon></a>
-            <div class="chat-btn chat-btn-popup d-flex justify-content-center align-items-center"><ion-icon
-                    name="chatbubbles-outline" class="icon fs-5"></ion-icon></div>
+            <button data-href="{{ url('chatify') }}"
+                class="chat-btn chat-btn-popup d-flex justify-content-center align-items-center"><ion-icon
+                    name="chatbubbles-outline" class="icon fs-5"></ion-icon></button>
         @endauth
         <div id="site-scroll" class="d-flex justify-content-center align-items-center d-none mt-2"><ion-icon
                 name="arrow-up-outline" class="icon fs-5"></ion-icon></div>
