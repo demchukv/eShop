@@ -4,14 +4,15 @@ namespace App\Livewire\Header;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\CategoryController;
 
 class Header extends Component
 {
     protected $listeners = ['cart_count', 'changeLang', 'changeCurrency'];
 
     public $cart_count = "";
-
     public $user_id = "";
+
     public function __construct()
     {
         $this->user_id = Auth::user() != '' ? Auth::user()->id : NUll;
@@ -30,6 +31,7 @@ class Header extends Component
         }
     }
 
+
     public function render()
     {
         $settings = getSettings('web_settings', true, true);
@@ -40,11 +42,29 @@ class Header extends Component
         $languages = fetchDetails('languages') ?? [];
 
         $store_details = fetchDetails('stores', ['status' => 1], '*');
+
+        // Отримуємо категорії через CategoryController
+        $categoryController = new CategoryController();
+        $categoriesResponse = $categoryController->getCategories(
+            id: null,
+            limit: '',
+            offset: '',
+            sort: 'row_order',
+            order: 'ASC',
+            has_child_or_item: 'true',
+            slug: '',
+            ignore_status: '',
+            seller_id: '',
+            store_id: session('store_id')
+        );
+        $categories = json_decode($categoriesResponse->getContent(), true)['categories'] ?? [];
+
         return view('components.header.header', [
             'settings' => $settings,
             'currencies' => $currencies,
             'languages' => $languages,
             'stores' => $store_details,
+            'categories' => $categories,
         ]);
     }
 

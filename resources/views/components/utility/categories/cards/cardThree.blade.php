@@ -7,7 +7,7 @@
         class="category-link  brand-box slider-link"
         data-link="{{ customUrl('categories/' . $category->slug . '/products') }}">
         <div
-            class="zoom-scal zoom-scal-nopb {{ $store_settings['category_card_style'] == 'category_card_style_1' ? 'img-box-rectangle-square' : 'img-box-h140' }} {{ $store_settings['category_card_style'] == 'category_card_style_3' ? 'rounded-circle' : '' }}">
+            class="zoom-scal zoom-scal-nopb {{ $store_settings['category_card_style'] == 'category_card_style_1' ? 'img-box-category-square' : 'img-box-h140' }} {{ $store_settings['category_card_style'] == 'category_card_style_3' ? 'rounded-circle' : '' }}">
             <img class="blur-up lazyload" data-src="{{ $category->image }}" src="{{ $category->image }}" alt="collection"
                 title="" />
         </div>

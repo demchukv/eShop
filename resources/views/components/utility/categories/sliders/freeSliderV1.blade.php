@@ -24,7 +24,9 @@
                 </div>
             </div>
             {{-- dots pagination --}}
-            <div class="swiper-pagination"></div>
+            <div class="swiper-pagination swiper-custom-pagination"></div>
+            {{-- <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div> --}}
         </div>
     </div>
 </section>
@@ -32,8 +34,13 @@
 
 @push('styles')
     <style>
+        .swiper-custom-pagination .swiper-pagination-bullet {
+            width: 20px !important;
+            height: 20px !important;
+        }
+
         .swiper-pagination {
-            z-index: 1000;
+            /* z-index: 1000; */
         }
 
         .free-slideshow {
@@ -83,8 +90,8 @@
         /* second slide */
         .free-slide-two-left {
             position: relative;
-            width: 23.53%;
-            aspect-ratio: 751 / 953;
+            width: 23.349%;
+            aspect-ratio: 375 / 526;
             background-image: url('assets/img/slides/two-left.png');
             background-position: top left;
             background-size: contain;
@@ -94,8 +101,8 @@
 
         .free-slide-two-right {
             position: relative;
-            width: 75.68%;
-            aspect-ratio: 2415 / 1045;
+            width: 75.84%;
+            aspect-ratio: 1218 / 526;
             background-image: url('assets/img/slides/two-right.png');
             background-position: top left;
             background-size: contain;
@@ -126,8 +133,8 @@
             position: absolute;
             /* left: calc(100vw / 3840 * 79); */
             /* top: calc(100vw / 3840 * 559); */
-            left: calc((79 / 2415 * 100%));
-            top: calc((559 / 1045 * 100%));
+            left: calc((39 / 1218 * 100%));
+            top: calc((235 / 526 * 100%));
         }
 
         .keyboard-btn {
@@ -135,8 +142,8 @@
             position: absolute;
             /* left: calc(100vw / 3840 * 968); */
             /* top: calc(100vw / 3840 * 920); */
-            left: calc((968 / 2415 * 100%));
-            top: calc((920 / 1045 * 100%));
+            left: calc((484 / 1218 * 100%));
+            top: calc((416 / 526 * 100%));
         }
 
         .laptop-btn {
@@ -144,8 +151,8 @@
             position: absolute;
             /* left: calc(100vw / 3840 * 89); */
             /* top: calc(100vw / 3840 * 920); */
-            left: calc((89 / 751 * 100%));
-            top: calc((920 / 1045 * 100%));
+            left: calc((44 / 376 * 100%));
+            top: calc((416 / 526 * 100%));
         }
 
 

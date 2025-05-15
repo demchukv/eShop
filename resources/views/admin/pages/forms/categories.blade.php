@@ -18,7 +18,8 @@
             <nav aria-label="breadcrumb" class="float-end">
                 <ol class="breadcrumb">
                     <i class='bx bx-home-smile'></i>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.home') }}">{{ labels('admin_labels.home', 'Home') }}</a>
+                    <li class="breadcrumb-item"><a
+                            href="{{ route('admin.home') }}">{{ labels('admin_labels.home', 'Home') }}</a>
                     </li>
                     <li class="breadcrumb-item active" aria-current="page">
                         {{ labels('admin_labels.categories', 'Categories') }}
@@ -67,8 +68,8 @@
                                             <option value="">
                                                 {{ labels('admin_labels.select_category', 'Select Category') }}
                                             </option>
-                                            @foreach ($categories as $category)
-                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                            @foreach ($hierarchicalCategories as $category)
+                                                <option value="{{ $category['id'] }}">{{ $category['name'] }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -191,10 +192,15 @@
                                         <i class='bx bx-download'></i>
                                     </button>
                                     <ul class="dropdown-menu" aria-labelledby="exportOptionsDropdown">
-                                        <li><button class="dropdown-item" type="button" onclick="exportTableData('admin_category_table','csv')">CSV</button></li>
-                                        <li><button class="dropdown-item" type="button" onclick="exportTableData('admin_category_table','json')">JSON</button></li>
-                                        <li><button class="dropdown-item" type="button" onclick="exportTableData('admin_category_table','sql')">SQL</button></li>
-                                        <li><button class="dropdown-item" type="button" onclick="exportTableData('admin_category_table','excel')">Excel</button></li>
+                                        <li><button class="dropdown-item" type="button"
+                                                onclick="exportTableData('admin_category_table','csv')">CSV</button></li>
+                                        <li><button class="dropdown-item" type="button"
+                                                onclick="exportTableData('admin_category_table','json')">JSON</button></li>
+                                        <li><button class="dropdown-item" type="button"
+                                                onclick="exportTableData('admin_category_table','sql')">SQL</button></li>
+                                        <li><button class="dropdown-item" type="button"
+                                                onclick="exportTableData('admin_category_table','excel')">Excel</button>
+                                        </li>
                                     </ul>
                                 </div>
                             </div>
@@ -202,10 +208,10 @@
                         </div>
                     </div>
                 </div>
-                 <!-- Buttons -->
-                 <div class="d-flex justify-content-start mt-2">
-                    <button type="button"
-                        class="btn btn-outline-primary btn-sm delete_selected_data" data-table-id="admin_category_table"
+                <!-- Buttons -->
+                <div class="d-flex justify-content-start mt-2">
+                    <button type="button" class="btn btn-outline-primary btn-sm delete_selected_data"
+                        data-table-id="admin_category_table"
                         data-delete-url="{{ route('categories.delete') }}">{{ labels('admin_labels.delete_selected', 'Delete Selected') }}</button>
                 </div>
                 <div class="row">
@@ -266,4 +272,3 @@
         </section>
     </div>
 @endsection
-

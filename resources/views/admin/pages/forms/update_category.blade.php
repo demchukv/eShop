@@ -50,10 +50,10 @@
                                             for="basic-default-fullname">{{ labels('admin_labels.select_catgeory_for_sub_categories', 'Select Category for subCategory') }}</label>
                                         <select id="" name="parent_id" class="form-select">
                                             <option value="">select a category</option>
-                                            @foreach ($categories as $category)
-                                                <option value="{{ $category->id }}"
-                                                    {{ $category->id == $data->parent_id ? 'selected' : '' }}>
-                                                    {{ $category->name }}
+                                            @foreach ($hierarchicalCategories as $category)
+                                                <option value="{{ $category['id'] }}"
+                                                    {{ old('parent_id', $data->parent_id) == $category['id'] ? 'selected' : '' }}>
+                                                    {{ $category['name'] }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -81,7 +81,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            @if ($category->image && !empty($category->image))
+                                            @if ($data->image && !empty($data->image))
                                                 <label for="" class="text-danger mt-3">*Only Choose When Update is
                                                     necessary</label>
                                                 <div class="container-fluid row image-upload-section">
@@ -96,7 +96,8 @@
                                                                 ]) }}"
                                                                 alt="Not Found">
                                                         </div>
-                                                        <input type="hidden" name="category_image" value='{{ $data->image }}'>
+                                                        <input type="hidden" name="category_image"
+                                                            value='{{ $data->image }}'>
                                                     </div>
                                                 </div>
                                             @endif
@@ -121,7 +122,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            @if ($category->banner && !empty($category->banner))
+                                            @if ($data->banner && !empty($data->banner))
                                                 <label for="" class="text-danger mt-3">*Only Choose When Update is
                                                     necessary</label>
                                                 <div class="container-fluid row image-upload-section">

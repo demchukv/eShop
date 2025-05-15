@@ -82,12 +82,14 @@
                             : getImageUrl($settings->logo);
                     $img = dynamic_image($img, 150);
                 @endphp
+
                 <!--Logo-->
                 <div class="logo col-5 col-sm-3 col-md-3 col-lg-2 align-self-center">
                     <a wire:navigate class="logoImg" href="{{ customUrl('home') }}"><img src="{{ $img }}"
                             alt="{{ $settings->site_title }}" title="{{ $settings->site_title }}" /></a>
                 </div>
                 <!--End Logo-->
+
                 <!--Menu-->
                 <div class="col-1 col-sm-1 col-md-1 col-lg-8 align-self-center d-menu-col">
                     <nav class="navigation" id="AccessibleNav">
@@ -100,6 +102,39 @@
                                     class="{{ request()->is('products*') ? 'active' : '' }}"
                                     href="{{ customUrl('products') }}">{{ labels('front_messages.products', 'Products') }}
                                 </a>
+                                <div class="megamenu">
+                                    <div class="container">
+                                        <div class="row">
+                                            @foreach ($categories as $index => $category)
+                                                @if ($index < 4)
+                                                    <!-- Обмежуємо до 4 колонок -->
+                                                    <div class="col-megamenu col-md-3">
+                                                        <h6 class="menu-title">{{ $category['name'] }}</h6>
+                                                        <ul class="list-unstyled">
+                                                            @foreach ($category['children'] as $subCategory)
+                                                                <li>
+                                                                    <a
+                                                                        href="{{ customUrl('products?category=' . $subCategory['slug']) }}">{{ $subCategory['name'] }}</a>
+                                                                    @if (!empty($subCategory['children']))
+                                                                        <ul class="list-unstyled">
+                                                                            @foreach ($subCategory['children'] as $childCategory)
+                                                                                <li>
+                                                                                    <a
+                                                                                        href="{{ customUrl('products?category=' . $childCategory['slug']) }}">{{ $childCategory['name'] }}</a>
+                                                                                </li>
+                                                                            @endforeach
+                                                                        </ul>
+                                                                    @endif
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </div>
+                                                @endif
+                                            @endforeach
+
+                                        </div>
+                                    </div>
+                                </div>
                             </li>
                             {{-- <li class="lvl1 parent megamenu"><a wire:navigate
                                     class="{{ request()->is('combo-products*') ? 'active' : '' }}"
@@ -123,12 +158,14 @@
                             </li>
                             <li class="lvl1 parent dropdown"><a wire:navigate
                                     class="{{ request()->is('blogs*') ? 'active' : '' }}"
-                                    href="{{ customUrl('blogs') }}">{{ labels('front_messages.blogs', 'Blogs') }} </a>
+                                    href="{{ customUrl('blogs') }}">{{ labels('front_messages.blogs', 'Blogs') }}
+                                </a>
                             </li>
                         </ul>
                     </nav>
                 </div>
                 <!--End Menu-->
+
                 <!--Right Icon-->
                 <div class="col-7 col-sm-9 col-md-9 col-lg-2 align-self-center icons-col text-right">
                     <!--Search-->
@@ -153,7 +190,8 @@
                                                     name="person-outline"
                                                     class="me-1"></ion-icon>{{ labels('front_messages.my_account', 'My Account') }}</a>
                                         </li>
-                                        <li><a href="{{ customUrl('orders') }}" wire:navigate><ion-icon name="cube-outline"
+                                        <li><a href="{{ customUrl('orders') }}" wire:navigate><ion-icon
+                                                    name="cube-outline"
                                                     class="me-1"></ion-icon>{{ labels('front_messages.my_orders', 'My Orders') }}</a>
                                         </li>
                                         <li><a href="{{ customUrl('my-account/wallet') }}" wire:navigate><ion-icon
@@ -381,7 +419,8 @@
                                                         <div class="zoom-scal zoom-scal-nopb brands-image">
                                                             <img class="blur-up lazyload w-100"
                                                                 data-src="{{ $store_img }}"
-                                                                src="{{ $store_img }}" alt="{{ $store->name }}"
+                                                                src="{{ $store_img }}"
+                                                                alt="{{ $store->name }}"
                                                                 title="{{ $store->name }}" />
                                                         </div>
                                                         <div

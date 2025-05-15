@@ -40,6 +40,11 @@ class Details extends Component
 
         foreach ($user_orders_transaction_data as &$user_order) {
             foreach ($user_order['order_items'] as &$user_order_item) {
+                // \Log::debug(json_encode($user_order_item['status']));
+                foreach ($user_order_item['status'] as $statuses) {
+                    $user_order_item['status_name'][$statuses[0]] = $statuses[1];
+                }
+                // \Log::debug(json_encode($user_order_item['status_name']));
                 $order_item_id = $user_order_item['id'];
                 $transaction = Transaction::where('order_item_id', $order_item_id)->first();
 

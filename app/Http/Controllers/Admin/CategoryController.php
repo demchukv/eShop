@@ -23,10 +23,74 @@ class CategoryController extends Controller
     public function index()
     {
         $store_id = getStoreId();
-        $categories = Category::where('status', 1)->where('store_id', $store_id)->orderBy('id', 'desc')->get();
+        $categories = Category::where('status', 1)->where('store_id', $store_id)->orderBy('row_order', 'asc')->get();
 
-        return view('admin.pages.forms.categories', ['categories' => $categories]);
+        // Будуємо ієрархічний список категорій
+        $hierarchicalCategories = $this->buildCategoryTree($categories);
+
+        return view('admin.pages.forms.categories', ['categories' => $categories, 'hierarchicalCategories' => $hierarchicalCategories]);
     }
+
+    // Функція для побудови ієрархічного дерева категорій
+    private function buildCategoryTree($categories, $parent_id = 0, $level = 0)
+    {
+        $result = [];
+        $filteredCategories = $categories->where('parent_id', $parent_id);
+
+        foreach ($filteredCategories as $category) {
+            $result[] = [
+                'id' => $category->id,
+                'name' => str_repeat('- ', $level) . $category->name,
+                'level' => $level
+            ];
+
+            // Рекурсивно отримуємо дочірні категорії
+            $children = $this->buildCategoryTree($categories, $category->id, $level + 1);
+            $result = array_merge($result, $children);
+        }
+
+        return $result;
+    }
+
+    // Допоміжна функція для генерації унікального slug
+    private function generateUniqueSlug($name, $parent_id, $store_id)
+    {
+        // Базовий slug із імені категорії
+        $baseSlug = Str::slug($name);
+        $slug = $baseSlug;
+        $counter = 1;
+
+        // Якщо є батьківська категорія, додаємо її назву до slug
+        if ($parent_id != 0) {
+            $parent = Category::find($parent_id);
+            if ($parent) {
+                $parentSlug = Str::slug($parent->name);
+                $slug = $parentSlug . '-' . $baseSlug;
+            }
+        }
+
+        // Перевіряємо унікальність slug
+        while (Category::where('slug', $slug)->where('store_id', $store_id)->exists()) {
+            if ($parent_id != 0 && $counter == 1) {
+                // Якщо перший дубль із батьківським префіксом, спробуємо без нього
+                $slug = $baseSlug;
+            } else {
+                // Додаємо числовий суфікс
+                $slug = ($parent_id != 0 && $counter == 1) ? $baseSlug : $baseSlug . '-' . $counter;
+                if ($parent_id != 0 && $counter > 1) {
+                    $parent = Category::find($parent_id);
+                    if ($parent) {
+                        $parentSlug = Str::slug($parent->name);
+                        $slug = $parentSlug . '-' . $baseSlug . '-' . $counter;
+                    }
+                }
+            }
+            $counter++;
+        }
+
+        return $slug;
+    }
+
 
     public function store(Request $request)
     {
@@ -39,15 +103,15 @@ class CategoryController extends Controller
         ]);
 
         // Check if the category name already exists in the same store
-        $validator->after(function ($validator) use ($request, $store_id) {
-            $existingCategory = Category::where('store_id', $store_id)
-                ->where('name', $request->name)
-                ->first();
+        // $validator->after(function ($validator) use ($request, $store_id) {
+        //     $existingCategory = Category::where('store_id', $store_id)
+        //         ->where('name', $request->name)
+        //         ->first();
 
-            if ($existingCategory) {
-                $validator->errors()->add('name', 'The category name already exists in this store.');
-            }
-        });
+        //     if ($existingCategory) {
+        //         $validator->errors()->add('name', 'The category name already exists in this store.');
+        //     }
+        // });
 
         if ($validator->fails()) {
             if ($request->ajax()) {
@@ -63,10 +127,11 @@ class CategoryController extends Controller
 
         $validatedData['banner'] = $request->banner;
         $validatedData['parent_id'] = ($request->input('parent_id') != null) ? $request->input('parent_id') : 0;
-        $validatedData['slug'] = generateSlug($validatedData['name']);
+        // $validatedData['slug'] = generateSlug($validatedData['name']);
         $validatedData['status'] = 1;
         $validatedData['store_id'] = $store_id;
         $validatedData['style'] = $request->filled('category_style') ? $request->category_style : '';
+        $validatedData['slug'] = $this->generateUniqueSlug($validatedData['name'], $validatedData['parent_id'], $store_id);
 
         Category::create($validatedData);
 
@@ -87,6 +152,9 @@ class CategoryController extends Controller
             ->where('id', '!=', $id)
             ->get();
 
+        // Будуємо ієрархічний список категорій
+        $hierarchicalCategories = $this->buildCategoryTree($categories);
+
         $data = Category::where('store_id', $store_id)
             ->find($id);
 
@@ -95,7 +163,8 @@ class CategoryController extends Controller
         } else {
             return view('admin.pages.forms.update_category', [
                 'data' => $data,
-                'categories' => $categories
+                'categories' => $categories,
+                'hierarchicalCategories' => $hierarchicalCategories
             ]);
         }
     }
@@ -118,6 +187,7 @@ class CategoryController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+
         // Find the category by the given ID
         $category = Category::find($data);
 
@@ -128,6 +198,7 @@ class CategoryController extends Controller
         $new_name = $request->name;
         $current_name = $category->name;
         $current_slug = $category->slug;
+        $parent_id = isset($request->parent_id) ? $request->parent_id : 0;
 
         // Check if the new name already exists (but not for the current category being updated)
         $existingCategory = Category::where('name', $new_name)
@@ -151,7 +222,8 @@ class CategoryController extends Controller
             'image' => $request->category_image,
             'banner' => $request->banner,
             'parent_id' => isset($request->parent_id) ? $request->parent_id : 0,
-            'slug' => generateSlug($new_name, 'categories', 'slug', $current_slug, $current_name),
+            // 'slug' => generateSlug($new_name, 'categories', 'slug', $current_slug, $current_name),
+            'slug' => $this->generateUniqueSlug($new_name, $parent_id, $category->store_id),
             'style' => $request->filled('category_style') ? $request->category_style : '',
             'status' => 1,
         ];
