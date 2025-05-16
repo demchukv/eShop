@@ -25,6 +25,7 @@
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/vendor/photoswipe.min.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/bootstrap-table.min.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('frontend/elegant/css/product-menu.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/theme.min.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/star-rating.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/elegant/css/star-rating.min.css') }}">
@@ -126,6 +127,7 @@
                 // await loadScript("{{ asset('frontend/elegant/js/star-rating.js') }}"); // Раніше
                 await loadScript("{{ asset('frontend/elegant/js/star-rating.min.js') }}"); // Раніше
                 await loadScript("{{ asset('frontend/elegant/js/custom.js') }}"); // Раніше
+                await loadScript("{{ asset('frontend/elegant/js/product-menu.js') }}"); // Раніше
                 await loadScript("{{ asset('frontend/elegant/js/firebase-app.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/firebase-firestore.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/bootstrap-table.min.js') }}");

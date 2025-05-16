@@ -1,0 +1,145 @@
+/* Product Menu Styles */
+.product-menu {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100vh;
+    background-color: var(--white-color);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    /* Вище оверлею */
+    border-radius: 0;
+    padding: 15px 0;
+    max-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+.product-menu.is-visible {
+    display: block;
+}
+
+.product-menu .container {
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.product-menu .menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.product-menu .menu-item {
+    position: relative;
+}
+
+.product-menu .menu-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+
+    color: var(--primary-color);
+}
+
+.product-menu .menu-title a {
+    color: var(--primary-color);
+    text-decoration: none;
+    display: block;
+    padding: 10px 20px;
+}
+
+.product-menu .menu-title a:hover {
+    color: var(--link-hover-color);
+    background-color: var(--bg-slider-green);
+}
+
+.product-menu .menu-list.level-1 {
+    display: block;
+    position: relative;
+    z-index: 1;
+}
+
+.product-menu .menu-list.level-2,
+.product-menu .menu-list.level-3 {
+    display: none;
+    position: fixed;
+    top: 0;
+    /* Вирівнювання з верхнім краєм екрану */
+    left: 250px;
+    /* Для level-2, праворуч від level-1 */
+    width: 250px;
+    min-height: 100vh;
+    /* Така ж висота, як level-1 */
+    background-color: var(--white-color);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 0;
+    padding: 15px 0;
+    max-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    z-index: 1002;
+    /* Вище level-1 */
+}
+
+.product-menu .menu-list.level-3 {
+    left: 500px;
+    /* Для level-3, праворуч від level-2 */
+    z-index: 1003;
+    /* Вище level-2 */
+}
+
+.product-menu .menu-item.level-1:hover>.menu-list.level-2,
+.product-menu .menu-item.level-2:hover>.menu-list.level-3 {
+    display: block;
+}
+
+.product-menu .menu-item.level-2 a,
+.product-menu .menu-item.level-3 a {
+    display: block;
+    padding: 10px 20px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.product-menu .menu-item.level-2 a:hover,
+.product-menu .menu-item.level-3 a:hover {
+    color: var(--link-hover-color);
+    background-color: var(--bg-slider-green);
+}
+
+/* Overlay */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    /* Нижче меню */
+}
+
+.overlay.is-visible {
+    display: block;
+}
+
+/* Category Menu Icon */
+.category-menu-icon {
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--primary-color);
+    transition: color 0.3s ease;
+}
+
+.category-menu-icon:hover {
+    color: var(--link-hover-color);
+}

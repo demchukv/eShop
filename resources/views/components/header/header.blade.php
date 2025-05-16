@@ -84,57 +84,35 @@
                 @endphp
 
                 <!--Logo-->
-                <div class="logo col-5 col-sm-3 col-md-3 col-lg-2 align-self-center">
-                    <a wire:navigate class="logoImg" href="{{ customUrl('home') }}"><img src="{{ $img }}"
-                            alt="{{ $settings->site_title }}" title="{{ $settings->site_title }}" /></a>
+                {{-- <div class="logo col-5 col-sm-3 col-md-3 col-lg-2 align-self-center"> --}}
+                <div class="col-1 col-sm-1 col-md-1 col-lg-2 align-self-center">
+                    <div class="logo">
+                        <a wire:navigate class="logoImg" href="{{ customUrl('home') }}"><img src="{{ $img }}"
+                                alt="{{ $settings->site_title }}" title="{{ $settings->site_title }}" /></a>
+                    </div>
                 </div>
                 <!--End Logo-->
 
+                <!--Category Menu Icon-->
+                <div class="col-1 col-sm-1 col-md-1 col-lg-1 align-self-center category-toggle">
+                    <ion-icon name="menu" class="category-menu-icon" id="categoryMenuToggle"
+                        title="Open Categories"></ion-icon>
+                </div>
+                <!--End Category Menu Icon-->
+
                 <!--Menu-->
-                <div class="col-1 col-sm-1 col-md-1 col-lg-8 align-self-center d-menu-col">
+                <div class="col-1 col-sm-1 col-md-1 col-lg-7 align-self-center d-menu-col">
+                    {{-- <div class="col-1 col-sm-1 col-md-1 col-lg-8 align-self-center d-menu-col"> --}}
                     <nav class="navigation" id="AccessibleNav">
                         <ul id="siteNav" class="site-nav medium center">
                             <li class="lvl1 parent dropdown"><a wire:navigate
                                     class="{{ request()->is('/') ? 'active' : '' }}"
                                     href="{{ customUrl('home') }}">{{ labels('front_messages.home', 'Home') }}</a>
                             </li>
-                            <li class="lvl1 parent megamenu"><a wire:navigate
-                                    class="{{ request()->is('products*') ? 'active' : '' }}"
+                            <li class="lvl1 parent ">
+                                <a wire:navigate class="{{ request()->is('products*') ? 'active' : '' }}"
                                     href="{{ customUrl('products') }}">{{ labels('front_messages.products', 'Products') }}
                                 </a>
-                                <div class="megamenu">
-                                    <div class="container">
-                                        <div class="row">
-                                            @foreach ($categories as $index => $category)
-                                                @if ($index < 4)
-                                                    <!-- Обмежуємо до 4 колонок -->
-                                                    <div class="col-megamenu col-md-3">
-                                                        <h6 class="menu-title">{{ $category['name'] }}</h6>
-                                                        <ul class="list-unstyled">
-                                                            @foreach ($category['children'] as $subCategory)
-                                                                <li>
-                                                                    <a
-                                                                        href="{{ customUrl('products?category=' . $subCategory['slug']) }}">{{ $subCategory['name'] }}</a>
-                                                                    @if (!empty($subCategory['children']))
-                                                                        <ul class="list-unstyled">
-                                                                            @foreach ($subCategory['children'] as $childCategory)
-                                                                                <li>
-                                                                                    <a
-                                                                                        href="{{ customUrl('products?category=' . $childCategory['slug']) }}">{{ $childCategory['name'] }}</a>
-                                                                                </li>
-                                                                            @endforeach
-                                                                        </ul>
-                                                                    @endif
-                                                                </li>
-                                                            @endforeach
-                                                        </ul>
-                                                    </div>
-                                                @endif
-                                            @endforeach
-
-                                        </div>
-                                    </div>
-                                </div>
                             </li>
                             {{-- <li class="lvl1 parent megamenu"><a wire:navigate
                                     class="{{ request()->is('combo-products*') ? 'active' : '' }}"
@@ -165,6 +143,42 @@
                     </nav>
                 </div>
                 <!--End Menu-->
+
+                <!--Product Menu-->
+                <div class="product-menu" id="productMenu">
+                    <div class="container">
+                        <ul class="menu-list level-1">
+                            @foreach ($categories as $category)
+                                <li class="menu-item level-1">
+                                    <h6 class="menu-title"><a
+                                            href="{{ customUrl('categories/' . $category['slug'] . '/products') }}">{{ html_entity_decode($category['name']) }}</a>
+                                    </h6>
+                                    @if (!empty($category['children']))
+                                        <ul class="menu-list level-2">
+                                            @foreach ($category['children'] as $subCategory)
+                                                <li class="menu-item level-2">
+                                                    <a
+                                                        href="{{ customUrl('categories/' . $subCategory['slug'] . '/products') }}">{{ html_entity_decode($subCategory['name']) }}</a>
+                                                    @if (!empty($subCategory['children']))
+                                                        <ul class="menu-list level-3">
+                                                            @foreach ($subCategory['children'] as $childCategory)
+                                                                <li class="menu-item level-3">
+                                                                    <a
+                                                                        href="{{ customUrl('categories/' . $childCategory['slug'] . '/products') }}">{{ html_entity_decode($childCategory['name']) }}</a>
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    @endif
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+                <!--End Product Menu-->
 
                 <!--Right Icon-->
                 <div class="col-7 col-sm-9 col-md-9 col-lg-2 align-self-center icons-col text-right">
