@@ -81,6 +81,8 @@ class PaymentsController extends Controller
                 'currency_code' => $request['currency_code'] ?? "",
                 'promo_code' => $request['promo_code'] ?? "",
                 'email' => $request['email'] ?? "",
+                'type' => $request['type'] ?? "",
+                'order_id' => $request['order_id'] ?? "",
             ];
         }
         $data['user_id'] = Auth::user()->id ?? 0;
@@ -137,11 +139,20 @@ class PaymentsController extends Controller
                         return redirect(url('payments?response=wallet_success'));
                     }
                     return redirect(url('payments?response=wallet_failed'));
-                    if ($result['error'] == false) {
-                        return redirect(url('payments?response=wallet_success'));
-                    }
-                    return redirect(url('payments?response=wallet_failed'));
                 }
+
+                // Pay for existing order after set delivery charge
+                if (isset($res['data']['metadata']['type']) && $res['data']['metadata']['type'] == "pay_for_order") {
+                    $orderController = app(OrderController::class);
+                    $result = $orderController->pay_for_order($newRequest, $transactionController);
+                    $result = json_decode($result->getContent(), true);
+                    if ($result['error'] == false) {
+                        return redirect(url('payments?response=order_success'));
+                    }
+                    return redirect(url('payments?response=order_failed'));
+                }
+
+                /** default place new order */
                 $cartController = app(CartController::class);
                 $result = $cartController->place_order($newRequest, $transactionController);
                 $result = json_decode($result->getContent(), true);

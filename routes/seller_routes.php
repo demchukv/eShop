@@ -289,6 +289,7 @@ Route::group(
         Route::post('seller/orders/generate_invoice', [OrderController::class, 'generate_invoice'])->name('seller.orders.generate_invoice');
         Route::post('seller/orders/getSellerOrderTrackingList', [OrderController::class, 'getSellerOrderTrackingList']);
         Route::post('seller/orders/update_shiprocket_order_status', [OrderController::class, 'update_shiprocket_order_status']);
+        Route::post('seller/orders/set_shipping_amount', [OrderController::class, 'set_shipping_amount'])->name('seller.orders.set_shipping_amount');
 
 
         Route::get('seller/orders/list', [OrderController::class, 'list'])->name('seller.orders.list');

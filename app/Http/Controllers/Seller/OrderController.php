@@ -8,6 +8,7 @@ use App\Models\DigitalOrdersMail;
 use App\Models\Order;
 use App\Models\OrderItems;
 use App\Models\OrderTracking;
+use App\Models\OrderCharges;
 use App\Models\Parcel;
 use App\Models\Parcelitem;
 use App\Models\Seller;
@@ -259,8 +260,8 @@ class OrderController extends Controller
         }
 
         if ($seller_id) {
-            $countQuery->where('oi.seller_id', $seller_id)
-                ->where('oi.active_status', '!=', 'awaiting');
+            $countQuery->where('oi.seller_id', $seller_id);
+            // ->where('oi.active_status', '!=', 'awaiting');
         }
 
         if ($userId) {
@@ -299,6 +300,9 @@ class OrderController extends Controller
             ->leftJoin('product_variants as v', 'oi.product_variant_id', '=', 'v.id')
             ->leftJoin('products as p', 'v.product_id', '=', 'p.id')
             ->leftJoin('transactions as t', 't.order_item_id', '=', 'oi.id')
+            // ->leftJoin('transactions as t', function ($join) {
+            //     $join->where('FIND_IN_SET(o.id, t.order_id)');
+            // })
             ->leftJoin('users as un', 'o.user_id', '=', 'un.id')
             ->select(
                 'o.id as order_id',
@@ -338,8 +342,8 @@ class OrderController extends Controller
         }
 
         if ($seller_id) {
-            $searchQuery->where('oi.seller_id', $seller_id)
-                ->where('oi.active_status', '!=', 'awaiting');
+            $searchQuery->where('oi.seller_id', $seller_id);
+            // ->where('oi.active_status', '!=', 'awaiting');
         }
 
         if ($userId) {
@@ -506,6 +510,7 @@ class OrderController extends Controller
         if ($res == null || empty($res)) {
             return view('admin.pages.views.no_data_found');
         } else {
+
             $delivery_res = DB::table('users as u')
                 ->select('u.*', 'c.name as city_name')
                 ->leftJoin('cities as c', 'u.city', '=', 'c.id')
@@ -626,7 +631,7 @@ class OrderController extends Controller
             } else {
                 $couriersList = [];
             }
-
+            // dd($order_detls);
             return view('seller.pages.forms.edit_orders', compact('delivery_res', 'store_id', 'order_detls', 'mobile_data', 'bank_transfer', 'items', 'settings', 'shipping_method', 'sellers', 'currency', 'order_tracking', 'is_customer_privacy_permission', 'couriersList'));
         }
     }
@@ -2023,6 +2028,44 @@ class OrderController extends Controller
             'message' => $res['message'],
             'data' => $res['data'] ?? []
         ];
+
+        return response()->json($response);
+    }
+
+    public function set_shipping_amount(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required',
+            'shipping_amount' => 'required',
+        ]);
+
+        // Validate the request
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+
+            if ($request->ajax()) {
+                return response()->json(['errors' => $errors->all()], 422);
+            }
+            return redirect()->back()->withErrors($errors)->withInput();
+        }
+        $order_id = $request->order_id ?? "";
+        $shipping_amount = $request->shipping_amount ?? "";
+        $res = Order::where('id', $order_id)->update(['delivery_charge' => $shipping_amount, 'set_delivery_charge' => 1]);
+        $res1 = OrderCharges::where('order_id', $order_id)->update(['delivery_charge' => $shipping_amount]);
+
+        if ($res && $res1) {
+            $response = [
+                'error' => false,
+                'message' => 'Shipping amount updated successfully',
+                'data' => $res['data'] ?? []
+            ];
+        } else {
+            $response = [
+                'error' => true,
+                'message' => 'Error while updating shipping amount',
+                'data' => $res['data'] ?? []
+            ];
+        }
 
         return response()->json($response);
     }

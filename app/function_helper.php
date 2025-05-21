@@ -3050,6 +3050,7 @@ function removeFromCart($data)
     }
 }
 
+
 function getCartTotal($user_id, $product_variant_id = false, $is_saved_for_later = 0, $address_id = '', $store_id = '')
 {
     $query = [];
@@ -3239,7 +3240,7 @@ function getCartTotal($user_id, $product_variant_id = false, $is_saved_for_later
 
         $shipping_settings = getSettings('shipping_method', true, true);
         $shipping_settings = json_decode($shipping_settings, true);
-
+        // dd($shipping_settings);
         $delivery_charge = '';
 
         if (!empty($address_id)) {
@@ -3262,14 +3263,26 @@ function getCartTotal($user_id, $product_variant_id = false, $is_saved_for_later
             }
 
             $tmpRow['delivery_by'] = $tmpRow['is_deliverable'] ? "local" : ((isset($shipping_settings['shiprocket_shipping_method']) && $shipping_settings['shiprocket_shipping_method'] == 1) ? 'standard_shipping' : '');
-            if (isset($tmpRow['delivery_by']) && $tmpRow['delivery_by'] === 'standard_shipping') {
+            if ($tmpRow['is_deliverable'] == true) {
+                $tmpRow['delivery_by'] = "local";
+            } elseif (isset($shipping_settings['shiprocket_shipping_method']) && $shipping_settings['shiprocket_shipping_method'] == 1) {
+                $tmpRow['delivery_by'] = "standard_shipping";
+            } elseif (isset($shipping_settings['couriers_list_method']) && $shipping_settings['couriers_list_method'] == 1) {
+                $tmpRow['delivery_by'] = "contractual_shipping";
+            } else {
+                $tmpRow['delivery_by'] = "";
+            }
+            // dd($tmpRow);
 
+            if (isset($tmpRow['delivery_by']) && $tmpRow['delivery_by'] === 'standard_shipping') {
                 $parcels = makeShippingParcels($query);
                 $parcels_details = checkParcelsDeliverability($parcels, $pincode);
                 $delivery_charge = $parcels_details['delivery_charge_without_cod'];
+            } elseif (isset($tmpRow['delivery_by']) && $tmpRow['delivery_by'] === 'contractual_shipping') {
+                $delivery_charge = 0;
+                // dd($delivery_charge);
             } else {
                 $product_availability = checkCartProductsDeliverable($user_id, '', '', $store_id);
-
                 for ($i = 0; $i < count($query); $i++) {
                     $cart[$i]['product_qty'] = $product_availability[$i]['product_qty'];
                     $cart[$i]['minimum_free_delivery_order_qty'] = $product_availability[$i]['minimum_free_delivery_order_qty'];
@@ -3281,16 +3294,8 @@ function getCartTotal($user_id, $product_variant_id = false, $is_saved_for_later
                         $local_shipping_cart[] = $cart[$i];
                     }
                 }
-
-
-
                 $delivery_charge = getDeliveryCharge($address_id, $total, $local_shipping_cart, $store_id);
-
-
                 if (isset($settings[0]->delivery_charge_type) && !empty($settings[0]->delivery_charge_type) && $settings[0]->delivery_charge_type == 'product_wise_delivery_charge') {
-
-
-
                     $deliveryCharge = 0;
                     foreach ($delivery_charge as $row) {
                         $deliveryCharge += isset($row['delivery_charge']) && !empty($row['delivery_charge']) ? $row['delivery_charge'] : 0;
@@ -3319,6 +3324,7 @@ function getCartTotal($user_id, $product_variant_id = false, $is_saved_for_later
         $query['total_arr'] = $total;
         $query['currency_total_arr_data'] = getPriceCurrency($query['total_arr']);
         $query['variant_id'] = $variant_id;
+
         $query['delivery_charge'] = $delivery_charge;
         $query['currency_delivery_charge_data'] = getPriceCurrency($query['delivery_charge']);
         $query['overall_amount'] = strval($overall_amt);
@@ -3328,6 +3334,7 @@ function getCartTotal($user_id, $product_variant_id = false, $is_saved_for_later
         $query['download_allowed'] = $download_allowed;
         $query['cart_items'] = $items;
     }
+    // dd($query);
     return $query;
 }
 
@@ -3385,6 +3392,12 @@ function getDeliveryCharge($address_id, $total = 0, $cartData = [], $store_id = 
                 }
 
                 return $d_charge;
+            } else if (isset($settings[0]->delivery_charge_type) && !empty($settings[0]->delivery_charge_type) && $settings[0]->delivery_charge_type == 'contractual_delivery_charge') {
+                return [
+                    'delivery_charge' => 0,
+                    'delivery_type' => 'contractual',
+                    'status' => 'awaiting'
+                ];
             }
         }
     }
@@ -3530,12 +3543,14 @@ function placeOrder($data, $for_web = '')
     $quantity = explode(',', $data['quantity']);
 
     $check_current_stock_status = validateStock($product_variant_id, $quantity, $cart_product_type);
-
+    // dd($check_current_stock_status);
     if (isset($check_current_stock_status['error']) && $check_current_stock_status['error'] == true) {
         return json_encode($check_current_stock_status);
     }
-    $total = 0;
+
     $promo_code_discount = 0;
+
+    $order_ids = [];
 
 
 
@@ -3592,6 +3607,7 @@ function placeOrder($data, $for_web = '')
 
     //merge both collection
     $product_variant = $product_variant->merge($combo_product_variant);
+    // dd($product_variant);
 
     if (!empty($product_variant)) {
 
@@ -3599,6 +3615,7 @@ function placeOrder($data, $for_web = '')
         $system_settings = json_decode($system_settings, true);
 
         $seller_ids = $product_variant->pluck('seller_id')->unique()->values()->all();
+        // dd($seller_ids);
 
         if ($system_settings['single_seller_order_system'] == '1') {
             if (isset($seller_ids) && count($seller_ids) > 1) {
@@ -3610,427 +3627,450 @@ function placeOrder($data, $for_web = '')
 
         $delivery_charge = isset($data['delivery_charge']) && !empty($data['delivery_charge']) ? $data['delivery_charge'] : 0;
         $discount = isset($data['discount']) && !empty($data['discount']) ? $data['discount'] : 0;
-        $gross_total = 0;
-        $cart_data = [];
+
+        // start split order between sellers
+
+        foreach ($seller_ids as $order_seller_id) {
 
 
-        for ($i = 0; $i < count($product_variant); $i++) {
-
-            $pv_price[$i] = ($product_variant[$i]['special_price'] > 0 && $product_variant[$i]['special_price'] != null) ? $product_variant[$i]['special_price'] : $product_variant[$i]['price'];
-            $tax_ids[$i] = (isset($product_variant[$i]['tax_ids']) && $product_variant[$i]['tax_ids'] != null) ? $product_variant[$i]['tax_ids'] : '0';
-            $tax_percentage[$i] = (isset($product_variant[$i]['tax_percentage']) && $product_variant[$i]['tax_percentage'] != null) ? $product_variant[$i]['tax_percentage'] : '0';
-            $tax_percntg[$i] = explode(',', $tax_percentage[$i]);
-            $total_tax = array_sum($tax_percntg[$i]);
-            if ((isset($product_variant[$i]['is_prices_inclusive_tax']) && $product_variant[$i]['is_prices_inclusive_tax'] == 0)) {
-                $tax_amount[$i] = $pv_price[$i] * ($total_tax / 100);
-                $pv_price[$i] = $pv_price[$i] + $tax_amount[$i];
-            }
-
-            $subtotal[$i] = ($pv_price[$i]) * $quantity[$i];
-            $pro_name[$i] = $product_variant[$i]['product_name'];
-
-            if ($product_variant[$i]['cart_product_type'] == 'regular') {
-                $variant_info = getVariantsValuesById($product_variant[$i]['id']);
-            } else {
-                $variant_info = [];
-            }
-
-            $product_variant[$i]['variant_name'] = (isset($variant_info[0]['variant_values']) && !empty($variant_info[0]['variant_values'])) ? $variant_info[0]['variant_values'] : "";
+            $total = 0;
+            $gross_total = 0;
+            $cart_data = [];
 
 
-            if ($tax_percentage[$i] != NUll && $tax_percentage[$i] > 0) {
-                $tax_amount[$i] = round($subtotal[$i] * $total_tax / 100, 2);
-            } else {
-                $tax_amount[$i] = 0;
-                $tax_percentage[$i] = 0;
-            }
-            $gross_total += $subtotal[$i];
-            $total += $subtotal[$i];
-            $total = round($total, 2);
-            $gross_total = round($gross_total, 2);
+            for ($i = 0; $i < count($product_variant); $i++) {
+                // dd($product_variant[$i]['seller_id']);
+                if ($product_variant[$i]['seller_id'] == $order_seller_id) {
+                    // dd($product_variant[$i]);
+                    $pv_price[$i] = ($product_variant[$i]['special_price'] > 0 && $product_variant[$i]['special_price'] != null) ? $product_variant[$i]['special_price'] : $product_variant[$i]['price'];
+                    $tax_ids[$i] = (isset($product_variant[$i]['tax_ids']) && $product_variant[$i]['tax_ids'] != null) ? $product_variant[$i]['tax_ids'] : '0';
+                    $tax_percentage[$i] = (isset($product_variant[$i]['tax_percentage']) && $product_variant[$i]['tax_percentage'] != null) ? $product_variant[$i]['tax_percentage'] : '0';
+                    $tax_percntg[$i] = explode(',', $tax_percentage[$i]);
+                    $total_tax = array_sum($tax_percntg[$i]);
+                    if ((isset($product_variant[$i]['is_prices_inclusive_tax']) && $product_variant[$i]['is_prices_inclusive_tax'] == 0)) {
+                        $tax_amount[$i] = $pv_price[$i] * ($total_tax / 100);
+                        $pv_price[$i] = $pv_price[$i] + $tax_amount[$i];
+                    }
 
-            array_push(
-                $cart_data,
-                array(
-                    'name' => $pro_name[$i],
-                    'tax_amount' => $tax_amount[$i],
-                    'qty' => $quantity[$i],
-                    'sub_total' => $subtotal[$i],
-                )
-            );
-        }
+                    $subtotal[$i] = ($pv_price[$i]) * $quantity[$i];
+                    $pro_name[$i] = $product_variant[$i]['product_name'];
 
+                    if ($product_variant[$i]['cart_product_type'] == 'regular') {
+                        $variant_info = getVariantsValuesById($product_variant[$i]['id']);
+                    } else {
+                        $variant_info = [];
+                    }
 
-        $settings = getSettings('system_settings', true, true);
-        $settings = json_decode($settings, true);
-        $app_name = isset($settings['app_name']) && !empty($settings['app_name']) ? $settings['app_name'] : '';
-
-        $currency = isset($settings['currency']) && !empty($settings['currency']) ? $settings['currency'] : '';
-        if (isset($settings['minimum_cart_amount']) && !empty($settings['minimum_cart_amount'])) {
-            $carttotal = $total + $delivery_charge;
-            if ($carttotal < $settings['minimum_cart_amount']) {
-                $response = [
-                    'error' => true,
-                    'message' => 'Total amount should be greater or equal to ' . $currency . $settings['minimum_cart_amount'] . ' total is ' . $currency . $carttotal,
-                    'code' => 102,
-                ];
-                return $response;
-            }
-        }
+                    $product_variant[$i]['variant_name'] = (isset($variant_info[0]['variant_values']) && !empty($variant_info[0]['variant_values'])) ? $variant_info[0]['variant_values'] : "";
 
 
-        // add promocode calculation here
-        if (isset($data['promo_code_id']) && !empty($data['promo_code_id'])) {
-            $data['promo_code'] = fetchDetails('promo_codes', ['id' => $data['promo_code_id']], 'promo_code')[0]->promo_code;
-            // dd($total);
-            $promo_code = validatePromoCode($data['promo_code_id'], $data['user_id'], $total, 1);
-            $promo_code = $promo_code->original;
-            if ($promo_code['error'] == false) {
+                    if ($tax_percentage[$i] != NUll && $tax_percentage[$i] > 0) {
+                        $tax_amount[$i] = round($subtotal[$i] * $total_tax / 100, 2);
+                    } else {
+                        $tax_amount[$i] = 0;
+                        $tax_percentage[$i] = 0;
+                    }
+                    $gross_total += $subtotal[$i];
+                    $total += $subtotal[$i];
+                    $total = round($total, 2);
+                    $gross_total = round($gross_total, 2);
 
-                if ($promo_code['data'][0]->discount_type == 'percentage') {
-                    $promo_code_discount = (isset($promo_code['data'][0]->is_cashback) && $promo_code['data'][0]->is_cashback == 0) ? floatval($total * $promo_code['data'][0]->discount / 100) : 0;
-                } else {
-                    $promo_code_discount = (isset($promo_code['data'][0]->is_cashback) && $promo_code['data'][0]->is_cashback == 0) ? $promo_code['data'][0]->discount : 0;
+                    array_push(
+                        $cart_data,
+                        array(
+                            'name' => $pro_name[$i],
+                            'tax_amount' => $tax_amount[$i],
+                            'qty' => $quantity[$i],
+                            'sub_total' => $subtotal[$i],
+                            'product_variant_id' => $product_variant[$i]['id'],
+                        )
+                    );
                 }
-                if ($promo_code_discount <= $promo_code['data'][0]->max_discount_amount) {
-                    $total = (isset($promo_code['data'][0]->is_cashback) && $promo_code['data'][0]->is_cashback == 0) ? floatval($total) - $promo_code_discount : floatval($total);
+            }
+            // dd($cart_data);
+
+
+
+            $settings = getSettings('system_settings', true, true);
+            $settings = json_decode($settings, true);
+            $app_name = isset($settings['app_name']) && !empty($settings['app_name']) ? $settings['app_name'] : '';
+
+            $currency = isset($settings['currency']) && !empty($settings['currency']) ? $settings['currency'] : '';
+            if (isset($settings['minimum_cart_amount']) && !empty($settings['minimum_cart_amount'])) {
+                $carttotal = $total + $delivery_charge;
+                if ($carttotal < $settings['minimum_cart_amount']) {
+                    $response = [
+                        'error' => true,
+                        'message' => 'Total amount should be greater or equal to ' . $currency . $settings['minimum_cart_amount'] . ' total is ' . $currency . $carttotal,
+                        'code' => 102,
+                    ];
+                    return $response;
+                }
+            }
+
+
+            // add promocode calculation here
+            if (isset($data['promo_code_id']) && !empty($data['promo_code_id'])) {
+                $data['promo_code'] = fetchDetails('promo_codes', ['id' => $data['promo_code_id']], 'promo_code')[0]->promo_code;
+                // dd($total);
+                $promo_code = validatePromoCode($data['promo_code_id'], $data['user_id'], $total, 1);
+                $promo_code = $promo_code->original;
+                if ($promo_code['error'] == false) {
+
+                    if ($promo_code['data'][0]->discount_type == 'percentage') {
+                        $promo_code_discount = (isset($promo_code['data'][0]->is_cashback) && $promo_code['data'][0]->is_cashback == 0) ? floatval($total * $promo_code['data'][0]->discount / 100) : 0;
+                    } else {
+                        $promo_code_discount = (isset($promo_code['data'][0]->is_cashback) && $promo_code['data'][0]->is_cashback == 0) ? $promo_code['data'][0]->discount : 0;
+                    }
+                    if ($promo_code_discount <= $promo_code['data'][0]->max_discount_amount) {
+                        $total = (isset($promo_code['data'][0]->is_cashback) && $promo_code['data'][0]->is_cashback == 0) ? floatval($total) - $promo_code_discount : floatval($total);
+                    } else {
+                        $total = (isset($promo_code['data'][0]->is_cashback) && $promo_code['data'][0]->is_cashback == 0) ? floatval($total) - $promo_code['data'][0]->max_discount_amount : floatval($total);
+                        $promo_code_discount = $promo_code['data'][0]->max_discount_amount;
+                    }
                 } else {
-                    $total = (isset($promo_code['data'][0]->is_cashback) && $promo_code['data'][0]->is_cashback == 0) ? floatval($total) - $promo_code['data'][0]->max_discount_amount : floatval($total);
-                    $promo_code_discount = $promo_code['data'][0]->max_discount_amount;
+                    return $promo_code;
+                }
+            }
+            // ---------------------------------------------------------
+
+            //add create parcel seller wise code here
+
+            $parcels = array();
+
+            for ($i = 0; $i < count($product_variant_id); $i++) {
+                if ($product_variant[$i]['seller_id'] == $order_seller_id) {
+                    $product_variant[$i]['qty'] = $quantity[$i];
+                }
+            }
+
+            foreach ($product_variant as $product) {
+                if ($product['seller_id'] == $order_seller_id) {
+                    $prctg = (isset($product['tax_percentage']) && $product['tax_percentage'] != null) ? $product['tax_percentage'] : '0';
+                    if ((isset($product['is_prices_inclusive_tax']) && $product['is_prices_inclusive_tax'] == 0)) {
+                        $tax_percentage = explode(',', $prctg);
+                        $total_tax = array_sum($tax_percentage);
+
+                        $price_tax_amount = $product['price'] * ($total_tax / 100);
+                        $special_price_tax_amount = $product['special_price'] * ($total_tax / 100);
+                    } else {
+                        $price_tax_amount = 0;
+                        $special_price_tax_amount = 0;
+                    }
+
+                    if (floatval($product['special_price']) > 0) {
+                        $product['total'] = floatval($product['special_price'] + $special_price_tax_amount) * $product['qty'];
+                    } else {
+                        $product['total'] = floatval($product['price'] + $price_tax_amount) * $product['qty'];
+                    }
+                    if (isset($parcels[$product['seller_id']]['variant_id']) && !empty($product['id'])) {
+                        $parcels[$product['seller_id']]['variant_id'] .= $product['id'] . ',';
+                    } elseif (!empty($product['id'])) {
+                        $parcels[$product['seller_id']]['variant_id'] = $product['id'] . ',';
+                    }
+                    if (isset($parcels[$product['seller_id']]['total']) && !empty($product['total'])) {
+                        $parcels[$product['seller_id']]['total'] += $product['total'];
+                    } elseif (!empty($product['total'])) {
+                        $parcels[$product['seller_id']]['total'] = $product['total'];
+                    }
+                }
+            }
+            $parcel_sub_total = 0.0;
+
+            foreach ($parcels as $seller_id => $parcel) {
+                $parcel_sub_total += $parcel['total'];
+            }
+            // ---------------------------------------------------------
+
+            $final_total = $total + intval($delivery_charge) - $discount;
+            $final_total = round($final_total, 2);
+
+            $total_payable = $final_total;
+
+            $wallet_txn_id = null;
+            if ($data['is_wallet_used'] == '1' && $data['wallet_balance_used'] <= $final_total) {
+
+                $wallet_balance = updateWalletBalance('debit', $data['user_id'], $data['wallet_balance_used'], "Used against Order Placement");
+                if ($wallet_balance['error'] == false) {
+                    $total_payable -= $data['wallet_balance_used'];
+                    $Wallet_used = true;
+                    $wallet_txn_id = $wallet_balance['data']['txn_id'];
+                } else {
+                    $response['error'] = true;
+                    $response['message'] = $wallet_balance['error_message'];
+                    return $response;
                 }
             } else {
-                return $promo_code;
-            }
-        }
-        // ---------------------------------------------------------
-
-        //add create parcel seller wise code here
-
-        $parcels = array();
-
-        for ($i = 0; $i < count($product_variant_id); $i++) {
-            $product_variant[$i]['qty'] = $quantity[$i];
-        }
-
-        foreach ($product_variant as $product) {
-
-            $prctg = (isset($product['tax_percentage']) && $product['tax_percentage'] != null) ? $product['tax_percentage'] : '0';
-            if ((isset($product['is_prices_inclusive_tax']) && $product['is_prices_inclusive_tax'] == 0)) {
-                $tax_percentage = explode(',', $prctg);
-                $total_tax = array_sum($tax_percentage);
-
-                $price_tax_amount = $product['price'] * ($total_tax / 100);
-                $special_price_tax_amount = $product['special_price'] * ($total_tax / 100);
-            } else {
-                $price_tax_amount = 0;
-                $special_price_tax_amount = 0;
+                if ($data['is_wallet_used'] == 1) {
+                    $response['error'] = true;
+                    $response['message'] = 'Wallet Balance should not exceed the total amount';
+                    return $response;
+                }
             }
 
-            if (floatval($product['special_price']) > 0) {
-                $product['total'] = floatval($product['special_price'] + $special_price_tax_amount) * $product['qty'];
-            } else {
-                $product['total'] = floatval($product['price'] + $price_tax_amount) * $product['qty'];
+
+            $status = (isset($data['payment_method'])) && (strtolower($data['payment_method']) == 'cod' || $data['payment_method'] == 'paystack' || $data['payment_method'] == 'stripe' || $data['payment_method'] == 'razorpay') ? 'received' : 'awaiting';
+            if (isset($data['wallet_balance_used']) && $data['wallet_balance_used'] == $final_total) {
+                $status = 'received';
             }
-            if (isset($parcels[$product['seller_id']]['variant_id']) && !empty($product['id'])) {
-                $parcels[$product['seller_id']]['variant_id'] .= $product['id'] . ',';
-            } elseif (!empty($product['id'])) {
-                $parcels[$product['seller_id']]['variant_id'] = $product['id'] . ',';
-            }
-            if (isset($parcels[$product['seller_id']]['total']) && !empty($product['total'])) {
-                $parcels[$product['seller_id']]['total'] += $product['total'];
-            } elseif (!empty($product['total'])) {
-                $parcels[$product['seller_id']]['total'] = $product['total'];
-            }
-        }
-        $parcel_sub_total = 0.0;
-
-        foreach ($parcels as $seller_id => $parcel) {
-            $parcel_sub_total += $parcel['total'];
-        }
-        // ---------------------------------------------------------
-
-        $final_total = $total + intval($delivery_charge) - $discount;
-        $final_total = round($final_total, 2);
-
-        $total_payable = $final_total;
-
-        $wallet_txn_id = null;
-        if ($data['is_wallet_used'] == '1' && $data['wallet_balance_used'] <= $final_total) {
-
-            $wallet_balance = updateWalletBalance('debit', $data['user_id'], $data['wallet_balance_used'], "Used against Order Placement");
-            if ($wallet_balance['error'] == false) {
-                $total_payable -= $data['wallet_balance_used'];
-                $Wallet_used = true;
-                $wallet_txn_id = $wallet_balance['data']['txn_id'];
-            } else {
-                $response['error'] = true;
-                $response['message'] = $wallet_balance['error_message'];
-                return $response;
-            }
-        } else {
-            if ($data['is_wallet_used'] == 1) {
-                $response['error'] = true;
-                $response['message'] = 'Wallet Balance should not exceed the total amount';
-                return $response;
-            }
-        }
-
-
-        $status = (isset($data['payment_method'])) && (strtolower($data['payment_method']) == 'cod' || $data['payment_method'] == 'paystack' || $data['payment_method'] == 'stripe' || $data['payment_method'] == 'razorpay') ? 'received' : 'awaiting';
-        if (isset($data['wallet_balance_used']) && $data['wallet_balance_used'] == $final_total) {
-            $status = 'received';
-        }
-        $order_payment_currency_data = fetchDetails('currencies', ['code' => $data['order_payment_currency_code']], ['id', 'exchange_rate']);
-        $base_currency = getDefaultCurrency()->code;
-        $order_data = [
-            'user_id' => $data['user_id'],
-            'mobile' => (isset($data['mobile']) && !empty($data['mobile']) && $data['mobile'] != '' && $data['mobile'] != 'NULL') ? $data['mobile'] : '',
-            'total' => $gross_total,
-            'promo_discount' => (isset($promo_code_discount) && $promo_code_discount != NULL) ? $promo_code_discount : '0',
-            'total_payable' => $total_payable,
-            'delivery_charge' => intval($delivery_charge),
-            'is_delivery_charge_returnable' => isset($data['is_delivery_charge_returnable']) ? $data['is_delivery_charge_returnable'] : 0,
-            'wallet_balance' => (isset($Wallet_used) && $Wallet_used == true) ? $data['wallet_balance_used'] : '0',
-            'final_total' => $final_total,
-            'discount' => $discount,
-            'payment_method' => $data['payment_method'] ?? '',
-            'promo_code_id' => (isset($data['promo_code_id'])) ? $data['promo_code_id'] : ' ',
-            'email' => isset($data['email']) ? $data['email'] : ' ',
-            'is_pos_order' => isset($data['is_pos_order']) ? $data['is_pos_order'] : 0,
-            'is_shiprocket_order' => isset($data['delivery_type']) && !empty($data['delivery_type']) && $data['delivery_type'] == 'standard_shipping' ? 1 : 0,
-            'order_payment_currency_id' => $order_payment_currency_data[0]->id ?? '',
-            'order_payment_currency_code' => $data['order_payment_currency_code'] ?? "",
-            'order_payment_currency_conversion_rate' => $order_payment_currency_data[0]->exchange_rate ?? '',
-            'base_currency_code' => $base_currency,
-            'is_custom_courier' => isset($data['delivery_type']) && !empty($data['delivery_type']) && $data['delivery_type'] == 'custom_courier' ? 1 : 0,
-        ];
-
-        if (isset($data['address_id']) && !empty($data['address_id'])) {
-            $order_data['address_id'] = (isset($data['address_id']) ? $data['address_id'] : '');
-        }
-
-        if (isset($data['delivery_date']) && !empty($data['delivery_date']) && !empty($data['delivery_time']) && isset($data['delivery_time'])) {
-            $order_data['delivery_date'] = date('Y-m-d', strtotime($data['delivery_date']));
-            $order_data['delivery_time'] = $data['delivery_time'];
-        }
-        $addressController = app(AddressController::class);
-        if (isset($data['address_id']) && !empty($data['address_id'])) {
-
-            $address_data = $addressController->getAddress(null, $data['address_id'], true);
-
-            if (!empty($address_data)) {
-                $order_data['latitude'] = $address_data[0]->latitude;
-                $order_data['longitude'] = $address_data[0]->longitude;
-                $order_data['address'] = (!empty($address_data[0]->address) && $address_data[0]->address != 'NULL') ? $address_data[0]->address . ', ' : '';
-                $order_data['address'] .= (!empty($address_data[0]->landmark) && $address_data[0]->landmark != 'NULL') ? $address_data[0]->landmark . ', ' : '';
-                $order_data['address'] .= (!empty($address_data[0]->area) && $address_data[0]->area != 'NULL') ? $address_data[0]->area . ', ' : '';
-                $order_data['address'] .= (!empty($address_data[0]->city) && $address_data[0]->city != 'NULL') ? $address_data[0]->city . ', ' : '';
-                $order_data['address'] .= (!empty($address_data[0]->state) && $address_data[0]->state != 'NULL') ? $address_data[0]->state . ', ' : '';
-                $order_data['address'] .= (!empty($address_data[0]->country) && $address_data[0]->country != 'NULL') ? $address_data[0]->country . ', ' : '';
-                $order_data['address'] .= (!empty($address_data[0]->pincode) && $address_data[0]->pincode != 'NULL') ? $address_data[0]->pincode : '';
-            }
-        } else {
-            $order_data['address'] = "";
-        }
-
-        if (!empty($data['latitude']) && !empty($data['longitude'])) {
-            $order_data['latitude'] = $data['latitude'];
-            $order_data['longitude'] = $data['longitude'];
-        }
-        $order_data['notes'] = isset($data['order_note']) ? $data['order_note'] : '';
-        $order_data['store_id'] = $store_id;
-
-        $order = Order::forceCreate($order_data);
-
-        $order_id = $order->id;
-
-        if ($wallet_txn_id) {
-            $transactionController = app(TransactionController::class);
-            $transactionController->update_transaction($wallet_txn_id, ['order_id' => $order_id]);
-            \Log::info("Updated wallet transaction txn_id {$wallet_txn_id} with order_id: {$order_id}");
-        }
-
-
-
-
-
-        for ($i = 0; $i < count($product_variant); $i++) {
-
-            $product_variant_data[$i] = [
+            $order_payment_currency_data = fetchDetails('currencies', ['code' => $data['order_payment_currency_code']], ['id', 'exchange_rate']);
+            $base_currency = getDefaultCurrency()->code;
+            $order_data = [
                 'user_id' => $data['user_id'],
-                'order_id' => $order_id,
-                'seller_id' => $product_variant[$i]['seller_id'],
-                'product_name' => $product_variant[$i]['product_name'],
-                'variant_name' => $product_variant[$i]['variant_name'],
-                'product_variant_id' => $product_variant[$i]['id'],
-                'quantity' => $quantity[$i],
-                'price' => $pv_price[$i],
-                'tax_percent' => $total_tax,
-                'tax_ids' => $tax_ids[$i],
-                'tax_amount' => $tax_amount[$i],
-                'sub_total' => $subtotal[$i],
-                'status' => json_encode(array(array($status, date("d-m-Y h:i:sa")))),
-                'active_status' => $status,
-                'otp' => 0,
-                'store_id' => $store_id,
-                'order_type' => $product_variant[$i]['cart_product_type'] . "_order",
-                'attachment' => $data['attachment_path'][$product_variant[$i]['id']] ?? "",
+                'mobile' => (isset($data['mobile']) && !empty($data['mobile']) && $data['mobile'] != '' && $data['mobile'] != 'NULL') ? $data['mobile'] : '',
+                'total' => $gross_total,
+                'promo_discount' => (isset($promo_code_discount) && $promo_code_discount != NULL) ? $promo_code_discount : '0',
+                'total_payable' => $total_payable,
+                'delivery_charge' => intval($delivery_charge),
+                'is_delivery_charge_returnable' => isset($data['is_delivery_charge_returnable']) ? $data['is_delivery_charge_returnable'] : 0,
+                'wallet_balance' => (isset($Wallet_used) && $Wallet_used == true) ? $data['wallet_balance_used'] : '0',
+                'final_total' => $final_total,
+                'discount' => $discount,
+                'payment_method' => $data['payment_method'] ?? '',
+                'promo_code_id' => (isset($data['promo_code_id'])) ? $data['promo_code_id'] : ' ',
+                'email' => isset($data['email']) ? $data['email'] : ' ',
+                'is_pos_order' => isset($data['is_pos_order']) ? $data['is_pos_order'] : 0,
+                'is_shiprocket_order' => isset($data['delivery_type']) && !empty($data['delivery_type']) && $data['delivery_type'] == 'standard_shipping' ? 1 : 0,
+                'order_payment_currency_id' => $order_payment_currency_data[0]->id ?? '',
+                'order_payment_currency_code' => $data['order_payment_currency_code'] ?? "",
+                'order_payment_currency_conversion_rate' => $order_payment_currency_data[0]->exchange_rate ?? '',
+                'base_currency_code' => $base_currency,
+                'is_custom_courier' => isset($data['delivery_type']) && !empty($data['delivery_type']) && $data['delivery_type'] == 'custom_courier' ? 1 : 0,
             ];
 
-            $order_items = OrderItems::forceCreate($product_variant_data[$i]);
-
-            $order_item_id = $order_items->id;
-
-            if (isset($product_variant[$i]['download_link']) && !empty($product_variant[$i]['download_link'])) {
-                $hash_link = $product_variant[$i]['download_link'] . '?' . $order_item_id;
-                $hash_link_data = ['hash_link' => $hash_link];
-                OrderItems::where('id', $order_item_id)->update($hash_link_data);
-            }
-        }
-        // add here  order_charges_parcel and insert in table
-        $discount_percentage = 0.00;
-
-        foreach ($parcels as $seller_id => $parcel) {
-            $parcel['delivery_charge'] = 0;
-
-            $discount_percentage = ($parcel['total'] * 100) / $parcel_sub_total;
-            $seller_promocode_discount = ($promo_code_discount * $discount_percentage) / 100;
-            $seller_delivery_charge = ($delivery_charge * $discount_percentage) / 100;
-            $otp = mt_rand(100000, 999999);
-            $order_item_ids = '';
-            $varient_ids = explode(',', trim($parcel['variant_id'], ','));
-            $parcel_total = $parcel['total'] + intval($parcel['delivery_charge']) - $seller_promocode_discount;
-            $parcel_total = round($parcel_total, 2);
-            foreach ($varient_ids as $ids) {
-                $order_item_ids .= fetchDetails('order_items', ['seller_id' => $seller_id, 'product_variant_id' => $ids, 'order_id' => $order_id], 'id')[0]->id . ',';
-            }
-            $order_item_id = explode(',', trim($order_item_ids, ','));
-            foreach ($order_item_id as $ids) {
-                updateDetails(['otp' => $otp], ['id' => $ids], 'order_items');
+            if (isset($data['address_id']) && !empty($data['address_id'])) {
+                $order_data['address_id'] = (isset($data['address_id']) ? $data['address_id'] : '');
             }
 
-            $order_parcels = [
-                'seller_id' => $seller_id,
-                'product_variant_ids' => trim($parcel['variant_id'], ','),
-                'order_id' => $order_id,
-                'order_item_ids' => trim($order_item_ids, ','),
-                'delivery_charge' => round($seller_delivery_charge, 2),
-                'promo_code_id' => $data['promo_code_id'] ?? '',
-                'promo_discount' => round($seller_promocode_discount, 2),
-                'sub_total' => $parcel['total'],
-                'total' => $parcel_total,
-                'otp' => ($system_settings['order_delivery_otp_system'] == '1') ? $otp : 0,
-            ];
+            if (isset($data['delivery_date']) && !empty($data['delivery_date']) && !empty($data['delivery_time']) && isset($data['delivery_time'])) {
+                $order_data['delivery_date'] = date('Y-m-d', strtotime($data['delivery_date']));
+                $order_data['delivery_time'] = $data['delivery_time'];
+            }
+            $addressController = app(AddressController::class);
+            if (isset($data['address_id']) && !empty($data['address_id'])) {
 
+                $address_data = $addressController->getAddress(null, $data['address_id'], true);
 
-            $order_charges = OrderCharges::forceCreate($order_parcels);
-        }
-
-        $product_variant_ids = explode(',', $data['product_variant_id']);
-
-        $qtns = explode(',', $data['quantity'] ?? '');
-
-        for ($i = 0; $i < count($product_variant_ids); $i++) {
-
-            if ($cart_product_type[$i] == 'regular') {
-                updateStock($product_variant_ids[$i], $qtns[$i], '');
+                if (!empty($address_data)) {
+                    $order_data['latitude'] = $address_data[0]->latitude;
+                    $order_data['longitude'] = $address_data[0]->longitude;
+                    $order_data['address'] = (!empty($address_data[0]->address) && $address_data[0]->address != 'NULL') ? $address_data[0]->address . ', ' : '';
+                    $order_data['address'] .= (!empty($address_data[0]->landmark) && $address_data[0]->landmark != 'NULL') ? $address_data[0]->landmark . ', ' : '';
+                    $order_data['address'] .= (!empty($address_data[0]->area) && $address_data[0]->area != 'NULL') ? $address_data[0]->area . ', ' : '';
+                    $order_data['address'] .= (!empty($address_data[0]->city) && $address_data[0]->city != 'NULL') ? $address_data[0]->city . ', ' : '';
+                    $order_data['address'] .= (!empty($address_data[0]->state) && $address_data[0]->state != 'NULL') ? $address_data[0]->state . ', ' : '';
+                    $order_data['address'] .= (!empty($address_data[0]->country) && $address_data[0]->country != 'NULL') ? $address_data[0]->country . ', ' : '';
+                    $order_data['address'] .= (!empty($address_data[0]->pincode) && $address_data[0]->pincode != 'NULL') ? $address_data[0]->pincode : '';
+                }
             } else {
-                updateComboStock($product_variant_ids[$i], $qtns[$i], '');
+                $order_data['address'] = "";
             }
-        }
+
+            if (!empty($data['latitude']) && !empty($data['longitude'])) {
+                $order_data['latitude'] = $data['latitude'];
+                $order_data['longitude'] = $data['longitude'];
+            }
+            $order_data['notes'] = isset($data['order_note']) ? $data['order_note'] : '';
+            $order_data['store_id'] = $store_id;
+
+            $order = Order::forceCreate($order_data);
+
+            $order_id = $order->id;
+            $order_ids[] = $order_id;
+
+            if ($wallet_txn_id) {
+                $transactionController = app(TransactionController::class);
+                $transactionController->update_transaction($wallet_txn_id, ['order_id' => $order_id]);
+                \Log::info("Updated wallet transaction txn_id {$wallet_txn_id} with order_id: {$order_id}");
+            }
 
 
 
-        $overall_total = array(
-            'total_amount' => array_sum($subtotal),
-            'delivery_charge' => $delivery_charge,
-            'discount' => $discount,
-            'tax_amount' => array_sum($tax_amount),
-            'tax_percentage' => array_sum($tax_percentage),
-            'discount' => $order_data['promo_discount'],
-            'wallet' => $order_data['wallet_balance'],
-            'final_total' => $order_data['final_total'],
-            'total_payable' => $order_data['total_payable'],
-            'address' => (isset($order_data['address'])) ? $order_data['address'] : '',
-            'payment_method' => $data['payment_method'] ?? ''
-        );
 
-        // add send notification,custom notificationa nd send mail code here
 
-        $user_res = fetchDetails('users', ['id' => $data['user_id']], ['username', 'fcm_id']);
-        $custom_notification = fetchDetails('custom_messages', ['type' => "place_order"], '*');
-        $hashtag_customer_name = '< customer_name >';
-        $hashtag_order_id = '< order_item_id >';
-        $hashtag_application_name = '< application_name >';
-        $string = isset($custom_notification) && !empty($custom_notification) ? json_encode($custom_notification[0]->message, JSON_UNESCAPED_UNICODE) : '';
-        $hashtag = html_entity_decode($string);
-        $notification_data = str_replace(array($hashtag_customer_name, $hashtag_order_id, $hashtag_application_name), array($user_res[0]->username, $order_id, $app_name), $hashtag);
-        $message = outputEscaping(trim($notification_data, '"'));
-        $title = "New order placed ID # " . $order_id;
-        $customer_msg = (!empty($custom_notification)) ? $message : 'New order received for  ' . $app_name . ' please process it.';
-        $fcm_ids = array();
-        $seller_fcm_ids = array();
-        $order_id = $order_id;
-        foreach ($parcels as $seller_id => $parcel) {
-            $seller_id = Seller::where('id', $seller_id)->value('user_id');
-            $seller_res = fetchDetails('users', ['id' => $seller_id], ['username', 'fcm_id']);
-            $results = UserFcm::join('users', 'user_fcm.user_id', '=', 'users.id')
-                ->where('user_fcm.user_id', $seller_id)
+            for ($i = 0; $i < count($product_variant); $i++) {
+                if ($product_variant[$i]['seller_id'] == $order_seller_id) {
+                    $product_variant_data[$i] = [
+                        'user_id' => $data['user_id'],
+                        'order_id' => $order_id,
+                        'seller_id' => $product_variant[$i]['seller_id'],
+                        'product_name' => $product_variant[$i]['product_name'],
+                        'variant_name' => $product_variant[$i]['variant_name'],
+                        'product_variant_id' => $product_variant[$i]['id'],
+                        'quantity' => $quantity[$i],
+                        'price' => $pv_price[$i],
+                        'tax_percent' => $total_tax,
+                        'tax_ids' => $tax_ids[$i],
+                        'tax_amount' => $tax_amount[$i],
+                        'sub_total' => $subtotal[$i],
+                        'status' => json_encode(array(array($status, date("d-m-Y h:i:sa")))),
+                        'active_status' => $status,
+                        'otp' => 0,
+                        'store_id' => $store_id,
+                        'order_type' => $product_variant[$i]['cart_product_type'] . "_order",
+                        'attachment' => $data['attachment_path'][$product_variant[$i]['id']] ?? "",
+                    ];
+
+                    $order_items = OrderItems::forceCreate($product_variant_data[$i]);
+
+                    $order_item_id = $order_items->id;
+
+                    if (isset($product_variant[$i]['download_link']) && !empty($product_variant[$i]['download_link'])) {
+                        $hash_link = $product_variant[$i]['download_link'] . '?' . $order_item_id;
+                        $hash_link_data = ['hash_link' => $hash_link];
+                        OrderItems::where('id', $order_item_id)->update($hash_link_data);
+                    }
+                }
+            }
+            // add here  order_charges_parcel and insert in table
+            $discount_percentage = 0.00;
+
+            foreach ($parcels as $seller_id => $parcel) {
+                $parcel['delivery_charge'] = 0;
+
+                $discount_percentage = ($parcel['total'] * 100) / $parcel_sub_total;
+                $seller_promocode_discount = ($promo_code_discount * $discount_percentage) / 100;
+                $seller_delivery_charge = ($delivery_charge * $discount_percentage) / 100;
+                $otp = mt_rand(100000, 999999);
+                $order_item_ids = '';
+                $varient_ids = explode(',', trim($parcel['variant_id'], ','));
+                $parcel_total = $parcel['total'] + intval($parcel['delivery_charge']) - $seller_promocode_discount;
+                $parcel_total = round($parcel_total, 2);
+                foreach ($varient_ids as $ids) {
+                    $order_item_ids .= fetchDetails('order_items', ['seller_id' => $seller_id, 'product_variant_id' => $ids, 'order_id' => $order_id], 'id')[0]->id . ',';
+                }
+                $order_item_id = explode(',', trim($order_item_ids, ','));
+                foreach ($order_item_id as $ids) {
+                    updateDetails(['otp' => $otp], ['id' => $ids], 'order_items');
+                }
+
+                $order_parcels = [
+                    'seller_id' => $seller_id,
+                    'product_variant_ids' => trim($parcel['variant_id'], ','),
+                    'order_id' => $order_id,
+                    'order_item_ids' => trim($order_item_ids, ','),
+                    'delivery_charge' => round($seller_delivery_charge, 2),
+                    'promo_code_id' => $data['promo_code_id'] ?? '',
+                    'promo_discount' => round($seller_promocode_discount, 2),
+                    'sub_total' => $parcel['total'],
+                    'total' => $parcel_total,
+                    'otp' => ($system_settings['order_delivery_otp_system'] == '1') ? $otp : 0,
+                ];
+
+
+                $order_charges = OrderCharges::forceCreate($order_parcels);
+            }
+
+            $product_variant_ids = explode(',', $data['product_variant_id']);
+
+            $qtns = explode(',', $data['quantity'] ?? '');
+
+            for ($i = 0; $i < count($product_variant_ids); $i++) {
+                if ($product_variant[$i]['seller_id'] == $order_seller_id) {
+                    if ($cart_product_type[$i] == 'regular') {
+                        updateStock($product_variant_ids[$i], $qtns[$i], '');
+                    } else {
+                        updateComboStock($product_variant_ids[$i], $qtns[$i], '');
+                    }
+                }
+            }
+
+
+
+            $overall_total = array(
+                'total_amount' => array_sum($subtotal),
+                'delivery_charge' => $delivery_charge,
+                'discount' => $discount,
+                'tax_amount' => array_sum($tax_amount),
+                'tax_percentage' => array_sum($tax_percentage),
+                'discount' => $order_data['promo_discount'],
+                'wallet' => $order_data['wallet_balance'],
+                'final_total' => $order_data['final_total'],
+                'total_payable' => $order_data['total_payable'],
+                'address' => (isset($order_data['address'])) ? $order_data['address'] : '',
+                'payment_method' => $data['payment_method'] ?? ''
+            );
+
+            // add send notification,custom notificationa nd send mail code here
+
+            $user_res = fetchDetails('users', ['id' => $data['user_id']], ['username', 'fcm_id']);
+            $custom_notification = fetchDetails('custom_messages', ['type' => "place_order"], '*');
+            $hashtag_customer_name = '< customer_name >';
+            $hashtag_order_id = '< order_item_id >';
+            $hashtag_application_name = '< application_name >';
+            $string = isset($custom_notification) && !empty($custom_notification) ? json_encode($custom_notification[0]->message, JSON_UNESCAPED_UNICODE) : '';
+            $hashtag = html_entity_decode($string);
+            $notification_data = str_replace(array($hashtag_customer_name, $hashtag_order_id, $hashtag_application_name), array($user_res[0]->username, $order_id, $app_name), $hashtag);
+            $message = outputEscaping(trim($notification_data, '"'));
+            $title = "New order placed ID # " . $order_id;
+            $customer_msg = (!empty($custom_notification)) ? $message : 'New order received for  ' . $app_name . ' please process it.';
+            $fcm_ids = array();
+            $seller_fcm_ids = array();
+            $order_id = $order_id;
+            foreach ($parcels as $seller_id => $parcel) {
+                $seller_id = Seller::where('id', $seller_id)->value('user_id');
+                $seller_res = fetchDetails('users', ['id' => $seller_id], ['username', 'fcm_id']);
+                $results = UserFcm::join('users', 'user_fcm.user_id', '=', 'users.id')
+                    ->where('user_fcm.user_id', $seller_id)
+                    ->where('users.is_notification_on', 1)
+                    ->select('user_fcm.fcm_id')
+                    ->get();
+                foreach ($results as $result) {
+                    if (is_object($result)) {
+                        $seller_fcm_ids[] = $result->fcm_id;
+                    }
+                }
+            }
+            $notification_store_id = $order->store_id;
+            // dd($store_id);
+            $fcmMsg = array(
+                'title' => "$title",
+                'body' => "$customer_msg",
+                'type' => "order",
+                'order_id' => "$order_id",
+                'store_id' => "$store_id",
+            );
+
+            $sellerRegistrationIDs_chunks = array_chunk($seller_fcm_ids, 1000);
+
+            sendNotification('', $sellerRegistrationIDs_chunks, $fcmMsg);
+
+
+            $user_results = UserFcm::join('users', 'user_fcm.user_id', '=', 'users.id')
+                ->where('user_fcm.user_id', $data['user_id'])
                 ->where('users.is_notification_on', 1)
                 ->select('user_fcm.fcm_id')
                 ->get();
-            foreach ($results as $result) {
+            foreach ($user_results as $result) {
                 if (is_object($result)) {
-                    $seller_fcm_ids[] = $result->fcm_id;
+                    $fcm_ids[] = $result->fcm_id;
                 }
             }
-        }
-        $notification_store_id = $order->store_id;
-        // dd($store_id);
-        $fcmMsg = array(
-            'title' => "$title",
-            'body' => "$customer_msg",
-            'type' => "order",
-            'order_id' => "$order_id",
-            'store_id' => "$store_id",
-        );
 
-        $sellerRegistrationIDs_chunks = array_chunk($seller_fcm_ids, 1000);
+            $fcmMsg = array(
+                'title' => "$title",
+                'body' => "$customer_msg",
+                'type' => "order",
+                'order_id' => "$order_id",
+                'store_id' => "$store_id",
+            );
+            $registrationIDs_chunks = array_chunk($fcm_ids, 1000);
+            sendNotification('', $registrationIDs_chunks, $fcmMsg);
 
-        sendNotification('', $sellerRegistrationIDs_chunks, $fcmMsg);
-
-
-        $user_results = UserFcm::join('users', 'user_fcm.user_id', '=', 'users.id')
-            ->where('user_fcm.user_id', $data['user_id'])
-            ->where('users.is_notification_on', 1)
-            ->select('user_fcm.fcm_id')
-            ->get();
-        foreach ($user_results as $result) {
-            if (is_object($result)) {
-                $fcm_ids[] = $result->fcm_id;
+            foreach ($product_variant_data as &$order_item_data) {
+                $order_item_data['attachment'] = asset('/storage/' . $order_item_data['attachment']);
             }
         }
-
-        $fcmMsg = array(
-            'title' => "$title",
-            'body' => "$customer_msg",
-            'type' => "order",
-            'order_id' => "$order_id",
-            'store_id' => "$store_id",
-        );
-        $registrationIDs_chunks = array_chunk($fcm_ids, 1000);
-        sendNotification('', $registrationIDs_chunks, $fcmMsg);
-
+        // clear cart
         removeFromCart($data);
-        foreach ($product_variant_data as &$order_item_data) {
-            $order_item_data['attachment'] = asset('/storage/' . $order_item_data['attachment']);
-        }
+
         // dd($product_variant_data);
         $user_balance = fetchDetails('users', ['id' => $data['user_id']], 'balance');
         $response = [
             'error' => false,
             'message' => 'Order Placed Successfully',
             'order_id' => $order_id,
+            'order_ids' => $order_ids,
             'final_total' => ($data['is_wallet_used'] == '1') ? $final_total -= $data['wallet_balance_used'] : $final_total,
             'total_payable' => $total_payable,
             'order_item_data' => $product_variant_data,
@@ -4658,7 +4698,7 @@ function checkCartProductsDeliverable($user_id, $zipcode = "", $zipcode_id = "",
     // dd($cart);
     $settings = getSettings('shipping_method', true, true);
     $settings = json_decode($settings, true);
-
+    // dd($settings);
     if (!$cart->isEmpty()) {
 
         $product_weight = 0;
@@ -4667,7 +4707,7 @@ function checkCartProductsDeliverable($user_id, $zipcode = "", $zipcode_id = "",
             /* check in local shipping first */
             $tmpRow['is_deliverable'] = false;
             $tmpRow['delivery_by'] = '';
-            // локальн адоставка курєром
+            // локальна доставка курєром
             if (isset($settings['local_shipping_method']) && $settings['local_shipping_method'] == 1) {
                 $seller_deliverable_details = fetchDetails('seller_store', ['seller_id' => $cart[$i]->seller_id, 'store_id' => $store_id], ['city', 'zipcode']);
                 // dd($zipcode_id);
@@ -4701,6 +4741,7 @@ function checkCartProductsDeliverable($user_id, $zipcode = "", $zipcode_id = "",
                 $tmpRow['is_deliverable'] = true;
                 $tmpRow['delivery_by'] = "custom_courier";
             }
+
             /* check in standard shipping then */
             if (isset($settings['shiprocket_shipping_method']) && $settings['shiprocket_shipping_method'] == 1) {
 
@@ -4767,7 +4808,6 @@ function checkCartProductsDeliverable($user_id, $zipcode = "", $zipcode_id = "",
 
 
         if (!empty($products)) {
-
             return $products;
         } else {
             return false;
@@ -5049,7 +5089,9 @@ function isSingleProductType($product_variant_id, $user_id, $product_type, $stor
         if ($product_type == 'regular') {
             $new_product_type = $new_data[0]['type'];
         } else {
-            $new_product_type = $new_data[0]['product_type'];
+            $new_product_type = isset(
+                $new_data[0]
+            ) ? $new_data[0]['product_type'] : '';
         }
 
         if (!empty($unique_product_types) && !empty($new_product_type)) {
@@ -7144,7 +7186,10 @@ function getOrderDetails($where = null, $status = false, $sellerId = null, $stor
         )
 
         ->leftJoin('product_variants as v', 'oi.product_variant_id', '=', 'v.id')
-        ->leftJoin('transactions as t', 'oi.order_id', '=', 't.order_id')
+        // ->leftJoin('transactions as t', 'oi.order_id', '=', 't.order_id')
+        ->leftJoin('transactions as t', function ($join) {
+            $join->whereRaw('FIND_IN_SET(oi.order_id, t.order_id)');
+        })
         ->leftJoin('products as p', 'p.id', '=', 'v.product_id')
         ->leftJoin('users as u', 'u.id', '=', 'oi.user_id')
         ->leftJoin('orders as o', 'o.id', '=', 'oi.order_id')
@@ -7156,7 +7201,7 @@ function getOrderDetails($where = null, $status = false, $sellerId = null, $stor
 
     $regularOrderItemData->where('o.is_pos_order', 0);
 
-
+    // dd($regularOrderItemData->toSql());
     if (isset($where) && $where != null) {
         $regularOrderItemData->where($where);
         if ($status == true) {
@@ -7171,8 +7216,10 @@ function getOrderDetails($where = null, $status = false, $sellerId = null, $stor
         $regularOrderItemData->where('oi.store_id', $store_id);
     }
     $regularOrderItemData->groupBy('oi.id');
+    // dd($regularOrderItemData->toSql());
     $regularOrderItemData = $regularOrderItemData->get()->toArray();
 
+    // dd($regularOrderItemData);
 
     // get data of combo order items
 

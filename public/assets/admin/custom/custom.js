@@ -483,20 +483,20 @@ $("#upload-media").on("click", function () {
                 ? media_type != "image"
                     ? appUrl + "assets/admin/images/" + media_type + "-file.png"
                     : encodeURI(
-                        appUrl +
-                        "storage/" +
-                        result[index].sub_directory +
-                        "/" +
-                        result[index].name
-                    )
+                          appUrl +
+                              "storage/" +
+                              result[index].sub_directory +
+                              "/" +
+                              result[index].name
+                      )
                 : media_type != "image"
-                    ? appUrl + "assets/admin/images/" + media_type + "-file.png"
-                    : result[index].object_url;
+                ? appUrl + "assets/admin/images/" + media_type + "-file.png"
+                : result[index].object_url;
 
             var inputImgPath = isPublicDisk
                 ? encodeURI(
-                    result[index].sub_directory + "/" + result[index].name
-                )
+                      result[index].sub_directory + "/" + result[index].name
+                  )
                 : result[index].object_url;
 
             $(current_selected_image)
@@ -504,18 +504,18 @@ $("#upload-media").on("click", function () {
                 .find(".image-upload-section")
                 .append(
                     '<div class="bg-white grow image product-image-container rounded shadow text-center m-2"><div class="image-upload-div"><img class="img-fluid mb-2" alt="' +
-                    result[index].name +
-                    '" title="' +
-                    result[index].name +
-                    '" src=' +
-                    imagePath +
-                    ' ><input type="hidden" name=' +
-                    input +
-                    " value=" +
-                    inputImgPath +
-                    "></div>" +
-                    removable_btn +
-                    "</div>"
+                        result[index].name +
+                        '" title="' +
+                        result[index].name +
+                        '" src=' +
+                        imagePath +
+                        ' ><input type="hidden" name=' +
+                        input +
+                        " value=" +
+                        inputImgPath +
+                        "></div>" +
+                        removable_btn +
+                        "</div>"
                 );
         }
     } else {
@@ -525,8 +525,8 @@ $("#upload-media").on("click", function () {
                 ? appUrl + "assets/admin/images/" + media_type + "-file.png"
                 : encodeURI(path)
             : media_type != "image"
-                ? appUrl + "assets/admin/images/" + media_type + "-file.png"
-                : result[0].object_url;
+            ? appUrl + "assets/admin/images/" + media_type + "-file.png"
+            : result[0].object_url;
 
         var inputImgPath = isPublicDisk
             ? encodeURI(result[0].sub_directory + "/" + result[0].name)
@@ -536,18 +536,18 @@ $("#upload-media").on("click", function () {
             .find(".image-upload-section")
             .html(
                 '<div class="bg-white grow image product-image-container rounded shadow text-center m-2"><div class="image-upload-div"><img class="img-fluid" alt="' +
-                result[0].name +
-                '" title="' +
-                result[0].name +
-                '" src=' +
-                imagePath +
-                ' ><input type="hidden" name=' +
-                input +
-                " value=" +
-                inputImgPath +
-                "></div>" +
-                removable_btn +
-                "</div>"
+                    result[0].name +
+                    '" title="' +
+                    result[0].name +
+                    '" src=' +
+                    imagePath +
+                    ' ><input type="hidden" name=' +
+                    input +
+                    " value=" +
+                    inputImgPath +
+                    "></div>" +
+                    removable_btn +
+                    "</div>"
             );
     }
 
@@ -618,7 +618,7 @@ function copyToClipboard(element) {
     try {
         navigator.clipboard
             .writeText(temp.val())
-            .then(function () { })
+            .then(function () {})
             .catch(function (err) {
                 iziToast.error({
                     message: "Failed to copy text: ",
@@ -658,6 +658,7 @@ $("input[name='delivery_charge_type']").on("change", function () {
     if (
         $(this).attr("id") == "zipcode_wise_delivery_charge_switch" ||
         $(this).attr("id") == "product_wise_delivery_charge_switch" ||
+        $(this).attr("id") == "contractual_delivery_charge_switch" ||
         $(this).attr("id") == "city_wise_delivery_charge_switch"
     ) {
         $(
@@ -677,6 +678,11 @@ $("input[name='delivery_charge_type']").on("change", function () {
         if ($(this).attr("id") == "product_wise_delivery_charge_switch") {
             $("input[name='delivery_charge_type_value']").val(
                 "product_wise_delivery_charge"
+            );
+        }
+        if ($(this).attr("id") == "contractual_delivery_charge_switch") {
+            $("input[name='delivery_charge_type_value']").val(
+                "contractual_delivery_charge"
             );
         }
     } else {
@@ -1169,8 +1175,8 @@ function load_attribute_section() {
             width: $(".swatche_type").data("width")
                 ? $(".swatche_type").data("width")
                 : $(".swatche_type").hasClass("w-100")
-                    ? "100%"
-                    : "style",
+                ? "100%"
+                : "style",
             placeholder: $(".swatche_type").data("placeholder"),
             allowClear: Boolean($(".swatche_type").data("allow-clear")),
         });
@@ -1641,8 +1647,8 @@ function load_category_section(
             width: $(".select_multiple").data("width")
                 ? $(".select_multiple").data("width")
                 : $(".select_multiple").hasClass("w-100")
-                    ? "100%"
-                    : "style",
+                ? "100%"
+                : "style",
             placeholder: $(".select_multiple").data("placeholder"),
             allowClear: Boolean($(".select_multiple").data("allow-clear")),
             dropdownParent: $("#set_commission_model"),
@@ -1657,8 +1663,8 @@ $(".select_multiple").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-                ? "100%"
-                : "style",
+            ? "100%"
+            : "style",
         placeholder: $(this).data("placeholder"),
         allowClear: Boolean($(this).data("allow-clear")),
     });
@@ -1865,8 +1871,8 @@ $(".select_single , .multiple_values , #product-type, #attribute").each(
             width: $(this).data("width")
                 ? $(this).data("width")
                 : $(this).hasClass("w-100")
-                    ? "100%"
-                    : "style",
+                ? "100%"
+                : "style",
             placeholder: $(this).data("placeholder"),
             allowClear: Boolean($(this).data("allow-clear")),
         });
@@ -2087,8 +2093,8 @@ $(function () {
                     width: $(this).data("width")
                         ? $(this).data("width")
                         : $(this).hasClass("w-100")
-                            ? "100%"
-                            : "style",
+                        ? "100%"
+                        : "style",
                     placeholder: $(this).data("placeholder"),
                     allowClear: Boolean($(this).data("allow-clear")),
                 });
@@ -2275,8 +2281,8 @@ $(document).on(
                     width: $(this).data("width")
                         ? $(this).data("width")
                         : $(this).hasClass("w-100")
-                            ? "100%"
-                            : "style",
+                        ? "100%"
+                        : "style",
                     placeholder: $(this).data("placeholder"),
                     allowClear: Boolean($(this).data("allow-clear")),
                 });
@@ -2288,8 +2294,8 @@ $(document).on(
                     width: $(this).data("width")
                         ? $(this).data("width")
                         : $(this).hasClass("w-100")
-                            ? "100%"
-                            : "style",
+                        ? "100%"
+                        : "style",
                     placeholder: $(this).data("placeholder"),
                     allowClear: Boolean($(this).data("allow-clear")),
                 });
@@ -2316,8 +2322,8 @@ $(".multiple_values").select2({
     width: $(this).data("width")
         ? $(this).data("width")
         : $(this).hasClass("w-100")
-            ? "100%"
-            : "style",
+        ? "100%"
+        : "style",
     placeholder: $(this).data("placeholder"),
     allowClear: Boolean($(this).data("allow-clear")),
 });
@@ -3387,8 +3393,8 @@ function create_attributes(value, selected_attr) {
             width: $(this).data("width")
                 ? $(this).data("width")
                 : $(this).hasClass("w-100")
-                    ? "100%"
-                    : "style",
+                ? "100%"
+                : "style",
             placeholder: $(this).data("placeholder"),
             allowClear: Boolean($(this).data("allow-clear")),
         })
@@ -3419,8 +3425,8 @@ function create_attributes(value, selected_attr) {
             width: $(this).data("width")
                 ? $(this).data("width")
                 : $(this).hasClass("w-100")
-                    ? "100%"
-                    : "style",
+                ? "100%"
+                : "style",
             placeholder: $(this).data("placeholder"),
             allowClear: Boolean($(this).data("allow-clear")),
         })
@@ -3464,7 +3470,7 @@ if (document.getElementById("system-update-dropzone")) {
                     this.files[_i].name === file.name &&
                     this.files[_i].size === file.size &&
                     this.files[_i].lastModifiedDate.toString() ===
-                    file.lastModifiedDate.toString()
+                        file.lastModifiedDate.toString()
                 ) {
                     this.removeFile(file);
                     i++;
@@ -3473,7 +3479,7 @@ if (document.getElementById("system-update-dropzone")) {
         }
     });
 
-    systemDropzone.on("error", function (file, response) { });
+    systemDropzone.on("error", function (file, response) {});
 
     systemDropzone.on("sending", function (file, xhr, formData) {
         xhr.onreadystatechange = function () {
@@ -3602,7 +3608,7 @@ $(document).on("submit", "#save-product", function (e) {
                     ) {
                         if (
                             $(".variant-stock-level-type").val() ==
-                            "product_level" &&
+                                "product_level" &&
                             $(".variant-stock-mustfill-field").filter(
                                 function () {
                                     return this.value === "";
@@ -4127,8 +4133,8 @@ $(".search_admin_category").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-                ? "100%"
-                : "style",
+            ? "100%"
+            : "style",
         allowClear: Boolean($(this).data("allow-clear")),
     });
 });
@@ -4175,8 +4181,8 @@ $(".search_admin_product").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-                ? "100%"
-                : "style",
+            ? "100%"
+            : "style",
         allowClear: Boolean($(this).data("allow-clear")),
     });
 });
@@ -4209,8 +4215,8 @@ $(".search_admin_product_for_combo").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-                ? "100%"
-                : "style",
+            ? "100%"
+            : "style",
         allowClear: Boolean($(this).data("allow-clear")),
     });
 });
@@ -4241,8 +4247,8 @@ $(".search_admin_digital_product").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-                ? "100%"
-                : "style",
+            ? "100%"
+            : "style",
         allowClear: Boolean($(this).data("allow-clear")),
     });
 });
@@ -4283,8 +4289,8 @@ $(".search_admin_combo_product").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-                ? "100%"
-                : "style",
+            ? "100%"
+            : "style",
         allowClear: Boolean($(this).data("allow-clear")),
     });
 });
@@ -4316,8 +4322,8 @@ $(".search_seller_combo_product").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-                ? "100%"
-                : "style",
+            ? "100%"
+            : "style",
         allowClear: Boolean($(this).data("allow-clear")),
         dropdownParent: $(".search_seller_combo_product_parent"),
     });
@@ -4350,8 +4356,8 @@ $(".search_seller_product").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-                ? "100%"
-                : "style",
+            ? "100%"
+            : "style",
         allowClear: Boolean($(this).data("allow-clear")),
         dropdownParent: $(".search_seller_product_parent"),
     });
@@ -4384,8 +4390,8 @@ $(".search_seller_digital_product").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-                ? "100%"
-                : "style",
+            ? "100%"
+            : "style",
         allowClear: Boolean($(this).data("allow-clear")),
     });
 });
@@ -4435,8 +4441,8 @@ $(".default_currency").select2({
     width: $(this).data("width")
         ? $(this).data("width")
         : $(this).hasClass("w-100")
-            ? "100%"
-            : "style",
+        ? "100%"
+        : "style",
     placeholder: $(this).data("placeholder"),
     allowClear: Boolean($(this).data("allow-clear")),
 });
@@ -5627,13 +5633,15 @@ $("#system-update").on("submit", function (e) {
 
 $(document).on("click", ".edit_order_tracking", function (e, rows) {
     e.preventDefault();
-    const orderTrackingDetails = document.getElementById("order_tracking_details");
+    const orderTrackingDetails = document.getElementById(
+        "order_tracking_details"
+    );
     const parcel_id = $(this).data("id");
     const order_id = $(this).data("order-id");
     const trackingData = $(this).data("tracking-data");
 
     // Очищаємо контейнер перед додаванням нового вмісту
-    orderTrackingDetails.innerHTML = '';
+    orderTrackingDetails.innerHTML = "";
 
     // Перевіряємо, чи є дані для відображення
     if (!trackingData || trackingData.length === 0) {
@@ -5646,11 +5654,13 @@ $(document).on("click", ".edit_order_tracking", function (e, rows) {
 
     // Отримуємо перший елемент масиву
     const tracking = trackingData[0];
-    const aftershipData = tracking.aftership_data ? JSON.parse(tracking.aftership_data) : {};
+    const aftershipData = tracking.aftership_data
+        ? JSON.parse(tracking.aftership_data)
+        : {};
 
     // Функція для форматування дати в локальний час
     const formatLocalDate = (dateString) => {
-        if (!dateString) return 'N/A';
+        if (!dateString) return "N/A";
         const date = new Date(dateString);
         return date.toLocaleString();
     };
@@ -5668,26 +5678,35 @@ $(document).on("click", ".edit_order_tracking", function (e, rows) {
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span>Courier Agency:</span>
-                                <span class="fw-bold">${tracking.courier_agency || 'N/A'}</span>
+                                <span class="fw-bold">${
+                                    tracking.courier_agency || "N/A"
+                                }</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span>Tracking ID:</span>
-                                <span class="fw-bold">${tracking.tracking_id || 'N/A'}</span>
+                                <span class="fw-bold">${
+                                    tracking.tracking_id || "N/A"
+                                }</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span>Tracking URL:</span>
                                 <span>
-                                    ${tracking.url
-            ? `<a href="${tracking.url}" target="_blank" class="text-primary">View Tracking</a>`
-            : 'N/A'
-        }
+                                    ${
+                                        tracking.url
+                                            ? `<a href="${tracking.url}" target="_blank" class="text-primary">View Tracking</a>`
+                                            : "N/A"
+                                    }
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span>Status:</span>
-                                <span class="badge bg-${aftershipData.tag === 'Delivered' ? 'success' :
-            aftershipData.tag === 'InTransit' ? 'warning' : 'info'
-        }">${aftershipData.tag || 'Unknown'}</span>
+                                <span class="badge bg-${
+                                    aftershipData.tag === "Delivered"
+                                        ? "success"
+                                        : aftershipData.tag === "InTransit"
+                                        ? "warning"
+                                        : "info"
+                                }">${aftershipData.tag || "Unknown"}</span>
                             </li>
                         </ul>
                     </div>
@@ -5696,19 +5715,27 @@ $(document).on("click", ".edit_order_tracking", function (e, rows) {
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span>Origin:</span>
-                                <span>${aftershipData.origin_city || 'N/A'}</span>
+                                <span>${
+                                    aftershipData.origin_city || "N/A"
+                                }</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span>Destination:</span>
-                                <span>${aftershipData.destination_city || 'N/A'}</span>
+                                <span>${
+                                    aftershipData.destination_city || "N/A"
+                                }</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span>Shipment Pickup:</span>
-                                <span>${formatLocalDate(aftershipData.shipment_pickup_date)}</span>
+                                <span>${formatLocalDate(
+                                    aftershipData.shipment_pickup_date
+                                )}</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span>Delivery Date:</span>
-                                <span>${formatLocalDate(aftershipData.shipment_delivery_date)}</span>
+                                <span>${formatLocalDate(
+                                    aftershipData.shipment_delivery_date
+                                )}</span>
                             </li>
                         </ul>
                     </div>
@@ -5727,12 +5754,12 @@ $(document).on("click", ".edit_order_tracking", function (e, rows) {
         const inTransitCheckpoints = [];
 
         // Розділяємо чекпойнти за типами
-        checkpoints.forEach(checkpoint => {
-            if (checkpoint.tag === 'Delivered') {
+        checkpoints.forEach((checkpoint) => {
+            if (checkpoint.tag === "Delivered") {
                 deliveredCheckpoint = checkpoint;
-            } else if (checkpoint.tag === 'InfoReceived') {
+            } else if (checkpoint.tag === "InfoReceived") {
                 infoReceivedCheckpoint = checkpoint;
-            } else if (checkpoint.tag === 'InTransit') {
+            } else if (checkpoint.tag === "InTransit") {
                 inTransitCheckpoints.push(checkpoint);
             }
         });
@@ -5741,10 +5768,18 @@ $(document).on("click", ".edit_order_tracking", function (e, rows) {
         if (deliveredCheckpoint) {
             html += `
                     <div class="mb-3 mt-3">
-                        <h6 class="text-success">${formatLocalDate(deliveredCheckpoint.checkpoint_time)} - ${deliveredCheckpoint.tag}</h6>
-                        <div class="fs-6"><strong>Message:</strong> ${deliveredCheckpoint.message}</div>
-                        <div class="fs-6"><strong>Location:</strong> ${deliveredCheckpoint.location || 'N/A'}</div>
-                        <div class="fs-6"><strong>Subtag:</strong> ${deliveredCheckpoint.subtag_message || 'N/A'}</div>
+                        <h6 class="text-success">${formatLocalDate(
+                            deliveredCheckpoint.checkpoint_time
+                        )} - ${deliveredCheckpoint.tag}</h6>
+                        <div class="fs-6"><strong>Message:</strong> ${
+                            deliveredCheckpoint.message
+                        }</div>
+                        <div class="fs-6"><strong>Location:</strong> ${
+                            deliveredCheckpoint.location || "N/A"
+                        }</div>
+                        <div class="fs-6"><strong>Subtag:</strong> ${
+                            deliveredCheckpoint.subtag_message || "N/A"
+                        }</div>
                     </div>
             `;
         }
@@ -5756,22 +5791,46 @@ $(document).on("click", ".edit_order_tracking", function (e, rows) {
 
                     <div class="mb-3">
                         <div class="mb-1">
-                            <h6 class="text-warning">${formatLocalDate(latestInTransit.checkpoint_time)} - ${latestInTransit.tag}</h6>
-                            <div class="fs-6"><strong>Message:</strong> ${latestInTransit.message}</div>
-                            <div class="fs-6"><strong>Location:</strong> ${latestInTransit.location || 'N/A'}</div>
-                            <div class="fs-6"><strong>Subtag:</strong> ${latestInTransit.subtag_message || 'N/A'}</div>
+                            <h6 class="text-warning">${formatLocalDate(
+                                latestInTransit.checkpoint_time
+                            )} - ${latestInTransit.tag}</h6>
+                            <div class="fs-6"><strong>Message:</strong> ${
+                                latestInTransit.message
+                            }</div>
+                            <div class="fs-6"><strong>Location:</strong> ${
+                                latestInTransit.location || "N/A"
+                            }</div>
+                            <div class="fs-6"><strong>Subtag:</strong> ${
+                                latestInTransit.subtag_message || "N/A"
+                            }</div>
                         </div>
-                        ${inTransitCheckpoints.length > 1
-                    ? `
+                        ${
+                            inTransitCheckpoints.length > 1
+                                ? `
                                 <div class="collapse" id="allInTransit">
-                                            ${inTransitCheckpoints.slice(1).map(checkpoint => `
+                                            ${inTransitCheckpoints
+                                                .slice(1)
+                                                .map(
+                                                    (checkpoint) => `
                                                 <div class="mb-1">
-                                                    <h6 class="text-warning">${formatLocalDate(checkpoint.checkpoint_time)} - ${checkpoint.tag}</h6>
-                                                    <div class="fs-6"><strong>Message:</strong> ${checkpoint.message}</div>
-                                                    <div class="fs-6"><strong>Location:</strong> ${checkpoint.location || 'N/A'}</div>
-                                                    <div class="fs-6"><strong>Subtag:</strong> ${checkpoint.subtag_message || 'N/A'}</div>
+                                                    <h6 class="text-warning">${formatLocalDate(
+                                                        checkpoint.checkpoint_time
+                                                    )} - ${checkpoint.tag}</h6>
+                                                    <div class="fs-6"><strong>Message:</strong> ${
+                                                        checkpoint.message
+                                                    }</div>
+                                                    <div class="fs-6"><strong>Location:</strong> ${
+                                                        checkpoint.location ||
+                                                        "N/A"
+                                                    }</div>
+                                                    <div class="fs-6"><strong>Subtag:</strong> ${
+                                                        checkpoint.subtag_message ||
+                                                        "N/A"
+                                                    }</div>
                                                 </div>
-                                            `).join('')}
+                                            `
+                                                )
+                                                .join("")}
                                 </div>
                                 <p class="mb-0">
                                     <a href="#" class="text-primary fs-5" data-bs-toggle="collapse" data-bs-target="#allInTransit"
@@ -5780,8 +5839,8 @@ $(document).on("click", ".edit_order_tracking", function (e, rows) {
                                     </a>
                                 </p>
                             `
-                    : ''
-                }
+                                : ""
+                        }
                     </div>
 
             `;
@@ -5791,16 +5850,28 @@ $(document).on("click", ".edit_order_tracking", function (e, rows) {
         if (infoReceivedCheckpoint) {
             html += `
                 <div class="mb-3">
-                        <h6 class="text-info">${formatLocalDate(infoReceivedCheckpoint.checkpoint_time)} - ${infoReceivedCheckpoint.tag}</h6>
-                        <div class="fs-6"><strong>Message:</strong> ${infoReceivedCheckpoint.message}</div>
-                        <div class="fs-6"><strong>Location:</strong> ${infoReceivedCheckpoint.location || 'N/A'}</div>
-                        <div class="fs-6"><strong>Subtag:</strong> ${infoReceivedCheckpoint.subtag_message || 'N/A'}</div>
+                        <h6 class="text-info">${formatLocalDate(
+                            infoReceivedCheckpoint.checkpoint_time
+                        )} - ${infoReceivedCheckpoint.tag}</h6>
+                        <div class="fs-6"><strong>Message:</strong> ${
+                            infoReceivedCheckpoint.message
+                        }</div>
+                        <div class="fs-6"><strong>Location:</strong> ${
+                            infoReceivedCheckpoint.location || "N/A"
+                        }</div>
+                        <div class="fs-6"><strong>Subtag:</strong> ${
+                            infoReceivedCheckpoint.subtag_message || "N/A"
+                        }</div>
                 </div>
             `;
         }
 
         // Якщо немає жодного з ключових чекпойнтів
-        if (!deliveredCheckpoint && !inTransitCheckpoints.length && !infoReceivedCheckpoint) {
+        if (
+            !deliveredCheckpoint &&
+            !inTransitCheckpoints.length &&
+            !infoReceivedCheckpoint
+        ) {
             html += `
                 <div class="alert alert-info mt-3" role="alert">
                     No key checkpoints (Delivered, InTransit, InfoReceived) available.
@@ -5824,12 +5895,14 @@ $(document).on("click", ".edit_order_tracking", function (e, rows) {
     orderTrackingDetails.innerHTML = html;
 
     // Додаємо обробник для зміни тексту посилання
-    const toggleLink = document.getElementById('toggleInTransit');
+    const toggleLink = document.getElementById("toggleInTransit");
     if (toggleLink) {
-        toggleLink.addEventListener('click', function (e) {
+        toggleLink.addEventListener("click", function (e) {
             e.preventDefault();
-            const isExpanded = this.getAttribute('aria-expanded') === 'true';
-            this.textContent = isExpanded ? 'Hide all updates' : 'Show all updates';
+            const isExpanded = this.getAttribute("aria-expanded") === "true";
+            this.textContent = isExpanded
+                ? "Hide all updates"
+                : "Show all updates";
         });
     }
 });
@@ -5934,7 +6007,7 @@ $(document).on("click", ".edit_stock", function (e, rows) {
                     : "";
             var stockType =
                 result.fetched_data.product[0].stock_type != undefined &&
-                    result.fetched_data.product[0].stock_type != 1
+                result.fetched_data.product[0].stock_type != 1
                     ? result.fetched_data.product[0].name
                     : "";
 
@@ -5944,7 +6017,7 @@ $(document).on("click", ".edit_stock", function (e, rows) {
                     : productName;
             var stock =
                 result.fetched_data.product[0].stock != undefined &&
-                    result.fetched_data.product[0].stock !== ""
+                result.fetched_data.product[0].stock !== ""
                     ? result.fetched_data.product[0].stock
                     : result.fetched;
             $('input[name="product_name"]').val(pname);
@@ -6014,8 +6087,8 @@ $(".search_stores").each(function () {
         width: $(this).data("width")
             ? $(this).data("width")
             : $(this).hasClass("w-100")
-                ? "100%"
-                : "style",
+            ? "100%"
+            : "style",
         allowClear: Boolean($(this).data("allow-clear")),
     });
 });
@@ -6077,27 +6150,6 @@ function formatCategories(category) {
     var image = category.image;
     var $category = $(
         '<div class="row">' +
-        '<div class="col-md-1 align-self-center">' +
-        '<div class="">' +
-        '<img class="img-fluid" src="' +
-        image +
-        '"></div>' +
-        "</div>" +
-        '<div class="col-md-4 category-name mt-4">' +
-        category.text +
-        "</div>" +
-        "</div>" +
-        "</div>"
-    );
-
-    return $category;
-}
-
-function formatCategoriesSelection(category) {
-    if (category.element.dataset.select2Text === undefined) {
-        var image = category.image;
-        var $category = $(
-            '<div class="row">' +
             '<div class="col-md-1 align-self-center">' +
             '<div class="">' +
             '<img class="img-fluid" src="' +
@@ -6109,6 +6161,27 @@ function formatCategoriesSelection(category) {
             "</div>" +
             "</div>" +
             "</div>"
+    );
+
+    return $category;
+}
+
+function formatCategoriesSelection(category) {
+    if (category.element.dataset.select2Text === undefined) {
+        var image = category.image;
+        var $category = $(
+            '<div class="row">' +
+                '<div class="col-md-1 align-self-center">' +
+                '<div class="">' +
+                '<img class="img-fluid" src="' +
+                image +
+                '"></div>' +
+                "</div>" +
+                '<div class="col-md-4 category-name mt-4">' +
+                category.text +
+                "</div>" +
+                "</div>" +
+                "</div>"
         );
     } else {
         $category = category.element.dataset.select2Text;
@@ -6144,56 +6217,20 @@ function formatOffers(offer) {
 
     var $offer = $(
         '<div class="row">' +
-        '<div class="col-md-1 align-self-center">' +
-        '<div class="">' +
-        '<img class="img-fluid" src="' +
-        image +
-        '"></div>' +
-        "</div>" +
-        '<div class="align-self-center col-md-10">' +
-        '<div class="">' +
-        (offer.min_discount != 0 && offer.max_discount != 0
-            ? "Min - Max Discount : " +
-            offer.min_discount +
-            "% - " +
-            offer.max_discount +
-            "%"
-            : "") +
-        "</div>" +
-        '<small class="">ID - ' +
-        offer.id +
-        " </small> |" +
-        '<small class="">Type - ' +
-        offer.text +
-        " </small> " +
-        "</div>" +
-        "</div>"
-    );
-
-    return $offer;
-}
-
-function formatoffersSelection(offer) {
-    if (offer.element.dataset.select2Text === undefined) {
-        var $offer = $(
-            '<div class="row">' +
             '<div class="col-md-1 align-self-center">' +
             '<div class="">' +
             '<img class="img-fluid" src="' +
-            offer.image +
+            image +
             '"></div>' +
             "</div>" +
             '<div class="align-self-center col-md-10">' +
             '<div class="">' +
-            (offer.min_discount != 0 &&
-                offer.max_discount != 0 &&
-                offer.min_discount != undefined &&
-                offer.max_discount != undefined
+            (offer.min_discount != 0 && offer.max_discount != 0
                 ? "Min - Max Discount : " +
-                offer.min_discount +
-                "% - " +
-                offer.max_discount +
-                "%"
+                  offer.min_discount +
+                  "% - " +
+                  offer.max_discount +
+                  "%"
                 : "") +
             "</div>" +
             '<small class="">ID - ' +
@@ -6204,6 +6241,42 @@ function formatoffersSelection(offer) {
             " </small> " +
             "</div>" +
             "</div>"
+    );
+
+    return $offer;
+}
+
+function formatoffersSelection(offer) {
+    if (offer.element.dataset.select2Text === undefined) {
+        var $offer = $(
+            '<div class="row">' +
+                '<div class="col-md-1 align-self-center">' +
+                '<div class="">' +
+                '<img class="img-fluid" src="' +
+                offer.image +
+                '"></div>' +
+                "</div>" +
+                '<div class="align-self-center col-md-10">' +
+                '<div class="">' +
+                (offer.min_discount != 0 &&
+                offer.max_discount != 0 &&
+                offer.min_discount != undefined &&
+                offer.max_discount != undefined
+                    ? "Min - Max Discount : " +
+                      offer.min_discount +
+                      "% - " +
+                      offer.max_discount +
+                      "%"
+                    : "") +
+                "</div>" +
+                '<small class="">ID - ' +
+                offer.id +
+                " </small> |" +
+                '<small class="">Type - ' +
+                offer.text +
+                " </small> " +
+                "</div>" +
+                "</div>"
         );
     } else {
         $offer = offer.element.dataset.select2Text;
@@ -6237,32 +6310,6 @@ function formatZones(zone) {
 
     var $zone = $(
         '<div class="row">' +
-        '<div class="align-self-center col-md-10">' +
-        '<small class="">ID - ' +
-        zone.id +
-        " </small> | " +
-        '<small class="">Name - ' +
-        zone.text +
-        " </small> " +
-        '<div class="">' +
-        (zone.serviceable_cities
-            ? "Serviceable Cities: " + zone.serviceable_cities + " | "
-            : "") +
-        (zone.serviceable_zipcodes
-            ? "Serviceable Zipcodes: " + zone.serviceable_zipcodes
-            : "") +
-        "</div>" +
-        "</div>" +
-        "</div>"
-    );
-
-    return $zone;
-}
-
-function formatzonesSelection(zone) {
-    if (zone.element.dataset.select2Text === undefined) {
-        var $zone = $(
-            '<div class="row">' +
             '<div class="align-self-center col-md-10">' +
             '<small class="">ID - ' +
             zone.id +
@@ -6280,6 +6327,32 @@ function formatzonesSelection(zone) {
             "</div>" +
             "</div>" +
             "</div>"
+    );
+
+    return $zone;
+}
+
+function formatzonesSelection(zone) {
+    if (zone.element.dataset.select2Text === undefined) {
+        var $zone = $(
+            '<div class="row">' +
+                '<div class="align-self-center col-md-10">' +
+                '<small class="">ID - ' +
+                zone.id +
+                " </small> | " +
+                '<small class="">Name - ' +
+                zone.text +
+                " </small> " +
+                '<div class="">' +
+                (zone.serviceable_cities
+                    ? "Serviceable Cities: " + zone.serviceable_cities + " | "
+                    : "") +
+                (zone.serviceable_zipcodes
+                    ? "Serviceable Zipcodes: " + zone.serviceable_zipcodes
+                    : "") +
+                "</div>" +
+                "</div>" +
+                "</div>"
         );
     } else {
         $zone = zone.element.dataset.select2Text;
@@ -6540,13 +6613,13 @@ $("#delivery_boys_details").on("check.bs.table", function (e, row) {
     d_boy_cash = row.cash_received;
     $("#details").val(
         "Id: " +
-        row.id +
-        " | Name:" +
-        row.username +
-        " | Mobile: " +
-        row.mobile +
-        " | Cash: " +
-        row.cash_received
+            row.id +
+            " | Name:" +
+            row.username +
+            " | Mobile: " +
+            row.mobile +
+            " | Cash: " +
+            row.cash_received
     );
     $("#delivery_boy_id").val(row.id);
 });
@@ -6610,32 +6683,32 @@ $(document).on("click", ".edit_delivery_boy", function (e, rows) {
         success: function (result) {
             var name =
                 result.userData.username != undefined &&
-                    result.userData.username !== ""
+                result.userData.username !== ""
                     ? result.userData.username
                     : "";
             var mobile =
                 result.userData.mobile != undefined &&
-                    result.userData.mobile !== ""
+                result.userData.mobile !== ""
                     ? result.userData.mobile
                     : "";
             var email =
                 result.userData.email != undefined &&
-                    result.userData.email !== ""
+                result.userData.email !== ""
                     ? result.userData.email
                     : "";
             var address =
                 result.userData.address != undefined &&
-                    result.userData.address !== ""
+                result.userData.address !== ""
                     ? result.userData.address
                     : "";
             var bonus_type =
                 result.userData.bonus_type != undefined &&
-                    result.userData.bonus_type !== ""
+                result.userData.bonus_type !== ""
                     ? result.userData.bonus_type
                     : "";
             var bonus =
                 result.userData.bonus != undefined &&
-                    result.userData.bonus !== ""
+                result.userData.bonus !== ""
                     ? result.userData.bonus
                     : 0;
 
@@ -6643,8 +6716,8 @@ $(document).on("click", ".edit_delivery_boy", function (e, rows) {
                 result.userData.front_licence_image.indexOf("https:") === -1
                     ? result.userData.front_licence_image !== ""
                         ? appUrl +
-                        "storage/delivery_boys" +
-                        result.userData.front_licence_image
+                          "storage/delivery_boys" +
+                          result.userData.front_licence_image
                         : appUrl + "assets/img/no-image.jpg"
                     : result.userData.front_licence_image;
 
@@ -6652,8 +6725,8 @@ $(document).on("click", ".edit_delivery_boy", function (e, rows) {
                 result.userData.back_licence_image.indexOf("https:") === -1
                     ? result.userData.front_licence_image !== ""
                         ? appUrl +
-                        "storage/delivery_boys" +
-                        result.userData.back_licence_image
+                          "storage/delivery_boys" +
+                          result.userData.back_licence_image
                         : appUrl + "assets/img/no-image.jpg"
                     : result.userData.back_licence_image;
 
@@ -6755,7 +6828,7 @@ $(window).on("load", function () {
                         appUrl +
                         "storage/" +
                         JSON.parse(store_thumbnail)[store_ids[i]][
-                        "store_thumbnail"
+                            "store_thumbnail"
                         ];
                 } else {
                     var thumbnailUrl = "";
@@ -6809,7 +6882,7 @@ $(window).on("load", function () {
                     '<label class="form-label" for="basic-default-company">Description <span class="text-danger text-sm">*</span></label>' +
                     '<textarea id="basic-default-message" value="" name="description[]" class="form-control" placeholder="Write some description here">' +
                     JSON.parse(store_description)[store_ids[i]][
-                    "store_description"
+                        "store_description"
                     ] +
                     "</textarea>" +
                     "</div>" +
@@ -7295,8 +7368,8 @@ $(document).on("change", ".change_ticket_status", function () {
         if (
             confirm(
                 "Are you sure you want to mark the ticket as " +
-                $(".change_ticket_status option:selected").text() +
-                "? "
+                    $(".change_ticket_status option:selected").text() +
+                    "? "
             )
         ) {
             var id = $(this).data("ticket_id");
@@ -7456,8 +7529,8 @@ if (from == "seller") {
                             product.product_image.indexOf("https:") === -1
                                 ? product.product_image !== ""
                                     ? appUrl +
-                                    "storage/" +
-                                    product.product_image
+                                      "storage/" +
+                                      product.product_image
                                     : appUrl + "assets/img/no-image.jpg"
                                 : product.product_image;
 
@@ -7465,15 +7538,17 @@ if (from == "seller") {
                         <div class="top-selling-product-list d-flex align-items-center">
                             <p class="body-default m-0">${index + 1}.</p>
                             <div >
-                                <img src="${imageUrl}" alt="${product.name
-                            }" class="product-img-box">
+                                <img src="${imageUrl}" alt="${
+                            product.name
+                        }" class="product-img-box">
                             </div>
                             <div>
                                 <p class="lead mb-2">${product.name}</p>
                                 <div class="d-flex total-product-sale">
                                     <i class='bx bx-badge-check body-default me-1'></i>
-                                    <p class="body-default m-0">Sold: ${product.total_sold
-                            }</p>
+                                    <p class="body-default m-0">Sold: ${
+                                        product.total_sold
+                                    }</p>
                                 </div>
                             </div>
                         </div>
@@ -7503,8 +7578,8 @@ if (from == "seller") {
                             product.product_image.indexOf("https:") === -1
                                 ? product.product_image !== ""
                                     ? appUrl +
-                                    "storage/" +
-                                    product.product_image
+                                      "storage/" +
+                                      product.product_image
                                     : appUrl + "assets/img/no-image.jpg"
                                 : product.product_image;
 
@@ -7512,17 +7587,20 @@ if (from == "seller") {
                         <div class="most-popular-product-list d-flex align-items-center">
                             <p class="body-default m-0">${index + 1}.</p>
                             <div >
-                                <img src="${imageUrl}" alt="${product.name
-                            }" class="product-img-box">
+                                <img src="${imageUrl}" alt="${
+                            product.name
+                        }" class="product-img-box">
                             </div>
                             <div>
                                 <p class="lead mb-2">${product.name}</p>
                                 <div class="d-flex total-product-sale">
                                     <i class='bx bxs-star body-default me-1'></i>
-                                    <p class="body-default me-1 product-rating">${product.average_rating
-                            }</p>
-                                    <p class="body-default m-0 total-reviews">(${product.total_reviews
-                            } Reviews)</p>
+                                    <p class="body-default me-1 product-rating">${
+                                        product.average_rating
+                                    }</p>
+                                    <p class="body-default m-0 total-reviews">(${
+                                        product.total_reviews
+                                    } Reviews)</p>
                                 </div>
                             </div>
                         </div>
@@ -7995,8 +8073,8 @@ $(function () {
         } else {
             $("#datepicker span").html(
                 start.format("MMMM D, YYYY") +
-                " - " +
-                end.format("MMMM D, YYYY")
+                    " - " +
+                    end.format("MMMM D, YYYY")
             );
             userSelectedDates = true; // Mark that the user has selected dates
         }
@@ -9883,9 +9961,11 @@ $(document).on("show.bs.modal", "#parcel_status_modal", function (event) {
         <tr>
             <td>${count++}</td>
             <td>${element.product_name}</td>
-            <td><a href='${element.image
-            }' class="image-box-100" data-toggle='lightbox' data-gallery='order-images'> <img src='${element.image
-            }' alt="${element.product_name}"></a></td>
+            <td><a href='${
+                element.image
+            }' class="image-box-100" data-toggle='lightbox' data-gallery='order-images'> <img src='${
+            element.image
+        }' alt="${element.product_name}"></a></td>
             <td>${element.quantity}</td>
             <td>${status}</td>
         </tr>
@@ -9900,19 +9980,31 @@ $(document).on("show.bs.modal", "#parcel_status_modal", function (event) {
         console.log(tracking_data);
         let latestTracking = tracking_data[0]; // Беремо перший запис трекінгу
         // Заповнення полів форми
-        $form.find("[name='courier_agency']").val(latestTracking.courier_agency).trigger("change"); // Для Select2
+        $form
+            .find("[name='courier_agency']")
+            .val(latestTracking.courier_agency)
+            .trigger("change"); // Для Select2
         $form.find("[name='tracking_id']").val(latestTracking.tracking_id);
         $form.find("[name='url']").val(latestTracking.url);
-        const aftership_courier_alert = document.getElementById("aftership_courier_alert");
-        if (aftership_courier_alert && !latestTracking.aftership_courier_alert) {
-            aftership_courier_alert.classList.add('d-none');
+        const aftership_courier_alert = document.getElementById(
+            "aftership_courier_alert"
+        );
+        if (
+            aftership_courier_alert &&
+            !latestTracking.aftership_courier_alert
+        ) {
+            aftership_courier_alert.classList.add("d-none");
         } else {
-            aftership_courier_alert.classList.remove('d-none');
+            aftership_courier_alert.classList.remove("d-none");
         }
         if (latestTracking.tracking_id !== "") {
-            const manualStatusBlock = document.querySelector('.manual-status-update-box');
-            manualStatusBlock.classList.remove('d-none');
-            const $manualStatusform = $(this).find("#manual-status-update-form");
+            const manualStatusBlock = document.querySelector(
+                ".manual-status-update-box"
+            );
+            manualStatusBlock.classList.remove("d-none");
+            const $manualStatusform = $(this).find(
+                "#manual-status-update-form"
+            );
             $manualStatusform.find("[name='parcel_id']").val(parcel_id);
             $manualStatusform.find("[name='status']").val(parcel_status);
         }
@@ -9934,7 +10026,9 @@ function formatStatus(status) {
 
 $(document).on("click", "#update_parcel_status_btn", function (e) {
     e.preventDefault();
-    const manualStatusForm = document.getElementById("manual-status-update-form");
+    const manualStatusForm = document.getElementById(
+        "manual-status-update-form"
+    );
     const parcel_id = manualStatusForm.elements.parcel_id.value;
     const status = manualStatusForm.elements.status.value;
     if (status == "" || status == null) {
@@ -10147,7 +10241,7 @@ function delete_parcel(id) {
                             response.data.map((val) => {
                                 $(
                                     "#product_variant_id_" +
-                                    val.product_variant_id
+                                        val.product_variant_id
                                 ).html(JSON.stringify(val));
                             });
                             iziToast.success({
@@ -10332,5 +10426,34 @@ $(document).on("click", ".update_return_status_delivery_boy", function (e) {
             });
         },
         allowOutsideClick: false,
+    });
+});
+
+$("#set_shipping_amount_form").submit(function (e) {
+    e.preventDefault();
+    let shipping_amount = $("#shipping_amount").val();
+    let order_id = $("#order_id").val();
+    $.ajax({
+        type: "POST",
+        url: appUrl + "seller/orders/set_shipping_amount",
+        data: {
+            shipping_amount: shipping_amount,
+            order_id: order_id,
+        },
+        dataType: "json",
+        success: function (result) {
+            if (result["error"] == false) {
+                iziToast.success({
+                    message: result["message"],
+                });
+                setTimeout(function () {
+                    location.reload();
+                }, 1000);
+            } else {
+                iziToast.error({
+                    message: result["message"],
+                });
+            }
+        },
     });
 });

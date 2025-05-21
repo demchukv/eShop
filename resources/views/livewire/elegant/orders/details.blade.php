@@ -1,6 +1,7 @@
 <?php
 $bread_crumb['page_main_bread_crumb'] = labels('front_messages.order_details', 'Order Details');
 ?>
+
 {{-- @dd($order_transaction); --}}
 <div id="page-content">
     <x-utility.breadcrumbs.breadcrumbTwo />
@@ -147,6 +148,7 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.order_details', '
                                                         }
                                                     }
                                                 @endphp
+
                                                 @if (
                                                     $user_order_item['is_already_cancelled'] == 0 &&
                                                         $user_order_item['is_cancelable'] == 1 &&
@@ -230,21 +232,24 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.order_details', '
                                             $currentWidth = 100;
                                             $statusDate = 100;
                                         } else {
-                                            $totalSteps = $user_order_item['active_status'] == 'awaiting' ? 5 : 4;
+                                            $addStep = $user_order_item['status'][0][0] == 'awaiting' ? 1 : 0;
+                                            $totalSteps = 4 + $addStep;
+
+                                            // $totalSteps = $user_order_item['active_status'] == 'awaiting' ? 5 : 4;
                                             if ($user_order_item['active_status'] == 'awaiting') {
-                                                $currentStep = 1;
+                                                $currentStep = 0 + $addStep;
                                             }
                                             if ($user_order_item['active_status'] == 'received') {
-                                                $currentStep = 1;
+                                                $currentStep = 1 + $addStep;
                                             }
                                             if ($user_order_item['active_status'] == 'processed') {
-                                                $currentStep = 2;
+                                                $currentStep = 2 + $addStep;
                                             }
                                             if ($user_order_item['active_status'] == 'shipped') {
-                                                $currentStep = 3;
+                                                $currentStep = 3 + $addStep;
                                             }
                                             if ($user_order_item['active_status'] == 'delivered') {
-                                                $currentStep = 4;
+                                                $currentStep = 4 + $addStep;
                                             }
                                             $halfLine = ($totalSteps - 2) * 2 + 2; // half line between two points
                                             $halfLineWidth = 100 / $halfLine;
@@ -297,7 +302,13 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.order_details', '
                                             @endphp
                                             <div
                                                 class="tracking-step {{ $user_order_item['active_status'] == 'awaiting' || array_key_exists('awaiting', $user_order_item['status_name']) ? 'current' : 'hide' }}">
-                                                <span class="tracking-step-icon-container"></span>
+                                                <span class="tracking-step-icon-container"><svg width="27"
+                                                        height="25" viewBox="0 0 27 25" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M4.91982 20.8342H15.5815C15.0388 17.5174 12.0197 15.1777 10.2648 14.0766C8.4925 15.1944 5.46796 17.5455 4.91982 20.8342ZM10.2702 16.6486C10.9949 17.207 11.7673 17.9164 12.375 18.7508H8.15776C8.78499 17.906 9.57362 17.1903 10.2702 16.6486ZM20.0003 6.24922C16.4157 6.24922 13.5005 9.05246 13.5005 12.4995C13.5005 15.9465 16.4157 18.7497 20.0003 18.7497C23.5849 18.7497 26.5 15.9465 26.5 12.4995C26.5 9.05246 23.5849 6.24922 20.0003 6.24922ZM20.0003 16.6663C17.6105 16.6663 15.6671 14.7975 15.6671 12.4995C15.6671 10.2015 17.6105 8.33264 20.0003 8.33264C22.39 8.33264 24.3334 10.2015 24.3334 12.4995C24.3334 14.7975 22.39 16.6663 20.0003 16.6663ZM21.0836 12.0588L22.6782 13.5485L21.1691 15.0433L18.917 12.9401V9.37435H21.0836V12.0588ZM19.9255 20.829C19.9602 21.1738 20.0003 21.5155 20.0003 21.8749V25H0.5V21.8749C0.5 17.7028 2.92657 14.5704 5.31197 12.4995C2.92657 10.4296 0.5 7.29718 0.5 3.12513C0.5 1.40214 1.95811 0 3.74986 0H16.7504C17.6181 0 18.4338 0.325014 19.047 0.914621C19.6601 1.50423 19.9992 2.28968 19.9992 3.12513C19.9992 3.48452 19.9591 3.8262 19.9244 4.16996C19.1618 4.17622 18.4263 4.28247 17.7232 4.46685C17.7925 4.0335 17.8326 3.58765 17.8326 3.12513C17.8326 2.84699 17.7199 2.58448 17.5152 2.3876C17.3116 2.19176 17.0396 2.08342 16.7504 2.08342H3.74986C3.15189 2.08342 2.66658 2.55115 2.66658 3.12513C2.66658 7.0555 5.38346 9.94833 7.6627 11.6838L8.73516 12.5005L7.66162 13.3172C5.38238 15.0517 2.66658 17.9445 2.66658 21.8749V22.9166H17.8326V21.8749C17.8326 21.4123 17.7925 20.9655 17.7221 20.5321C18.4252 20.7165 19.1618 20.8227 19.9234 20.829H19.9255Z"
+                                                            fill="white" />
+                                                    </svg></span>
                                                 <span
                                                     class="tracking-label">{{ labels('front_messages.awaiting', 'Awaiting') }}</span>
                                             </div>
@@ -496,7 +507,7 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.order_details', '
                                     </p>
                                     @if ($user_order['delivery_charge'] > 0)
                                         <p class="order-payment-details-light">
-                                            {{ labels('front_messages.delivary_charge', 'Delivary Charge') }}
+                                            {{ labels('front_messages.delivary_charge', 'Delivery Charge') }}
                                             <span>+{{ isset($currency_details) && !empty($currency_details) ? $currency_symbol . number_format((float) $user_order['delivery_charge'] * $currency_details[0]->exchange_rate, 2) : '' }}</span>
                                         </p>
                                     @endif
@@ -523,13 +534,24 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.order_details', '
                                             {{ labels('front_messages.final_total', 'Final Total') }}<br>
                                             @php
                                                 if (isset($transaction['fee']) && $transaction['fee'] != 0) {
-                                                    $final_total = $user_order['final_total'] + $transaction['fee'];
+                                                    $final_total =
+                                                        $user_order['final_total'] +
+                                                        $transaction['fee'] +
+                                                        $user_order['delivery_charge'];
                                                 } else {
-                                                    $final_total = $user_order['final_total'];
+                                                    $final_total =
+                                                        $user_order['final_total'] + $user_order['delivery_charge'];
                                                 }
                                             @endphp
                                             <span>{{ isset($currency_details) && !empty($currency_details) ? $currency_symbol . number_format((float) $final_total * $currency_details[0]->exchange_rate, 2) : '' }}</span>
                                         </p>
+
+                                        @if ($user_order['payment_method'] == 'contractual' && $user_order['set_delivery_charge'] == 1)
+                                            <button type="button" class="btn btn-primary btn-sm" id="pay_order_btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#pay_for_order_modal">{{ labels('front_messages.pay_order', 'Pay Order') }}</button>
+                                        @endif
+
                                         <a href="{{ route('front_end.orders.generatInvoicePDF', $user_orders['order_data'][0]->id) }}"
                                             class="btn btn-secondary btn-sm instructions_files"><i
                                                 class='bx bx-download me-1'></i>{{ labels('admin_labels.invoice', 'Invoice') }}
@@ -557,6 +579,143 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.order_details', '
         </div>
     </div>
 
+    @if ($user_order['payment_method'] == 'contractual' && $user_order['set_delivery_charge'] == 1)
+        <div wire:ignore.self class="modal fade" id="pay_for_order_modal" tabindex="-1"
+            aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Pay for order #{{ $user_order['id'] }}
+                        </h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <form action="{{ Route('wallet.refill') }}" method="post" id="pay_for_order_form">
+                        <input type="hidden" name="order_id" id="order_id" value="{{ $user_order['id'] }}">
+                        <input type="hidden" name="pay_amount" id="pay_amount" value="{{ $final_total }}">
+                        <input type="hidden" name="delivery_charge" id="delivery_charge"
+                            value="{{ $user_order['delivery_charge'] }}">
+                        <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+                        <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+                        <input type="hidden" name="transaction_id" id="transaction_id">
+                        <input type="hidden" name="user-email" id="user-email"
+                            value="{{ $user_info['email'] ?? '' }}" />
+                        <input type="hidden" name="username" id="username"
+                            value="{{ $user_info['username'] ?? '' }}" />
+                        <input type="hidden" name="paystack_reference" id="paystack_reference" value="" />
+                        <div class="modal-body px-2 pt-2">
+                            @csrf
+                            <h2>Amount:
+                                {{ isset($currency_details) && !empty($currency_details) ? $currency_symbol . number_format((float) $final_total * $currency_details[0]->exchange_rate, 2) : '' }}
+                            </h2>
+                            <div class="payment-accordion mt-3">
+                                @if ($payment_method->phonepe_method == 1)
+                                    <div class="form-check mb-2 d-flex align-items-center">
+                                        <input class="form-check-input" type="radio" name="payment_method"
+                                            id="phonepe" value="phonepe">
+                                        <label class="form-check-label d-flex align-items-center ps-2" for="phonepe"
+                                            value="phonepe">
+                                            <div class="image payment-image">
+                                                <img class="blur-up lazyload"
+                                                    data-src="{{ asset('frontend/elegant/images/logo/PhonePe_Logo.png') }}"
+                                                    src="{{ asset('frontend/elegant/images/logo/PhonePe_Logo.png') }}"
+                                                    alt="PhonePe" />
+                                            </div>
+                                        </label>
+                                    </div>
+                                @endif
+                                @if ($payment_method->paypal_method == 1)
+                                    <div class="form-check mb-2 d-flex align-items-center">
+                                        <input class="form-check-input" type="radio" name="payment_method"
+                                            id="paypal-payment" value="paypal">
+                                        <label class="form-check-label d-flex align-items-center ps-2"
+                                            for="paypal-payment" value="paypal">
+                                            <div class="image payment-image">
+                                                <img class="blur-up lazyload"
+                                                    data-src="{{ asset('frontend/elegant/images/logo/paypal-Logo.png') }}"
+                                                    src="{{ asset('frontend/elegant/images/logo/paypal-Logo.png') }}"
+                                                    alt="Paypal" />
+                                            </div>
+                                        </label>
+                                    </div>
+                                @endif
+                                @if ($payment_method->paystack_method == 1)
+                                    <div class="form-check mb-2 d-flex align-items-center">
+                                        <input class="form-check-input" type="radio" name="payment_method"
+                                            id="paystack-payment" value="paystack">
+                                        <label class="form-check-label d-flex align-items-center ps-2"
+                                            for="paystack-payment" value="paystack">
+                                            <div class="image payment-image">
+                                                <img class="blur-up lazyload"
+                                                    data-src="{{ asset('frontend/elegant/images/logo/Paystack_Logo.png') }}"
+                                                    src="{{ asset('frontend/elegant/images/logo/Paystack_Logo.png') }}"
+                                                    alt="paystack" />
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <input type="hidden" name="paystack_public_key" id="paystack_public_key"
+                                        value="{{ $payment_method->paystack_key_id ?? '' }}" />
+                                @endif
+                                @if ($payment_method->stripe_method == 1)
+                                    <div class="form-check mb-2 d-flex align-items-center">
+                                        <input class="form-check-input" type="radio" name="payment_method"
+                                            id="stripe-payment" value="stripe">
+                                        <label class="form-check-label d-flex align-items-center ps-2"
+                                            for="stripe-payment" value="stripe" title="Stripe">
+                                            <div class="image payment-image">
+                                                <img class="blur-up lazyload"
+                                                    data-src="{{ asset('frontend/elegant/images/logo/stripe_logo.png') }}"
+                                                    src="{{ asset('frontend/elegant/images/logo/stripe_logo.png') }}"
+                                                    alt="Stripe" />
+                                            </div>
+                                        </label>
+                                    </div>
+                                @endif
+                                @if ($payment_method->razorpay_method == 1)
+                                    <div class="form-check mb-2 d-flex align-items-center">
+                                        <input class="form-check-input" type="radio" name="payment_method"
+                                            id="razorpay-payment" value="razorpay">
+                                        <label class="form-check-label d-flex align-items-center ps-2"
+                                            for="razorpay-payment" value="razorpay" title="razorpay">
+                                            <div class="image payment-image">
+                                                <img class="blur-up lazyload"
+                                                    data-src="{{ asset('frontend/elegant/images/logo/razorpay_logo.png') }}"
+                                                    src="{{ asset('frontend/elegant/images/logo/razorpay_logo.png') }}"
+                                                    alt="razorpay" />
+                                            </div>
+                                        </label>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary"
+                                data-bs-dismiss="modal">{{ labels('front_messages.close', 'Close') }}</button>
+                            <button type="submit"
+                                class="btn btn-primary">{{ labels('front_messages.add', 'Add') }}</button>
+                        </div>
+                        <div id="paypal-button-container" class="m-3 d-none"></div>
+                        <div id="stripe-checkout"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        @if ($payment_method->razorpay_method == 1)
+            <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        @endif
+        @if ($payment_method->paypal_method == 1)
+            <script
+                src="https://www.paypal.com/sdk/js?client-id={{ $payment_method->paypal_client_id }}&currency={{ $payment_method->currency_code }}">
+            </script>
+        @endif
+        @if ($payment_method->paystack_method == 1)
+            <script src="https://js.paystack.co/v1/inline.js"></script>
+        @endif
+        @if ($payment_method->stripe_method == 1)
+            <script src="https://js.stripe.com/v3/" data-navigate-once></script>
+        @endif
+    @endif
+
     <!-- Track Order Modal -->
     <div class="modal fade" id="trackOrderModal" tabindex="-1" aria-labelledby="trackOrderModalLabel"
         aria-hidden="true">
@@ -577,93 +736,148 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.order_details', '
     </div>
 
     <!-- Refund Option Modal -->
-    <div class="modal fade" id="refundOptionModal" tabindex="-1" aria-labelledby="refundOptionModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="refundOptionModalLabel">Choose Refund Method and Items</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="refundOptionForm">
-                        <div class="mb-3">
-                            <h6>Refund Method</h6>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="refundMethod" id="refundWallet"
-                                    value="wallet" checked>
-                                <label class="form-check-label" for="refundWallet">
-                                    Refund to Wallet
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="refundMethod" id="refundCard"
-                                    value="card" @if ($transaction['transaction_type'] !== 'transaction' || $transaction['type'] !== 'stripe') disabled @endif>
-                                <label class="form-check-label" for="refundCard">
-                                    Refund to Card (via Stripe)<br>
-                                    <small>Refunds take 5-10 days to appear on a customer's statement.</small>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <h6>Select Items to Cancel</h6>
-                            @foreach ($order_transaction as $user_order)
-                                @foreach ($user_order['order_items'] as $user_order_item)
-                                    @if ($user_order_item['is_cancelable'] == 1 && $user_order_item['is_already_cancelled'] == 0)
-                                        <div class="form-check">
-                                            <input class="form-check-input cancel-item-checkbox" type="checkbox"
-                                                name="order_items[]" value="{{ $user_order_item['id'] }}"
-                                                data-item-id="{{ $user_order_item['id'] }}"
-                                                id="item_{{ $user_order_item['id'] }}">
-                                            <label class="form-check-label" for="item_{{ $user_order_item['id'] }}">
-                                                {{ $user_order_item['product_name'] }}
-                                                {{ $user_order_item['variant_name'] ? ' - ' . $user_order_item['variant_name'] : '' }}
-                                                ({{ $currency_symbol . number_format((float) $user_order_item['sub_total'], 2) }})
-                                            </label>
-                                        </div>
-                                    @endif
+    @if ($user_order['payment_method'] == 'contractual')
+        <div class="modal fade" id="refundOptionModal" tabindex="-1" aria-labelledby="refundOptionModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="refundOptionModalLabel">Choose Items</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="refundOptionForm">
+                            <div class="mb-3">
+                                <h6>Select Items to Cancel</h6>
+                                @foreach ($order_transaction as $user_order)
+                                    @foreach ($user_order['order_items'] as $user_order_item)
+                                        @if ($user_order_item['is_cancelable'] == 1 && $user_order_item['is_already_cancelled'] == 0)
+                                            <div class="form-check">
+                                                <input class="form-check-input cancel-item-checkbox" type="checkbox"
+                                                    name="order_items[]" value="{{ $user_order_item['id'] }}"
+                                                    data-item-id="{{ $user_order_item['id'] }}"
+                                                    id="item_{{ $user_order_item['id'] }}">
+                                                <label class="form-check-label"
+                                                    for="item_{{ $user_order_item['id'] }}">
+                                                    {{ $user_order_item['product_name'] }}
+                                                    {{ $user_order_item['variant_name'] ? ' - ' . $user_order_item['variant_name'] : '' }}
+                                                    ({{ $currency_symbol . number_format((float) $user_order_item['sub_total'], 2) }})
+                                                </label>
+                                            </div>
+                                        @endif
+                                    @endforeach
                                 @endforeach
-                            @endforeach
-                        </div>
-                        <input type="hidden" id="paymentMethod" value="{{ $transaction['transaction_type'] }}">
-                        <input type="hidden" id="paymentType" value="{{ $transaction['type'] }}">
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="confirmRefund">Confirm Refund</button>
+                            </div>
+                            <input type="hidden" id="paymentMethod" value="contractual">
+                            <input type="hidden" id="refundMethod" value="contractual">
+                            <input type="hidden" id="paymentType" value="not-set">
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="confirmRefund">Confirm</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    @endif
+    @if ($user_order['payment_method'] != 'contractual')
+        <div class="modal fade" id="refundOptionModal" tabindex="-1" aria-labelledby="refundOptionModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="refundOptionModalLabel">Choose Refund Method and Items</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="refundOptionForm">
+                            <div class="mb-3">
+                                <h6>Refund Method</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="refundMethod"
+                                        id="refundWallet" value="wallet" checked>
+                                    <label class="form-check-label" for="refundWallet">
+                                        Refund to Wallet
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="refundMethod"
+                                        id="refundCard" value="card"
+                                        @if ($transaction['transaction_type'] !== 'transaction' || $transaction['type'] !== 'stripe') disabled @endif>
+                                    <label class="form-check-label" for="refundCard">
+                                        Refund to Card (via Stripe)<br>
+                                        <small>Refunds take 5-10 days to appear on a customer's statement.</small>
+                                    </label>
+                                </div>
+                            </div>
 
-    {{-- Confirm received Modal --}}
-    <div class="modal fade" id="confirmReceivedModal" tabindex="-1" aria-labelledby="confirmReceivedModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmReceivedModalLabel">Item received confirmation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Logistic shows that your package has been delivered. Please check your order and if you're
-                        satisfied click the "Confirm" button to confirm receipt.</p>
-                    <form id="confirmReceivedForm">
-                        <div class="mb-3" id="confirmItemList">
-                        </div>
-                        <input type="hidden" id="order_item_id" value="{{ $transaction['transaction_type'] }}">
-                        <input type="hidden" id="paymentType" value="{{ $transaction['type'] }}">
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="confirmReceived">Confirm</button>
+                            <div class="mb-3">
+                                <h6>Select Items to Cancel</h6>
+                                @foreach ($order_transaction as $user_order)
+                                    @foreach ($user_order['order_items'] as $user_order_item)
+                                        @if ($user_order_item['is_cancelable'] == 1 && $user_order_item['is_already_cancelled'] == 0)
+                                            <div class="form-check">
+                                                <input class="form-check-input cancel-item-checkbox" type="checkbox"
+                                                    name="order_items[]" value="{{ $user_order_item['id'] }}"
+                                                    data-item-id="{{ $user_order_item['id'] }}"
+                                                    id="item_{{ $user_order_item['id'] }}">
+                                                <label class="form-check-label"
+                                                    for="item_{{ $user_order_item['id'] }}">
+                                                    {{ $user_order_item['product_name'] }}
+                                                    {{ $user_order_item['variant_name'] ? ' - ' . $user_order_item['variant_name'] : '' }}
+                                                    ({{ $currency_symbol . number_format((float) $user_order_item['sub_total'], 2) }})
+                                                </label>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                @endforeach
+                            </div>
+                            <input type="hidden" id="paymentMethod"
+                                value="{{ $transaction['transaction_type'] }}">
+                            <input type="hidden" id="paymentType" value="{{ $transaction['type'] }}">
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="confirmRefund">Confirm Refund</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+
+
+        {{-- Confirm received Modal --}}
+        <div class="modal fade" id="confirmReceivedModal" tabindex="-1" aria-labelledby="confirmReceivedModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmReceivedModalLabel">Item received confirmation</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Logistic shows that your package has been delivered. Please check your order and if you're
+                            satisfied click the "Confirm" button to confirm receipt.</p>
+                        <form id="confirmReceivedForm">
+                            <div class="mb-3" id="confirmItemList">
+                            </div>
+                            <input type="hidden" id="order_item_id"
+                                value="{{ $transaction['transaction_type'] }}">
+                            <input type="hidden" id="paymentType" value="{{ $transaction['type'] }}">
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="confirmReceived">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
 
 @push('scripts')
@@ -869,13 +1083,13 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.order_details', '
                     </div>
                     <div class="collapse mb-0" id="allInTransit">
                         ${group.slice(0, -1).reverse().map(cp => `
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <div class="mb-3">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            `).join('')}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <div class="mb-3">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <h6 class="text-warning mb-1">${formatLocalDate(cp.checkpoint_time)} - ${cp.tag}</h6>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <div class="fs-6"><strong>Message:</strong> ${cp.message || 'N/A'}</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <div class="fs-6"><strong>Location:</strong> ${cp.location || 'N/A'}</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <div class="fs-6"><strong>Subtag:</strong> ${cp.subtag_message || 'N/A'}</div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        `).join('')}
                     </div>
                     <p class="mb-3 mt-0">
                         <a href="#" class="text-primary fs-6" data-bs-target="#allInTransit"

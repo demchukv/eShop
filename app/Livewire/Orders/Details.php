@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Orders;
 
+use Illuminate\Support\Facades\Session;
 use App\Models\OrderItems;
 use Livewire\Component;
 use App\Models\Transaction;
@@ -15,6 +16,7 @@ use App\Models\Parcelitem;
 use App\Models\ReturnRequest;
 use App\Models\Disput;
 
+
 class Details extends Component
 {
     public function render(Request $request)
@@ -22,6 +24,8 @@ class Details extends Component
         $store_id = session('store_id');
         $order_id = $request->segment(2);
         $user = Auth::user();
+        $payment_method = getSettings('payment_method', true, true);
+        $payment_method = json_decode($payment_method);
 
         $user_orders = fetchOrders(order_id: $order_id, user_id: $user->id, store_id: $store_id);
         // dd($user_orders);
@@ -31,7 +35,8 @@ class Details extends Component
         $user_orders_transaction_data = json_decode(json_encode($user_orders['order_data']), true);
 
         $couriersFilePath = storage_path('app/aftership_couriers_cache.json');
-        $main_transaction = Transaction::where('order_id', $order_id)->first();
+        // $main_transaction = Transaction::where('order_id', $order_id)->first();
+        $main_transaction = Transaction::whereRaw("FIND_IN_SET($order_id, order_id)")->first();
 
         $couriersMap = \Cache::remember('aftership_couriers', 60 * 60 * 24, function () use ($couriersFilePath) {
             $couriersData = file_exists($couriersFilePath) ? json_decode(file_get_contents($couriersFilePath), true) : ['couriers' => []];
@@ -81,23 +86,27 @@ class Details extends Component
             $currency_symbol = $currency[0]->symbol;
         }
 
+
+
         return view('livewire.' . config('constants.theme') . '.orders.details', [
             'user_orders' => $user_orders,
             'order_transaction' => $user_orders_transaction_data,
             'currency_symbol' => $currency_symbol,
             'transaction' => $main_transaction,
-            'user_info' => $user
+            'user_info' => $user,
+            'payment_method' => $payment_method
         ])->title("Orders Detail |");
     }
 
 
     public function update_order_item_status(Request $request)
     {
+        // dd($request->all());
         $validator = Validator::make($request->all(), [
             'order_status' => 'required',
             'order_item_id' => 'required|array',
             'order_item_id.*' => 'exists:order_items,id',
-            'refund_method' => 'sometimes|in:wallet,card'
+            'refund_method' => 'sometimes|in:wallet,card,contractual'
         ]);
 
         if ($validator->fails()) {
@@ -110,7 +119,8 @@ class Details extends Component
 
         $order_item_ids = $request->input('order_item_id');
         $refund_method = $request->input('refund_method', 'wallet');
-
+        $payment_method = $request->input('payment_method');
+        // dd($refund_method);
         \Log::info("Запит на оновлення статусу: order_status={$request['order_status']}, order_item_ids=" . json_encode($order_item_ids) . ", refund_method={$refund_method}");
 
         if ($request['order_status'] == 'cancelled') {
@@ -122,32 +132,35 @@ class Details extends Component
                 ]);
             }
 
-            $transaction = Transaction::where('order_id', $order_item->order_id)
-                ->where('status', 'success')
-                ->first();
+            if ($payment_method != 'contractual') {
+                // $transaction = Transaction::where('order_id', $order_item->order_id)
+                $transaction = Transaction::whereRaw("FIND_IN_SET($order_item->order_id, order_id)")
+                    ->where('status', 'success')
+                    ->first();
 
-            if (!$transaction) {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'No successful transaction found for this order',
-                ]);
-            }
+                if (!$transaction) {
+                    return response()->json([
+                        'error' => true,
+                        'message' => 'No successful transaction found for this order',
+                    ]);
+                }
 
-            $transaction_type = $transaction->transaction_type;
-            $payment_type = $transaction->type;
+                $transaction_type = $transaction->transaction_type;
+                $payment_type = $transaction->type;
 
-            if ($transaction_type === 'wallet' && $refund_method !== 'wallet') {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'For wallet payments, refund can only be made to wallet',
-                ]);
-            }
+                if ($transaction_type === 'wallet' && $refund_method !== 'wallet') {
+                    return response()->json([
+                        'error' => true,
+                        'message' => 'For wallet payments, refund can only be made to wallet',
+                    ]);
+                }
 
-            if ($transaction_type === 'transaction' && $payment_type !== 'stripe' && $refund_method !== 'wallet') {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'For this payment method, refund can only be made to wallet',
-                ]);
+                if ($transaction_type === 'transaction' && $payment_type !== 'stripe' && $refund_method !== 'wallet') {
+                    return response()->json([
+                        'error' => true,
+                        'message' => 'For this payment method, refund can only be made to wallet',
+                    ]);
+                }
             }
 
             $order_items = OrderItems::where('order_id', $order_item->order_id)->get();
@@ -183,16 +196,18 @@ class Details extends Component
 
                 updateStock($order_item->product_variant_id, $order_item->quantity, 'plus');
 
-                if ($refund_method === 'wallet') {
-                    process_refund($order_item->id, $request['order_status']);
-                } elseif ($refund_method === 'card' && $transaction->type === 'stripe') {
-                    $this->processStripeRefund($request, $order_item, $transaction, $total_order_amount, $cancelled_amount);
+                if ($payment_method != 'contractual') {
+                    if ($refund_method === 'wallet') {
+                        process_refund($order_item->id, $request['order_status']);
+                    } elseif ($refund_method === 'card' && $transaction->type === 'stripe') {
+                        $this->processStripeRefund($request, $order_item, $transaction, $total_order_amount, $cancelled_amount);
+                    }
                 }
             }
-
-            $commissionController = new CommissionController();
-            $commissionController->updateCommissions($order_item->order_id, $is_full_refund, $cancelled_items, $order_items);
-
+            if ($payment_method != 'contractual') {
+                $commissionController = new CommissionController();
+                $commissionController->updateCommissions($order_item->order_id, $is_full_refund, $cancelled_items, $order_items);
+            }
             // Логуємо стан усіх товарів після оновлення
             $updated_items = OrderItems::where('order_id', $order_item->order_id)->get();
             \Log::info("Стан товарів після скасування: " . json_encode($updated_items->toArray()));

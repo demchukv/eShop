@@ -4,6 +4,7 @@ $.ajaxSetup({
         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
     },
 });
+
 var is_logged = "";
 var appUrl = document.getElementById("app_url").dataset.appUrl;
 if (appUrl.charAt(appUrl.length - 1) !== "/") {
@@ -14,7 +15,6 @@ $(".loading-state").addClass("d-none");
 Livewire.on("validationErrorshow", (message) => {
     let messages = message[0].data;
     $.each(messages, function (key, value) {
-
         iziToast.error({
             message: Array.isArray(value) ? value[0] : value,
             position: "topRight",
@@ -250,9 +250,9 @@ function FirebaseAuth() {
                                 success: function (response) {
                                     if (
                                         response.allow_modification_error !=
-                                        undefined &&
+                                            undefined &&
                                         response.allow_modification_error ==
-                                        true
+                                            true
                                     ) {
                                         $("#send_otp")
                                             .attr("disabled", false)
@@ -315,7 +315,7 @@ function FirebaseAuth() {
                                 return;
                             });
                     })
-                    .catch((err) => { });
+                    .catch((err) => {});
             });
             $("#verify_otp").on("click", function () {
                 let code = $("#verificationCode").val();
@@ -666,7 +666,7 @@ function CustomSmsAuth() {
                     },
                 });
             })
-            .catch((err) => { });
+            .catch((err) => {});
         $("#verify_otp").on("click", function () {
             let code = $("#verificationCode").val();
             let number = $("#number").val();
@@ -1235,7 +1235,6 @@ document.addEventListener("livewire:navigating", () => {
 });
 
 document.addEventListener("livewire:navigated", () => {
-
     $(".loading-state").addClass("d-none");
     let store_slug = $("#store_slug").val();
     let current_store_id = $("#current_store_id").val();
@@ -1561,19 +1560,22 @@ document.addEventListener("livewire:navigated", () => {
         // Livewire.dispatch("updateRating", { update_rating: value });
         const id = $(this).attr("id");
         if (id.startsWith("seller-")) {
-            const field = $(this).attr('id').replace('seller-', '').replace(/-/g, '_');
-            Livewire.dispatch('updateSellerRating', {
+            const field = $(this)
+                .attr("id")
+                .replace("seller-", "")
+                .replace(/-/g, "_");
+            Livewire.dispatch("updateSellerRating", {
                 field: field,
-                value: value
+                value: value,
             });
             return;
         }
         const orderItemId = $(this).attr("id").replace("rating-", "") ?? null;
-        Livewire.dispatch("updateRating", { update_rating: value, orderItemId: orderItemId });
+        Livewire.dispatch("updateRating", {
+            update_rating: value,
+            orderItemId: orderItemId,
+        });
     });
-
-
-
 
     $(document).on("shown.bs.collapse", ".accordion-collapse", function () {
         const ratingInputs = $(this).find(".kv-ltr-theme-svg-star");
@@ -1651,7 +1653,9 @@ document.addEventListener("livewire:navigated", () => {
                                 $(".product_price").html(
                                     currency_symbol + price.toFixed(2)
                                 );
-                                $("#special_price").html(currency_symbol + spacial_price.toFixed(2));
+                                $("#special_price").html(
+                                    currency_symbol + spacial_price.toFixed(2)
+                                );
                             } else {
                                 price = parseFloat(prices[0].price);
                                 $(".add_cart").attr(
@@ -1664,18 +1668,23 @@ document.addEventListener("livewire:navigated", () => {
                                 $("#special_price").html("");
                             }
                             //show dealer price and difference between price and dealer price
-                            const dealer_price = parseFloat(prices[0].dealer_price);
-                            const dealer_price_box = document.getElementById("dealer_price");
-                            const diff_price_box = document.getElementById("diff_price");
+                            const dealer_price = parseFloat(
+                                prices[0].dealer_price
+                            );
+                            const dealer_price_box =
+                                document.getElementById("dealer_price");
+                            const diff_price_box =
+                                document.getElementById("diff_price");
                             if (dealer_price_box) {
                                 $("#dealer_price").html(
                                     currency_symbol + dealer_price.toFixed(2)
-                                )
+                                );
                             }
                             if (diff_price_box) {
                                 $("#diff_price").html(
-                                    currency_symbol + (price - dealer_price).toFixed(2)
-                                )
+                                    currency_symbol +
+                                        (price - dealer_price).toFixed(2)
+                                );
                             }
                             $(".add_cart").removeAttr("disabled");
                         } else {
@@ -2069,10 +2078,10 @@ document.addEventListener("livewire:navigated", () => {
             slide: function (event, ui) {
                 $("#amount").val(
                     currency_symbol +
-                    ui.values[0] +
-                    " - " +
-                    currency_symbol +
-                    ui.values[1]
+                        ui.values[0] +
+                        " - " +
+                        currency_symbol +
+                        ui.values[1]
                 );
                 $("#min-price").val(ui.values[0]);
                 $("#max-price").val(ui.values[1]);
@@ -2080,10 +2089,10 @@ document.addEventListener("livewire:navigated", () => {
         });
         $("#amount").val(
             currency_symbol +
-            $("#slider-range").slider("values", 0) +
-            " - " +
-            currency_symbol +
-            $("#slider-range").slider("values", 1)
+                $("#slider-range").slider("values", 0) +
+                " - " +
+                currency_symbol +
+                $("#slider-range").slider("values", 1)
         );
     }
     price_slider();
@@ -2581,102 +2590,128 @@ document.addEventListener("livewire:navigated", () => {
         let confirm_btn = "";
 
         if (order_status === "cancelled") {
-            confirm_title = "Are you sure you want to cancel the selected ordered items?";
+            confirm_title =
+                "Are you sure you want to cancel the selected ordered items?";
             confirm_btn = "Yes Remove";
 
-            $('#refundOptionModal').modal('show');
-            $(`.cancel-item-checkbox[data-item-id="${initial_order_item_id}"]`).prop('checked', true);
+            $("#refundOptionModal").modal("show");
+            $(
+                `.cancel-item-checkbox[data-item-id="${initial_order_item_id}"]`
+            ).prop("checked", true);
 
             // Налаштування варіантів повернення на основі методу оплати
-            const paymentMethod = $('#paymentMethod').val();
-            const paymentType = $('#paymentType').val();
+            const paymentMethod = $("#paymentMethod").val();
+            const paymentType = $("#paymentType").val();
 
-            if (paymentMethod === 'wallet') {
-                $('#refundWallet').prop('checked', true);
-                $('#refundCard').prop('disabled', true);
-            } else if (paymentMethod === 'transaction' && paymentType === 'stripe') {
-                $('#refundWallet').prop('checked', true); // За замовчуванням вибрано гаманець
-                $('#refundCard').prop('disabled', false); // Обидва варіанти доступні для Stripe
-            } else {
-                $('#refundWallet').prop('checked', true);
-                $('#refundCard').prop('disabled', true); // Для інших платіжних систем тільки гаманець
+            if (paymentMethod !== "contractual") {
+                if (paymentMethod === "wallet") {
+                    $("#refundWallet").prop("checked", true);
+                    $("#refundCard").prop("disabled", true);
+                } else if (
+                    paymentMethod === "transaction" &&
+                    paymentType === "stripe"
+                ) {
+                    $("#refundWallet").prop("checked", true); // За замовчуванням вибрано гаманець
+                    $("#refundCard").prop("disabled", false); // Обидва варіанти доступні для Stripe
+                } else {
+                    $("#refundWallet").prop("checked", true);
+                    $("#refundCard").prop("disabled", true); // Для інших платіжних систем тільки гаманець
+                }
             }
 
-            $('#confirmRefund').off('click').on('click', function () {
-                const refundMethod = $('input[name="refundMethod"]:checked').val();
-                const selectedItems = $('.cancel-item-checkbox:checked').map(function () {
-                    return $(this).val();
-                }).get();
+            $("#confirmRefund")
+                .off("click")
+                .on("click", function () {
+                    const refundMethod = $(
+                        'input[name="refundMethod"]:checked'
+                    ).val();
+                    const selectedItems = $(".cancel-item-checkbox:checked")
+                        .map(function () {
+                            return $(this).val();
+                        })
+                        .get();
 
-                if (selectedItems.length === 0) {
-                    iziToast.error({
-                        message: "Please select at least one item to cancel",
-                        position: "topRight",
-                    });
-                    return;
-                }
-
-                // Перевірка для wallet: дозволяємо тільки повернення на гаманець
-                if (paymentMethod === 'wallet' && refundMethod !== 'wallet') {
-                    iziToast.error({
-                        message: "For wallet payments, refund can only be made to wallet",
-                        position: "topRight",
-                    });
-                    return;
-                }
-
-                // Для transaction+stripe дозволяємо обидва варіанти, для інших тільки wallet
-                if (paymentMethod === 'transaction' && paymentType !== 'stripe' && refundMethod !== 'wallet') {
-                    iziToast.error({
-                        message: "For this payment method, refund can only be made to wallet",
-                        position: "topRight",
-                    });
-                    return;
-                }
-
-                Swal.fire({
-                    title: confirm_title,
-                    showCancelButton: true,
-                    confirmButtonText: confirm_btn,
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            type: "POST",
-                            url: appUrl + "orders/update-order-item-status",
-                            data: {
-                                order_status: order_status,
-                                order_item_id: selectedItems,
-                                refund_method: refundMethod
-                            },
-                            dataType: "json",
-                            success: function (response) {
-                                if (response.error == false) {
-                                    iziToast.success({
-                                        message: response.message,
-                                        position: "topRight",
-                                    });
-                                    Livewire.dispatch("refreshComponent");
-                                    $('#refundOptionModal').modal('hide');
-                                    const reloadTimer = setTimeout(() => {
-                                        location.reload();
-                                    }, 1500);
-                                } else {
-                                    iziToast.error({
-                                        message: response.message,
-                                        position: "topRight",
-                                    });
-                                }
-                            },
-                            error: function (xhr, status, error) {
-                                iziToast.error({
-                                    message: "An error occurred while processing your request",
-                                    position: "topRight",
-                                });
-                            }
+                    if (selectedItems.length === 0) {
+                        iziToast.error({
+                            message:
+                                "Please select at least one item to cancel",
+                            position: "topRight",
                         });
+                        return;
                     }
+
+                    // Перевірка для wallet: дозволяємо тільки повернення на гаманець
+                    if (
+                        paymentMethod === "wallet" &&
+                        refundMethod !== "wallet"
+                    ) {
+                        iziToast.error({
+                            message:
+                                "For wallet payments, refund can only be made to wallet",
+                            position: "topRight",
+                        });
+                        return;
+                    }
+
+                    // Для transaction+stripe дозволяємо обидва варіанти, для інших тільки wallet
+                    if (
+                        paymentMethod === "transaction" &&
+                        paymentType !== "stripe" &&
+                        refundMethod !== "wallet"
+                    ) {
+                        iziToast.error({
+                            message:
+                                "For this payment method, refund can only be made to wallet",
+                            position: "topRight",
+                        });
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: confirm_title,
+                        showCancelButton: true,
+                        confirmButtonText: confirm_btn,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                type: "POST",
+                                url: appUrl + "orders/update-order-item-status",
+                                data: {
+                                    order_status: order_status,
+                                    order_item_id: selectedItems,
+                                    refund_method: refundMethod,
+                                    payment_method: paymentMethod,
+                                },
+                                dataType: "json",
+                                success: function (response) {
+                                    if (response.error == false) {
+                                        iziToast.success({
+                                            message: response.message,
+                                            position: "topRight",
+                                        });
+                                        Livewire.dispatch("refreshComponent");
+                                        $("#refundOptionModal").modal("hide");
+                                        const reloadTimer = setTimeout(() => {
+                                            location.reload();
+                                        }, 1500);
+                                    } else {
+                                        iziToast.error({
+                                            message: response.message,
+                                            position: "topRight",
+                                        });
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    iziToast.error({
+                                        message:
+                                            "An error occurred while processing your request",
+                                        position: "topRight",
+                                    });
+                                },
+                            });
+                        }
+                    });
                 });
-            });
         } else if (order_status === "returned") {
             // Keep existing return logic
             confirm_title = "Are you sure you want to return the ordered item?";
@@ -2748,7 +2783,7 @@ document.addEventListener("livewire:navigated", () => {
             separateDialCode: !0,
             initialCountry: "auto",
             geoIpLookup: function (e) {
-                $.get("https://ipinfo.io", function () { }, "jsonp").always(
+                $.get("https://ipinfo.io", function () {}, "jsonp").always(
                     function (t) {
                         var a = t && t.country ? t.country : "";
                         e(a);
@@ -2777,7 +2812,6 @@ document.addEventListener("livewire:navigated", () => {
     // if (store_exsist == null) {
     //     Livewire.navigate(store);
     // }
-
 
     const send_dealer_request_form = document.querySelector("#dealer-form");
     if (send_dealer_request_form) {
@@ -2968,8 +3002,8 @@ function newMessage() {
     }
     $(
         '<li class="sent"><img src="http://emilcarlsson.se/assets/mikeross.png" alt="" /><p>' +
-        message +
-        "</p></li>"
+            message +
+            "</p></li>"
     ).appendTo($(".messages ul"));
     $(".message-input input").val(null);
     $(".contact.active .preview").html("<span>You: </span>" + message);
@@ -3093,8 +3127,8 @@ function display_compare() {
                             (e.type == "simple_product"
                                 ? e.variants[0]["special_price"]
                                 : e.min_max_price.max_price +
-                                "-" +
-                                e.min_max_price.special_min_price) +
+                                  "-" +
+                                  e.min_max_price.special_min_price) +
                             "</span></div>";
                     });
 
@@ -3252,9 +3286,6 @@ function arrays_equal(e, t) {
     return !0;
 }
 
-
-
-
 // Делегування події кліку для всіх кнопок із класом .copy-btn
 document.addEventListener("click", function (event) {
     const button = event.target.closest(".copy-btn");
@@ -3291,4 +3322,3 @@ document.addEventListener("click", function (event) {
         }
     }
 });
-

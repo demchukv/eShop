@@ -29,6 +29,7 @@ class Wallet extends Component
         ])->title("Wallet |");
     }
 
+
     public function get_user_info()
     {
         return Auth::user();

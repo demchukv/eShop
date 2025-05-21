@@ -6,6 +6,7 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AddressController;
 
+
 class Checkout extends Component
 {
     protected $listeners = ['refreshComponent', 'get_selected_address', 'get_selected_promo', 'is_wallet_use'];
@@ -57,6 +58,7 @@ class Checkout extends Component
 
         $promo_codes = getPromoCodes(store_id: $store_id);
         $cart_data = $this->get_user_cart($this->user_id, $store_id, ($default_address[0]->id ?? ""));
+        // dd($cart_data);
         if (count($cart_data) < 1) {
             return $this->redirect(customUrl('/'), true);
         }
@@ -120,7 +122,7 @@ class Checkout extends Component
 
         $payment_method = getSettings('payment_method', true, true);
         $payment_method_ = json_decode($payment_method);
-
+        // dd($product_availability);
         return view('livewire.' . config('constants.theme') . '.cart.checkout', [
             'cart_data' => $cart_data,
             'final_total' => $final_total,
@@ -134,12 +136,14 @@ class Checkout extends Component
             'time_slots' => $time_slots,
             'payment_method' => $payment_method,
             'user_details' => $user_details,
+            'delivery_charge_type' => $settings[0]->delivery_charge_type
         ])->title('Checkout |');
     }
 
     public function get_user_cart($user_id, $store_id, $address_id = "")
     {
         $cart_data = getCartTotal($user_id, false, 0, $address_id, $store_id);
+        // dd($cart_data);
         return $cart_data;
     }
 

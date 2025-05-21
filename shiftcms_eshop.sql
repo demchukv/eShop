@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: shiftcms.mysql.ukraine.com.ua:3306
--- Час створення: Квт 21 2025 р., 10:25
+-- Час створення: Трв 17 2025 р., 09:37
 -- Версія сервера: 5.7.44-52-log
 -- Версія PHP: 7.4.33
 
@@ -59,7 +59,8 @@ CREATE TABLE `addresses` (
 INSERT INTO `addresses` (`id`, `user_id`, `name`, `type`, `mobile`, `alternate_mobile`, `address`, `landmark`, `area_id`, `city_id`, `city`, `area`, `pincode`, `system_pincode`, `country_code`, `state`, `country`, `latitude`, `longitude`, `is_default`, `updated_at`, `created_at`) VALUES
 (1, 413, 'Володимир Демчук', 'home', '0963926935', NULL, 'вул. Вернадського, 32, кв. 35', 'No landmark', NULL, 1, 'Lviv', 'NULL', '79000', 1, 380, 'Львівська область', 'Ukraine', NULL, NULL, 0, '2025-03-10 08:13:24', '2025-03-10 08:13:24'),
 (2, 420, 'Natalia Demchuk', 'home', '963926935', NULL, 'Vernadsky Str., 32', 'No landmark', NULL, 1, 'Lviv', 'NULL', '79000', 1, 380, 'Lviv region', 'Ukraine', NULL, NULL, 0, '2025-03-30 17:16:17', '2025-03-30 17:16:17'),
-(3, 421, 'Volodymyr Demchuk', 'home', '963237058', NULL, 'Vernadskogo str., 35', 'no', NULL, 1, 'Lviv', 'NULL', '79000', 1, 380, 'Lviv region', 'Ukraine', NULL, NULL, 0, '2025-03-31 06:17:32', '2025-03-31 06:17:32');
+(3, 421, 'Volodymyr Demchuk', 'home', '963237058', NULL, 'Vernadskogo str., 35', 'no', NULL, 1, 'Lviv', 'NULL', '79000', 1, 380, 'Lviv region', 'Ukraine', NULL, NULL, 0, '2025-03-31 06:17:32', '2025-03-31 06:17:32'),
+(6, 435, 'Володимир Демчук', 'home', '0963926935', NULL, 'вул. Вернадського, 32, кв. 35', 'No landmark', NULL, 1, 'Lviv', 'NULL', '79049', 1, 380, 'Львівська область', 'Ukraine', NULL, NULL, 0, '2025-05-07 15:39:43', '2025-05-07 15:39:43');
 
 -- --------------------------------------------------------
 
@@ -206,10 +207,10 @@ CREATE TABLE `brands` (
 --
 
 INSERT INTO `brands` (`id`, `store_id`, `name`, `slug`, `image`, `status`, `created_at`, `updated_at`) VALUES
-(1, 2, 'LG', 'lg', '/media/image-(1)-1741259454_8901.png', 1, '2025-03-06 09:11:02', '2025-03-06 09:11:02'),
-(2, 2, 'Bosch', 'bosch', '/media/image-(3)-1741259498_3449.jpg', 1, '2025-03-06 09:11:44', '2025-03-06 09:11:44'),
-(3, 2, 'Colgate', 'colgate', '/media/image-(5)-1744092159_3058.png', 1, '2025-04-08 03:02:49', '2025-04-08 03:02:49'),
-(4, 2, 'Pantene', 'pantene', '/media/image-(6)-1744092216_6333.png', 1, '2025-04-08 03:03:56', '2025-04-08 03:03:56');
+(1, 2, 'LG', 'lg', '/media/image-2-1745397848_5026.png', 1, '2025-03-06 09:11:02', '2025-04-23 05:44:16'),
+(2, 2, 'Bosch', 'bosch', '/media/brand-bosch-1745398246_8584.png', 1, '2025-03-06 09:11:44', '2025-04-23 05:51:12'),
+(3, 2, 'Colgate', 'colgate', '/media/image-43316.64429754417-1745474122_3040.png', 1, '2025-04-08 03:02:49', '2025-04-24 02:55:33'),
+(4, 2, 'Pantene', 'pantene', '/media/image-43831.56921778596-1745474122_6805.png', 1, '2025-04-08 03:03:56', '2025-04-24 02:55:48');
 
 -- --------------------------------------------------------
 
@@ -228,6 +229,17 @@ CREATE TABLE `cart` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Дамп даних таблиці `cart`
+--
+
+INSERT INTO `cart` (`id`, `user_id`, `store_id`, `product_variant_id`, `qty`, `is_saved_for_later`, `product_type`, `created_at`, `updated_at`) VALUES
+(103, 422, 2, 5, 1, 0, 'regular', '2025-05-16 07:50:13', '2025-05-16 07:50:13'),
+(106, 435, 2, 9, 1, 0, 'regular', '2025-05-16 10:27:41', '2025-05-16 10:27:41'),
+(107, 435, 2, 3, 1, 0, 'regular', '2025-05-17 03:15:12', '2025-05-17 03:15:12'),
+(108, 435, 2, 5, 1, 0, 'regular', '2025-05-17 03:15:25', '2025-05-17 03:15:25'),
+(109, 435, 2, 4, 1, 0, 'regular', '2025-05-17 03:15:29', '2025-05-17 03:15:29');
 
 -- --------------------------------------------------------
 
@@ -257,16 +269,94 @@ CREATE TABLE `categories` (
 
 INSERT INTO `categories` (`id`, `store_id`, `name`, `parent_id`, `slug`, `image`, `banner`, `style`, `row_order`, `status`, `clicks`, `created_at`, `updated_at`) VALUES
 (1, 1, 'Pharmacy', 0, 'pharmacy', '/media/image-(2)-1740223072_6534.jpg', '/media/image-(1)-1740039826_1164.jpg', '', 0, 1, 0, '2025-02-22 11:18:00', '2025-02-22 11:18:00'),
-(3, 2, 'Computers', 0, 'computers', '/media/e-image-1741257993_7213.jpg', '/media/e2-image-1741257993_7393.jpg', '', 0, 1, 0, '2025-03-06 10:46:50', '2025-03-06 10:46:50'),
-(4, 2, 'Home Appliance', 0, 'home-appliance', '/media/home-appliance-2-1717396497_6130-1741258138_2089.webp', '/media/e2-image-1741257993_7393.jpg', '', 0, 1, 0, '2025-03-06 10:49:13', '2025-03-06 10:49:13'),
+(3, 2, 'Electronics', 0, 'electronics', '/media/group-167-1746882852_4494.jpg', '/media/e2-image-1741257993_7393.jpg', '', 7, 1, 0, '2025-03-06 10:46:50', '2025-05-15 07:45:44'),
+(4, 2, 'Home', 0, 'home', '/media/group-172-1746883281_8889.jpg', '/media/e2-image-1741257993_7393.jpg', '', 4, 1, 0, '2025-03-06 10:49:13', '2025-05-15 07:45:44'),
 (5, 2, 'Motherboards', 3, 'motherboards', '/media/image-(5)-1741267960_2485.jpg', '/media/image-(1)-1741267960_1021.webp', '', 0, 1, 0, '2025-03-06 13:32:54', '2025-03-06 13:32:54'),
-(6, 2, 'Pharmacy', 0, 'pharmacy-1', '/media/image-(14)-1744091716_7722.jpg', '/media/image-(14)-1744091716_7722.jpg', '', 0, 1, 0, '2025-04-08 05:55:45', '2025-04-08 05:55:45'),
+(6, 2, 'Pharmacy', 0, 'pharmacy-1', '/media/group-173-1746883447_6588.jpg', '/media/image-(14)-1744091716_7722.jpg', '', 13, 1, 0, '2025-04-08 05:55:45', '2025-05-15 07:45:44'),
 (7, 2, 'Dental Care', 6, 'dental-care', '/media/image-(2)-1744091823_8753.png', '/media/image-(2)-1744091823_8753.png', '', 0, 1, 0, '2025-04-08 05:58:04', '2025-04-08 05:58:04'),
 (8, 2, 'Medicine', 6, 'medicine', '/media/image-(3)-1744091937_1901.png', '/media/image-(3)-1744091937_1901.png', '', 0, 1, 0, '2025-04-08 05:59:15', '2025-04-08 05:59:15'),
 (9, 2, 'Pet Care', 6, 'pet-care', '/media/image-(4)-1744092074_6520.png', '/media/image-(4)-1744092074_6520.png', '', 0, 1, 0, '2025-04-08 06:01:27', '2025-04-08 06:01:27'),
-(10, 2, 'LuxeLine', 0, 'luxeline', '/media/image-(15)-1744094847_5798.jpg', '/media/image-(16)-1744094847_8818.jpg', '', 0, 1, 0, '2025-04-08 06:47:42', '2025-04-08 06:47:42'),
+(10, 2, 'LuxeLine', 0, 'luxeline', '/media/group-175-1746883668_5352.jpg', '/media/image-(16)-1744094847_8818.jpg', '', 14, 1, 0, '2025-04-08 06:47:42', '2025-05-15 07:45:44'),
 (11, 2, 'Men', 10, 'men', '/media/image-(17)-1744094925_9680.jpg', '/media/image-(18)-1744094925_6367.jpg', '', 0, 1, 0, '2025-04-08 06:48:55', '2025-04-08 06:48:55'),
-(12, 2, 'Women', 10, 'women', '/media/image-(19)-1744094998_1673.jpg', '/media/image-(20)-1744094998_9832.jpg', '', 0, 1, 0, '2025-04-08 06:50:10', '2025-04-08 06:50:10');
+(12, 2, 'Women', 10, 'women', '/media/image-(19)-1744094998_1673.jpg', '/media/image-(20)-1744094998_9832.jpg', '', 0, 1, 0, '2025-04-08 06:50:10', '2025-04-08 06:50:10'),
+(14, 2, 'For women', 0, 'for-women', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 05:51:52', '2025-05-15 07:45:44'),
+(15, 2, 'Blouses and shirts', 14, 'blouses-and-shirts', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 05:53:37', '2025-05-15 05:53:37'),
+(16, 2, 'Trousers', 14, 'trousers', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 05:54:03', '2025-05-15 05:54:03'),
+(17, 2, 'Outerwear', 14, 'outerwear', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 05:54:25', '2025-05-15 05:54:25'),
+(18, 2, 'Jumpers, turtlenecks and cardigans', 14, 'jumpers-turtlenecks-and-cardigans', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 05:54:52', '2025-05-15 05:54:52'),
+(19, 2, 'Jeans', 14, 'jeans', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 05:55:22', '2025-05-15 05:55:22'),
+(20, 2, 'Overalls', 14, 'overalls', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 05:56:10', '2025-05-15 05:56:10'),
+(21, 2, 'Suits', 14, 'suits', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 05:56:42', '2025-05-15 05:56:42'),
+(22, 2, 'Longsleeves', 14, 'longsleeves', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 05:57:05', '2025-05-15 05:57:05'),
+(23, 2, 'Jackets, vests and jackets', 14, 'jackets-vests-and-jackets', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 05:57:28', '2025-05-15 05:57:28'),
+(24, 2, 'Dresses and sundresses', 14, 'dresses-and-sundresses', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 05:57:54', '2025-05-15 05:57:54'),
+(25, 2, 'Sweatshirts, sweatshirts and hoodies', 14, 'sweatshirts-sweatshirts-and-hoodies', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 05:58:21', '2025-05-15 05:58:21'),
+(26, 2, 'Tunics', 14, 'tunics', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 05:58:41', '2025-05-15 05:58:41'),
+(27, 2, 'T-shirts and tops', 14, 't-shirts-and-tops', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 05:59:06', '2025-05-15 05:59:06'),
+(28, 2, 'Robes', 14, 'robes', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 05:59:45', '2025-05-15 05:59:45'),
+(29, 2, 'Shorts', 14, 'shorts', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:00:07', '2025-05-15 06:00:07'),
+(30, 2, 'Skirts', 14, 'skirts', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:00:35', '2025-05-15 06:00:35'),
+(31, 2, 'Underwear', 14, 'underwear', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:00:54', '2025-05-15 06:00:54'),
+(32, 2, 'Plus Sizes', 14, 'plus-sizes', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:02:08', '2025-05-15 06:02:08'),
+(33, 2, 'Expectant Mothers', 14, 'expectant-mothers', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:02:35', '2025-05-15 06:02:35'),
+(34, 2, 'For Tall', 14, 'for-tall', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:03:01', '2025-05-15 06:03:01'),
+(35, 2, 'For Short', 14, 'for-short', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:03:24', '2025-05-15 06:03:24'),
+(36, 2, 'Home Wear', 14, 'home-wear', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:03:52', '2025-05-15 06:03:52'),
+(37, 2, 'Office', 14, 'office', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:04:15', '2025-05-15 06:04:15'),
+(38, 2, 'Beachwear', 14, 'beachwear', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:04:36', '2025-05-15 06:04:36'),
+(39, 2, 'Religious', 14, 'religious', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:04:57', '2025-05-15 06:04:57'),
+(40, 2, 'Wedding', 14, 'wedding', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:05:25', '2025-05-15 06:05:25'),
+(41, 2, 'Workwear and PPE', 14, 'workwear-and-ppe', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:05:56', '2025-05-15 06:05:56'),
+(42, 2, 'Gifts for Women', 14, 'gifts-for-women', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:06:18', '2025-05-15 06:06:18'),
+(43, 2, 'Shoes', 0, 'shoes', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 1, 1, 0, '2025-05-15 06:08:19', '2025-05-15 07:45:44'),
+(44, 2, 'Children\'s', 43, 'childrens', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:16:35', '2025-05-15 06:16:35'),
+(45, 2, 'For newborns', 43, 'for-newborns', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:16:55', '2025-05-15 06:16:55'),
+(46, 2, 'Women\'s', 43, 'womens', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:17:17', '2025-05-15 06:17:17'),
+(47, 2, 'Men\'s', 43, 'mens', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:17:38', '2025-05-15 06:17:38'),
+(48, 2, 'Special footwear', 43, 'special-footwear', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:17:58', '2025-05-15 06:17:58'),
+(49, 2, 'Shoe accessories', 43, 'shoe-accessories', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:18:21', '2025-05-15 06:18:21'),
+(50, 2, 'For girls', 44, 'for-girls', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:19:13', '2025-05-15 06:19:13'),
+(51, 2, 'For boys', 44, 'for-boys', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:19:31', '2025-05-15 06:19:31'),
+(52, 2, 'Ballet flats and Czech shoes', 46, 'ballet-flats-and-czech-shoes', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:20:26', '2025-05-15 06:20:26'),
+(53, 2, 'Sandals and sandals', 46, 'sandals-and-sandals', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 06:26:07', '2025-05-15 06:26:07'),
+(54, 2, 'Boots and low shoes', 46, 'boots-and-low-shoes', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 07:02:51', '2025-05-15 07:02:51'),
+(55, 2, 'Sneakers and trainers', 46, 'sneakers-and-trainers', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 07:03:20', '2025-05-15 07:03:20'),
+(56, 2, 'Moccasins and topsiders', 46, 'moccasins-and-topsiders', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 07:03:37', '2025-05-15 07:03:37'),
+(57, 2, 'Clogs and mules', 46, 'clogs-and-mules', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 07:03:54', '2025-05-15 07:03:54'),
+(58, 2, 'Boots', 46, 'boots', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 07:04:12', '2025-05-15 07:04:12'),
+(59, 2, 'Slippers', 46, 'slippers', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 07:04:28', '2025-05-15 07:04:28'),
+(60, 2, 'Shoes and loafers', 46, 'shoes-and-loafers', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 07:04:44', '2025-05-15 07:04:44'),
+(61, 2, 'Flip-flops and aquasocks', 46, 'flip-flops-and-aquasocks', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 07:05:01', '2025-05-15 07:05:01'),
+(62, 2, 'Children', 0, 'children', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 2, 1, 0, '2025-05-15 07:10:50', '2025-05-15 07:45:44'),
+(63, 2, 'Men', 0, 'men-1', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 3, 1, 0, '2025-05-15 07:37:30', '2025-05-15 07:45:44'),
+(64, 2, 'Beauty', 0, 'beauty', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 5, 1, 0, '2025-05-15 07:39:55', '2025-05-15 07:45:44'),
+(65, 2, 'Accessories', 0, 'accessories', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 6, 1, 0, '2025-05-15 07:40:23', '2025-05-15 07:45:44'),
+(66, 2, 'Toys', 0, 'toys', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 8, 1, 0, '2025-05-15 07:41:14', '2025-05-15 07:45:44'),
+(67, 2, 'Furniture', 0, 'furniture', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 9, 1, 0, '2025-05-15 07:43:32', '2025-05-15 07:45:44'),
+(68, 2, 'Products for adults', 0, 'products-for-adults', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 10, 1, 0, '2025-05-15 07:43:49', '2025-05-15 07:45:44'),
+(69, 2, 'Products', 0, 'products', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 11, 1, 0, '2025-05-15 07:44:06', '2025-05-15 07:45:44'),
+(70, 2, 'Household appliances', 0, 'household-appliances', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 12, 1, 0, '2025-05-15 07:44:24', '2025-05-15 07:45:44'),
+(71, 2, 'Boots and low shoes', 47, 'boots-and-low-shoes-1', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 07:47:44', '2025-05-15 07:47:44'),
+(72, 2, 'Sneakers and trainers', 47, 'sneakers-and-trainers-1', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 07:48:04', '2025-05-15 07:48:04'),
+(73, 2, 'Moccasins and topsiders', 47, 'moccasins-and-topsiders-1', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 07:48:22', '2025-05-15 07:48:22'),
+(74, 2, 'Boots and fur boots', 47, 'mens-boots-and-fur-boots', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 07:48:39', '2025-05-15 07:49:48'),
+(75, 2, 'Slippers', 47, 'slippers-1', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 07:50:18', '2025-05-15 07:50:18'),
+(76, 2, 'Shoes and loafers', 47, 'shoes-and-loafers-1', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 07:50:38', '2025-05-15 07:50:38'),
+(77, 2, 'Flip-flops and aquasocks', 47, 'flip-flops-and-aquasocks-1', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 07:51:10', '2025-05-15 07:51:10'),
+(78, 2, 'Shoe Inserts', 49, 'shoe-inserts', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 07:53:03', '2025-05-15 07:53:03'),
+(79, 2, 'Sponges and Brushes', 49, 'sponges-and-brushes', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 08:06:44', '2025-05-15 08:06:44'),
+(80, 2, 'Shoe Deodorants', 49, 'shoe-deodorants', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 08:07:02', '2025-05-15 08:07:02'),
+(81, 2, 'For Shoe Repair and Creation', 49, 'for-shoe-repair-and-creation', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 08:07:23', '2025-05-15 08:07:23'),
+(82, 2, 'Raincoats for Shoes', 49, 'raincoats-for-shoes', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 08:08:52', '2025-05-15 08:08:52'),
+(83, 2, 'Ice Cleats and Anti-Slip Pads', 49, 'ice-cleats-and-anti-slip-pads', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 08:09:11', '2025-05-15 08:09:11'),
+(84, 2, 'Shoe Spoons', 49, 'shoe-spoons', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 08:09:29', '2025-05-15 08:09:29'),
+(85, 2, 'Bags and Covers for Shoes', 49, 'bags-and-covers-for-shoes', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 08:09:45', '2025-05-15 08:09:45'),
+(86, 2, 'Stretchers and Shoe Trees', 49, 'stretchers-and-shoe-trees', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 08:10:02', '2025-05-15 08:10:02'),
+(87, 2, 'Shoe Care Products', 49, 'shoe-care-products', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 08:10:20', '2025-05-15 08:10:20'),
+(88, 2, 'Insoles', 49, 'insoles', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 08:10:40', '2025-05-15 08:10:40'),
+(89, 2, 'Shoe Dryers', 49, 'shoe-dryers', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 08:10:59', '2025-05-15 08:10:59'),
+(90, 2, 'Shoe Decorations', 49, 'shoe-decorations', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 08:11:17', '2025-05-15 08:11:17'),
+(91, 2, 'Laces', 49, 'laces', '/media/group-175-1746883668_5352.jpg', '/media/e1-image-1747288306_9785.jpg', '', 0, 1, 0, '2025-05-15 08:11:33', '2025-05-15 08:11:33');
 
 -- --------------------------------------------------------
 
@@ -317,6 +407,13 @@ CREATE TABLE `ch_messages` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Дамп даних таблиці `ch_messages`
+--
+
+INSERT INTO `ch_messages` (`id`, `from_id`, `to_id`, `body`, `attachment`, `seen`, `created_at`, `updated_at`) VALUES
+('cfff0c8e-1e09-4521-9e7d-e8d5015afb44', 402, 435, 'Congratulations on registering on our site! If you have any questions, you can always contact our support team.', NULL, 1, '2025-05-07 12:38:42', '2025-05-07 12:38:47');
 
 -- --------------------------------------------------------
 
@@ -507,6 +604,47 @@ CREATE TABLE `commission_distributions` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Дамп даних таблиці `commission_distributions`
+--
+
+INSERT INTO `commission_distributions` (`id`, `order_id`, `user_id`, `user_id_sub`, `amount`, `message`, `status`, `created_at`, `updated_at`) VALUES
+(461, 82, 419, NULL, 570.00, '95% from dealer_price for seller', 'pending', '2025-05-07 12:41:59', '2025-05-07 12:41:59'),
+(462, 82, 413, NULL, 6.00, '1% commission from dealer_price for manager', 'pending', '2025-05-07 12:41:59', '2025-05-07 12:41:59'),
+(463, 82, 1, 'shareholders', 6.00, '1% commission from dealer_price for shareholders', 'pending', '2025-05-07 12:41:59', '2025-05-07 12:41:59'),
+(464, 82, 1, 'company_one', 12.00, '2% commission from dealer_price for base company account', 'pending', '2025-05-07 12:41:59', '2025-05-07 12:41:59'),
+(465, 82, 1, 'company_two', 6.00, '1% commission from dealer_price for hidden company account', 'pending', '2025-05-07 12:41:59', '2025-05-07 12:41:59'),
+(466, 82, 1, NULL, 20.00, '10% commission from price_difference for company', 'pending', '2025-05-07 12:41:59', '2025-05-07 12:41:59'),
+(467, 82, 1, NULL, 180.00, 'User don\'t have friends_code. Referral commission for company', 'pending', '2025-05-07 12:41:59', '2025-05-07 12:41:59'),
+(468, 83, 419, NULL, 570.00, '95% from dealer_price for seller', 'canceled', '2025-05-08 07:06:02', '2025-05-13 09:27:00'),
+(469, 83, 413, NULL, 6.00, '1% commission from dealer_price for manager', 'canceled', '2025-05-08 07:06:02', '2025-05-13 09:27:00'),
+(470, 83, 1, 'shareholders', 6.00, '1% commission from dealer_price for shareholders', 'canceled', '2025-05-08 07:06:02', '2025-05-13 09:27:00'),
+(471, 83, 1, 'company_one', 12.00, '2% commission from dealer_price for base company account', 'canceled', '2025-05-08 07:06:02', '2025-05-13 09:27:00'),
+(472, 83, 1, 'company_two', 6.00, '1% commission from dealer_price for hidden company account', 'canceled', '2025-05-08 07:06:02', '2025-05-13 09:27:00'),
+(473, 83, 1, NULL, 20.00, '10% commission from price_difference for company', 'canceled', '2025-05-08 07:06:02', '2025-05-13 09:27:00'),
+(474, 83, 435, NULL, 180.00, 'User don\'t have friends_code and is dealer. Referral commission for company', 'canceled', '2025-05-08 07:06:02', '2025-05-13 09:27:00'),
+(475, 84, 419, NULL, 114.00, '95% from dealer_price for seller', 'pending', '2025-05-12 05:30:04', '2025-05-12 05:30:04'),
+(476, 84, 413, NULL, 1.20, '1% commission from dealer_price for manager', 'pending', '2025-05-12 05:30:04', '2025-05-12 05:30:04'),
+(477, 84, 1, 'shareholders', 1.20, '1% commission from dealer_price for shareholders', 'pending', '2025-05-12 05:30:04', '2025-05-12 05:30:04'),
+(478, 84, 1, 'company_one', 2.40, '2% commission from dealer_price for base company account', 'pending', '2025-05-12 05:30:04', '2025-05-12 05:30:04'),
+(479, 84, 1, 'company_two', 1.20, '1% commission from dealer_price for hidden company account', 'pending', '2025-05-12 05:30:04', '2025-05-12 05:30:04'),
+(480, 84, 1, NULL, 2.00, '10% commission from price_difference for company', 'pending', '2025-05-12 05:30:04', '2025-05-12 05:30:04'),
+(481, 84, 435, NULL, 18.00, 'User don\'t have friends_code and is dealer. Referral commission for company', 'pending', '2025-05-12 05:30:04', '2025-05-12 05:30:04'),
+(482, 84, 419, NULL, 171.00, '95% from dealer_price for seller', 'pending', '2025-05-12 05:30:04', '2025-05-12 05:30:04'),
+(483, 84, 413, NULL, 1.80, '1% commission from dealer_price for manager', 'pending', '2025-05-12 05:30:04', '2025-05-12 05:30:04'),
+(484, 84, 1, 'shareholders', 1.80, '1% commission from dealer_price for shareholders', 'pending', '2025-05-12 05:30:04', '2025-05-12 05:30:04'),
+(485, 84, 1, 'company_one', 3.60, '2% commission from dealer_price for base company account', 'pending', '2025-05-12 05:30:04', '2025-05-12 05:30:04'),
+(486, 84, 1, 'company_two', 1.80, '1% commission from dealer_price for hidden company account', 'pending', '2025-05-12 05:30:04', '2025-05-12 05:30:04'),
+(487, 84, 1, NULL, 1.00, '10% commission from price_difference for company', 'pending', '2025-05-12 05:30:04', '2025-05-12 05:30:04'),
+(488, 84, 435, NULL, 9.00, 'User don\'t have friends_code and is dealer. Referral commission for company', 'pending', '2025-05-12 05:30:04', '2025-05-12 05:30:04'),
+(489, 85, 419, NULL, 171.00, '95% from dealer_price for seller', 'pending', '2025-05-14 11:37:35', '2025-05-14 11:37:35'),
+(490, 85, 413, NULL, 1.80, '1% commission from dealer_price for manager', 'pending', '2025-05-14 11:37:35', '2025-05-14 11:37:35'),
+(491, 85, 1, 'shareholders', 1.80, '1% commission from dealer_price for shareholders', 'pending', '2025-05-14 11:37:35', '2025-05-14 11:37:35'),
+(492, 85, 1, 'company_one', 3.60, '2% commission from dealer_price for base company account', 'pending', '2025-05-14 11:37:35', '2025-05-14 11:37:35'),
+(493, 85, 1, 'company_two', 1.80, '1% commission from dealer_price for hidden company account', 'pending', '2025-05-14 11:37:35', '2025-05-14 11:37:35'),
+(494, 85, 1, NULL, 1.00, '10% commission from price_difference for company', 'pending', '2025-05-14 11:37:35', '2025-05-14 11:37:35'),
+(495, 85, 435, NULL, 9.00, 'User don\'t have friends_code and is dealer. Referral commission for company', 'pending', '2025-05-14 11:37:35', '2025-05-14 11:37:35');
 
 -- --------------------------------------------------------
 
@@ -959,6 +1097,13 @@ CREATE TABLE `favorites` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Дамп даних таблиці `favorites`
+--
+
+INSERT INTO `favorites` (`id`, `user_id`, `product_id`, `seller_id`, `product_type`, `is_seller`, `updated_at`, `created_at`) VALUES
+(2, 413, 6, NULL, 'regular', 0, '2025-04-29 14:05:15', '2025-04-29 14:05:15');
+
 -- --------------------------------------------------------
 
 --
@@ -1022,6 +1167,14 @@ CREATE TABLE `languages` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Дамп даних таблиці `languages`
+--
+
+INSERT INTO `languages` (`id`, `language`, `code`, `is_rtl`, `created_at`, `updated_at`) VALUES
+(1, 'russian', 'ru', 0, '2025-05-02 05:26:23', '2025-05-02 05:26:23'),
+(2, 'english', 'en', 0, '2025-05-02 05:30:27', '2025-05-02 05:30:27');
 
 -- --------------------------------------------------------
 
@@ -1167,7 +1320,37 @@ INSERT INTO `media` (`id`, `store_id`, `seller_id`, `name`, `extension`, `type`,
 (92, 2, 0, 'image-(18)', 'jpg', 'image', '/media', '6600', 91, 'App\\Models\\StorageType', 1, 'image-(18)-1744094925_6367.jpg', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 580, NULL, '2025-04-08 03:48:45', '2025-04-08 06:48:45'),
 (93, 2, 0, 'image-(19)', 'jpg', 'image', '/media', '4946', 92, 'App\\Models\\StorageType', 1, 'image-(19)-1744094998_1673.jpg', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 9878, NULL, '2025-04-08 03:49:58', '2025-04-08 06:49:58'),
 (94, 2, 0, 'image-(20)', 'jpg', 'image', '/media', '2210', 93, 'App\\Models\\StorageType', 1, 'image-(20)-1744094998_9832.jpg', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 144496, NULL, '2025-04-08 03:49:58', '2025-04-08 06:49:58'),
-(95, 2, 4, 'image (22)', 'jpg', 'image', '/media', '3640', 94, 'App\\Models\\StorageType', 1, 'image-(22)-1744095415_5993.jpg', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 57339, NULL, '2025-04-08 03:56:55', '2025-04-08 06:56:55');
+(95, 2, 4, 'image (22)', 'jpg', 'image', '/media', '3640', 94, 'App\\Models\\StorageType', 1, 'image-(22)-1744095415_5993.jpg', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 57339, NULL, '2025-04-08 03:56:55', '2025-04-08 06:56:55'),
+(96, 2, 0, 'alny-logo', 'png', 'image', '/media', '5924', 95, 'App\\Models\\StorageType', 1, 'alny-logo-1745305897_8012.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 9, NULL, '2025-04-22 04:11:37', '2025-04-22 07:11:37'),
+(97, NULL, 0, 'alny-logo', '', '', '', '5668', 1, 'App\\Models\\Store', 2, 'alny-logo-1745307249_1930.png', 'public', 'public', 'store_images', 'image/png', '[]', '[]', '[]', '[]', 5, NULL, '2025-04-22 04:34:09', '2025-04-22 07:34:09'),
+(98, NULL, 0, 'headphones-banner', '', '', '', '623228', 2, 'App\\Models\\Store', 2, 'headphones-banner-1745307593_5573.png', 'public', 'public', 'store_images', 'image/png', '[]', '[]', '[]', '[]', 0, NULL, '2025-04-22 04:39:53', '2025-04-22 07:39:53'),
+(99, NULL, 0, 'headphones-banner', '', '', '', '623228', 3, 'App\\Models\\Store', 2, 'headphones-banner-1745307911_3016.png', 'public', 'public', 'store_images', 'image/png', '[]', '[]', '[]', '[]', 0, NULL, '2025-04-22 04:45:12', '2025-04-22 07:45:12'),
+(100, 2, 0, 'headphones-banner', 'png', 'image', '/media', '82262', 96, 'App\\Models\\StorageType', 1, 'headphones-banner-1745308274_7230.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 46, NULL, '2025-04-22 04:51:14', '2025-04-22 07:51:14'),
+(101, 2, 0, 'main-banner', 'png', 'image', '/media', '87467', 97, 'App\\Models\\StorageType', 1, 'main-banner-1745327397_8718.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 91, NULL, '2025-04-22 10:09:57', '2025-04-22 13:09:57'),
+(102, 2, 0, 'main-banner-2', 'png', 'image', '/media', '66009', 98, 'App\\Models\\StorageType', 1, 'main-banner-2-1745327397_7814.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 733, NULL, '2025-04-22 10:09:57', '2025-04-22 13:09:57'),
+(103, 2, 0, 'cat-audio', 'png', 'image', '/media', '3638', 99, 'App\\Models\\StorageType', 1, 'cat-audio-1745328765_8606.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 0, NULL, '2025-04-22 10:32:45', '2025-04-22 13:32:45'),
+(104, 2, 0, 'cat-computers', 'png', 'image', '/media', '3285', 100, 'App\\Models\\StorageType', 1, 'cat-computers-1745328765_2819.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 77, NULL, '2025-04-22 10:32:45', '2025-04-22 13:32:45'),
+(105, 2, 0, 'cat-gadgets', 'png', 'image', '/media', '4969', 101, 'App\\Models\\StorageType', 1, 'cat-gadgets-1745328765_5978.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 399, NULL, '2025-04-22 10:32:45', '2025-04-22 13:32:45'),
+(106, 2, 0, 'cat-home', 'png', 'image', '/media', '4677', 102, 'App\\Models\\StorageType', 1, 'cat-home-1745328765_9346.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 4, NULL, '2025-04-22 10:32:45', '2025-04-22 13:32:45'),
+(107, 2, 0, 'cat-home-appliance', 'png', 'image', '/media', '3433', 103, 'App\\Models\\StorageType', 1, 'cat-home-appliance-1745328765_2952.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 8, NULL, '2025-04-22 10:32:45', '2025-04-22 13:32:45'),
+(108, 2, 0, 'cat-other', 'png', 'image', '/media', '5383', 104, 'App\\Models\\StorageType', 1, 'cat-other-1745328765_5557.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 894, NULL, '2025-04-22 10:32:45', '2025-04-22 13:32:45'),
+(109, 2, 0, 'cat-photo', 'png', 'image', '/media', '3675', 105, 'App\\Models\\StorageType', 1, 'cat-photo-1745328765_8446.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 0, NULL, '2025-04-22 10:32:45', '2025-04-22 13:32:45'),
+(110, 2, 0, 'cat-tv', 'png', 'image', '/media', '5774', 106, 'App\\Models\\StorageType', 1, 'cat-tv-1745328765_3339.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 49438, NULL, '2025-04-22 10:32:45', '2025-04-22 13:32:45'),
+(111, 2, 0, 'image-2', 'png', 'image', '/media', '6400', 107, 'App\\Models\\StorageType', 1, 'image-2-1745397848_5026.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 0, NULL, '2025-04-23 05:44:08', '2025-04-23 08:44:08'),
+(112, 2, 0, 'brand-bosch', 'png', 'image', '/media', '8407', 108, 'App\\Models\\StorageType', 1, 'brand-bosch-1745398246_8584.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 8, NULL, '2025-04-23 05:50:46', '2025-04-23 08:50:46'),
+(113, 2, 0, 'brand-colgate', 'png', 'image', '/media', '6470', 109, 'App\\Models\\StorageType', 1, 'brand-colgate-1745398246_2944.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 0, NULL, '2025-04-23 05:50:46', '2025-04-23 08:50:46'),
+(114, 2, 0, 'brand-pantene', 'png', 'image', '/media', '6027', 110, 'App\\Models\\StorageType', 1, 'brand-pantene-1745398246_6446.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 0, NULL, '2025-04-23 05:50:46', '2025-04-23 08:50:46'),
+(115, 2, 0, 'image-43316.64429754417', 'png', 'image', '/media', '5818', 111, 'App\\Models\\StorageType', 1, 'image-43316.64429754417-1745474122_3040.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 193528, NULL, '2025-04-24 02:55:22', '2025-04-24 05:55:22'),
+(116, 2, 0, 'image-43831.56921778596', 'png', 'image', '/media', '5281', 112, 'App\\Models\\StorageType', 1, 'image-43831.56921778596-1745474122_6805.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 1, NULL, '2025-04-24 02:55:22', '2025-04-24 05:55:22'),
+(117, 2, 0, 'image-31786.079370511754', 'png', 'image', '/media', '5383', 113, 'App\\Models\\StorageType', 1, 'image-31786.079370511754-1745474196_5072.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 6878480, NULL, '2025-04-24 02:56:36', '2025-04-24 05:56:36'),
+(118, NULL, 0, 'smith-store', '', '', '', '22110', 1, 'App\\Models\\Seller', 4, 'smith-store-1746272182_6867.jpg', 'public', 'public', 'sellers', 'image/jpeg', '[]', '[]', '[]', '[]', 0, NULL, '2025-05-03 08:36:22', '2025-05-03 11:36:22'),
+(119, NULL, 0, 'raj-mar', '', '', '', '35140', 1, 'App\\Models\\Seller', 1, 'raj-mar-1746272242_5075.jpg', 'public', 'public', 'sellers', 'image/jpeg', '[]', '[]', '[]', '[]', 56, NULL, '2025-05-03 08:37:22', '2025-05-03 11:37:22'),
+(120, 2, 0, 'group-167', 'png', 'image', '/media', '1727', 114, 'App\\Models\\StorageType', 1, 'group-167-1746882058_6566.png', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 8, NULL, '2025-05-10 10:00:58', '2025-05-10 13:00:58'),
+(121, 2, 0, 'group-167', 'jpg', 'image', '/media', '1672', 115, 'App\\Models\\StorageType', 1, 'group-167-1746882852_4494.jpg', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 2147483647, NULL, '2025-05-10 10:14:12', '2025-05-10 13:14:12'),
+(122, 2, 0, 'group-172', 'jpg', 'image', '/media', '1603', 116, 'App\\Models\\StorageType', 1, 'group-172-1746883281_8889.jpg', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 50, NULL, '2025-05-10 10:21:21', '2025-05-10 13:21:21'),
+(123, 2, 0, 'group-173', 'jpg', 'image', '/media', '1966', 117, 'App\\Models\\StorageType', 1, 'group-173-1746883447_6588.jpg', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 67699, NULL, '2025-05-10 10:24:07', '2025-05-10 13:24:07'),
+(124, 2, 0, 'group-175', 'jpg', 'image', '/media', '2169', 118, 'App\\Models\\StorageType', 1, 'group-175-1746883668_5352.jpg', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 56, NULL, '2025-05-10 10:27:48', '2025-05-10 13:27:48'),
+(125, 2, 0, 'e1-image', 'jpg', 'image', '/media', '74652', 119, 'App\\Models\\StorageType', 1, 'e1-image-1747288306_9785.jpg', 'public', 'public', 'media', 'image/jpeg', '[]', '[]', '[]', '[]', 4, NULL, '2025-05-15 02:51:46', '2025-05-15 05:51:46');
 
 -- --------------------------------------------------------
 
@@ -1357,6 +1540,21 @@ CREATE TABLE `orders` (
   `is_custom_courier` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Дамп даних таблиці `orders`
+--
+
+INSERT INTO `orders` (`id`, `user_id`, `store_id`, `address_id`, `mobile`, `total`, `delivery_charge`, `is_delivery_charge_returnable`, `wallet_balance`, `promo_code_id`, `promo_discount`, `discount`, `total_payable`, `final_total`, `payment_method`, `latitude`, `longitude`, `address`, `delivery_time`, `delivery_date`, `otp`, `email`, `notes`, `is_pos_order`, `is_shiprocket_order`, `is_cod_collected`, `type`, `order_payment_currency_id`, `order_payment_currency_code`, `base_currency_code`, `order_payment_currency_conversion_rate`, `created_at`, `updated_at`, `is_custom_courier`) VALUES
+(74, 413, 2, 1, '0963926935', 140, 0, 0, 140, '', 0, 0, 0, 140, '', '', '', 'вул. Вернадського, 32, кв. 35, No landmark, Lviv, Львівська область, Ukraine, 79000', NULL, NULL, 0, '', '', 0, 0, 0, NULL, 0, '$', 'USD', 0, '2025-04-21 06:18:23', '2025-04-21 06:18:23', 1),
+(75, 413, 2, 1, '0963926935', 0, 0, 0, 0, '', 0, 0, 0, 0, '', '', '', 'вул. Вернадського, 32, кв. 35, No landmark, Lviv, Львівська область, Ukraine, 79000', NULL, NULL, 0, '', '', 0, 0, 0, NULL, 0, '$', 'USD', 0, '2025-04-21 07:26:56', '2025-04-21 07:26:56', 1),
+(76, 413, 2, 1, '0963926935', 90, 0, 0, 0, '', 0, 0, 90, 90, 'stripe', '', '', 'вул. Вернадського, 32, кв. 35, No landmark, Lviv, Львівська область, Ukraine, 79000', NULL, NULL, 0, '', '', 0, 0, 0, NULL, 0, '$', 'USD', 0, '2025-04-21 08:14:58', '2025-04-21 08:14:58', 1),
+(77, 413, 2, 1, '0963926935', 0, 0, 0, 0, '', 0, 0, 0, 0, '', '', '', 'вул. Вернадського, 32, кв. 35, No landmark, Lviv, Львівська область, Ukraine, 79000', NULL, NULL, 0, '', '', 0, 0, 0, NULL, 0, '$', 'USD', 0, '2025-04-21 08:38:20', '2025-04-21 08:38:20', 1),
+(78, 413, 2, 1, '0963926935', 290, 0, 0, 290, '', 0, 0, 0, 290, '', '', '', 'вул. Вернадського, 32, кв. 35, No landmark, Lviv, Львівська область, Ukraine, 79000', NULL, NULL, 0, '', '', 0, 0, 0, NULL, 0, '$', 'USD', 0, '2025-05-01 08:38:24', '2025-05-01 08:38:24', 1),
+(82, 435, 2, 6, '0963926935', 800, 0, 0, 0, '', 0, 0, 800, 800, 'stripe', '', '', 'вул. Вернадського, 32, кв. 35, No landmark, Lviv, Львівська область, Ukraine, 79049', NULL, NULL, 0, '', '', 0, 0, 0, NULL, 0, '$', 'USD', 0, '2025-05-07 12:41:59', '2025-05-07 12:41:59', 1),
+(83, 435, 2, 6, '0963926935', 0, 0, 0, 0, '', 0, 0, 0, 0, 'stripe', '', '', 'вул. Вернадського, 32, кв. 35, No landmark, Lviv, Львівська область, Ukraine, 79049', NULL, NULL, 0, '', '', 0, 0, 0, NULL, 0, '$', 'USD', 0, '2025-05-08 07:06:02', '2025-05-08 07:06:02', 1),
+(84, 435, 2, 6, '0963926935', 330, 0, 0, 0, '', 0, 0, 330, 330, 'stripe', '', '', 'вул. Вернадського, 32, кв. 35, No landmark, Lviv, Львівська область, Ukraine, 79049', NULL, NULL, 0, '', '', 0, 0, 0, NULL, 0, '$', 'USD', 0, '2025-05-12 05:30:04', '2025-05-12 05:30:04', 1),
+(85, 435, 2, 6, '0963926935', 190, 0, 0, 0, '', 0, 0, 190, 190, 'stripe', '', '', 'вул. Вернадського, 32, кв. 35, No landmark, Lviv, Львівська область, Ukraine, 79049', NULL, NULL, 0, '', '', 0, 0, 0, NULL, 0, '$', 'USD', 0, '2025-05-14 11:37:35', '2025-05-14 11:37:35', 1);
+
 -- --------------------------------------------------------
 
 --
@@ -1464,7 +1662,21 @@ INSERT INTO `order_charges` (`id`, `seller_id`, `product_variant_ids`, `order_id
 (62, 1, '3', 71, '64', 0, '', 0, 50, 50, 253071, '2025-04-07 01:50:15', '2025-04-07 01:50:15'),
 (63, 4, '13,5,4', 72, '65,67,68', 0, '', 0, 430, 430, 614293, '2025-04-09 06:20:58', '2025-04-09 06:20:58'),
 (64, 1, '3', 72, '66', 0, '', 0, 50, 50, 908951, '2025-04-09 06:20:58', '2025-04-09 06:20:58'),
-(65, 4, '12,4,5', 73, '69,70,71', 0, '', 0, 440, 440, 265996, '2025-04-13 08:11:00', '2025-04-13 08:11:00');
+(65, 4, '12,4,5', 73, '69,70,71', 0, '', 0, 440, 440, 265996, '2025-04-13 08:11:00', '2025-04-13 08:11:00'),
+(66, 4, '4', 74, '1', 0, '', 0, 140, 140, 715918, '2025-04-21 06:18:23', '2025-04-21 06:18:23'),
+(67, 4, '12', 75, '3', 0, '', 0, 100, 100, 591744, '2025-04-21 07:26:56', '2025-04-21 07:26:56'),
+(68, 4, '13', 76, '4', 0, '', 0, 90, 90, 937144, '2025-04-21 08:14:58', '2025-04-21 08:14:58'),
+(69, 4, '12', 77, '5', 0, '', 0, 100, 100, 942569, '2025-04-21 08:38:20', '2025-04-21 08:38:20'),
+(70, 4, '5,12', 78, '6,7', 0, '', 0, 290, 290, 232272, '2025-05-01 08:38:24', '2025-05-01 08:38:24'),
+(71, 1, '3', 78, '8', 0, '', 0, 50, 50, 125645, '2025-05-01 08:38:24', '2025-05-01 08:38:24'),
+(72, 4, '5', 79, '9', 0, '', 0, 190, 190, 898087, '2025-05-05 04:30:48', '2025-05-05 04:30:48'),
+(73, 4, '12,5,4', 80, '10,11,13', 0, '', 0, 430, 430, 335072, '2025-05-06 08:28:03', '2025-05-06 08:28:03'),
+(74, 1, '3', 80, '12', 0, '', 0, 50, 50, 879805, '2025-05-06 08:28:03', '2025-05-06 08:28:03'),
+(75, 4, '5', 81, '14', 0, '', 0, 190, 190, 859476, '2025-05-06 13:11:14', '2025-05-06 13:11:14'),
+(76, 4, '6', 82, '15', 0, '', 0, 800, 800, 506860, '2025-05-07 12:41:59', '2025-05-07 12:41:59'),
+(77, 4, '6', 83, '16', 0, '', 0, 800, 800, 691821, '2025-05-08 07:06:02', '2025-05-08 07:06:02'),
+(78, 4, '4,5', 84, '17,18', 0, '', 0, 330, 330, 124668, '2025-05-12 05:30:04', '2025-05-12 05:30:04'),
+(79, 4, '5', 85, '19', 0, '', 0, 190, 190, 301739, '2025-05-14 11:37:35', '2025-05-14 11:37:35');
 
 -- --------------------------------------------------------
 
@@ -1509,6 +1721,24 @@ CREATE TABLE `order_items` (
   `is_write_review` tinyint(4) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Дамп даних таблиці `order_items`
+--
+
+INSERT INTO `order_items` (`id`, `user_id`, `store_id`, `order_id`, `delivery_boy_id`, `seller_id`, `is_credited`, `otp`, `product_name`, `variant_name`, `product_variant_id`, `quantity`, `delivered_quantity`, `price`, `discounted_price`, `tax_ids`, `tax_percent`, `tax_amount`, `discount`, `sub_total`, `deliver_by`, `updated_by`, `status`, `admin_commission_amount`, `seller_commission_amount`, `active_status`, `hash_link`, `is_sent`, `order_type`, `attachment`, `created_at`, `updated_at`, `is_completed`, `is_write_review`) VALUES
+(1, 413, 2, 74, 0, 4, 0, 715918, 'CoviSelf Covid 19 Rapid Antigen Self Test Kit', '', 4, 1, 1, 140, NULL, '0', 0, 0, 0, 140, NULL, 419, '[[\"received\",\"21-04-2025 09:18:23am\"],[\"processed\",\"21-04-2025 09:19:23am\"],[\"shipped\",\"21-04-2025 09:23:44am\"],[\"delivered\",\"21-04-2025 09:24:20am\"]]', 0, 0, 'delivered', 'NULL', 0, 'regular_order', '', '2025-04-21 06:18:23', '2025-04-21 06:25:17', 1, 1),
+(3, 413, 2, 75, 0, 4, 0, 591744, '1100 Watt Dry Non-Stick soleplate Iron', 'White', 12, 1, 1, 100, NULL, '0', 0, 0, 0, 100, NULL, 419, '[[\"received\",\"21-04-2025 10:26:56am\"],[\"processed\",\"21-04-2025 10:27:25am\"],[\"shipped\",\"21-04-2025 10:28:12am\"],[\"delivered\",\"21-04-2025 10:28:32am\"],[\"return_request_pending\",\"21-04-2025 10:30:16am\"]]', 0, 0, 'return_request_pending', 'NULL', 0, 'regular_order', '', '2025-04-21 07:26:56', '2025-04-21 07:29:02', 1, 1),
+(4, 413, 2, 76, 0, 4, 0, 937144, '1100 Watt Dry Non-Stick soleplate Iron', 'Blue', 13, 1, 1, 90, NULL, '0', 0, 0, 0, 90, NULL, 419, '[[\"received\",\"21-04-2025 11:14:58am\"],[\"processed\",\"21-04-2025 11:15:42am\"],[\"shipped\",\"21-04-2025 11:16:14am\"],[\"delivered\",\"21-04-2025 11:16:27am\"],[\"return_request_pending\",\"21-04-2025 11:17:55am\"]]', 0, 0, 'return_request_pending', 'NULL', 0, 'regular_order', '', '2025-04-21 08:14:58', '2025-04-21 08:17:26', 1, 0),
+(5, 413, 2, 77, 0, 4, 0, 942569, '1100 Watt Dry Non-Stick soleplate Iron', 'White', 12, 1, 1, 100, NULL, '0', 0, 0, 0, 100, NULL, 419, '[[\"received\",\"21-04-2025 11:38:20am\"],[\"processed\",\"21-04-2025 11:40:36am\"],[\"shipped\",\"21-04-2025 11:41:11am\"],[\"delivered\",\"21-04-2025 11:41:22am\"],[\"return_request_pending\",\"21-04-2025 11:41:56am\"],[\"returned\",\"21-04-2025 12:52:42pm\"]]', 0, 0, 'returned', 'NULL', 0, 'regular_order', '', '2025-04-21 08:38:20', '2025-04-21 08:41:32', 1, 0),
+(6, 413, 2, 78, NULL, 4, 0, 232272, 'Dominion Care N95 Mask White', '', 5, 1, 0, 190, NULL, '0', 0, 0, 0, 190, NULL, 0, '[[\"received\",\"01-05-2025 11:38:24am\"]]', 0, 0, 'received', 'NULL', 0, 'regular_order', '', '2025-05-01 08:38:24', '2025-05-01 08:38:24', 0, 0),
+(7, 413, 2, 78, NULL, 4, 0, 232272, '1100 Watt Dry Non-Stick soleplate Iron', 'White', 12, 1, 0, 100, NULL, '0', 0, 0, 0, 100, NULL, 0, '[[\"received\",\"01-05-2025 11:38:24am\"]]', 0, 0, 'received', 'NULL', 0, 'regular_order', '', '2025-05-01 08:38:24', '2025-05-01 08:38:24', 0, 0),
+(8, 413, 2, 78, NULL, 1, 0, 125645, 'Stainless Steel Water Bottle', '', 3, 1, 0, 50, NULL, '0', 0, 0, 0, 50, NULL, 0, '[[\"received\",\"01-05-2025 11:38:24am\"],[\"cancelled\",\"01-05-2025 11:39:42am\"]]', 0, 0, 'cancelled', 'NULL', 0, 'regular_order', '', '2025-05-01 08:38:24', '2025-05-01 08:38:24', 0, 0),
+(15, 435, 2, 82, 0, 4, 0, 506860, 'Graphic Printed Drop-Shoulder Sleeves Relaxed Fit Pure Cotton T-shirt', '', 6, 1, 1, 800, NULL, '0', 0, 0, 0, 800, NULL, 419, '[[\"received\",\"07-05-2025 03:41:59pm\"],[\"processed\",\"07-05-2025 03:43:04pm\"],[\"shipped\",\"13-05-2025 03:12:46pm\"],[\"delivered\",\"13-05-2025 03:13:12pm\"]]', 0, 0, 'delivered', 'NULL', 0, 'regular_order', '', '2025-05-07 12:41:59', '2025-05-13 12:15:44', 1, 0),
+(16, 435, 2, 83, NULL, 4, 0, 691821, 'Graphic Printed Drop-Shoulder Sleeves Relaxed Fit Pure Cotton T-shirt', '', 6, 1, 0, 800, NULL, '0', 0, 0, 0, 800, NULL, 0, '[[\"received\",\"08-05-2025 10:06:02am\"],[\"cancelled\",\"13-05-2025 12:27:00pm\"]]', 0, 0, 'cancelled', 'NULL', 0, 'regular_order', '', '2025-05-08 07:06:02', '2025-05-08 07:06:02', 0, 0),
+(17, 435, 2, 84, 0, 4, 0, 124668, 'CoviSelf Covid 19 Rapid Antigen Self Test Kit', '', 4, 1, 1, 140, NULL, '0', 0, 0, 0, 140, NULL, 419, '[[\"received\",\"12-05-2025 08:30:04am\"],[\"processed\",\"13-05-2025 07:42:36am\"],[\"shipped\",\"13-05-2025 08:32:11am\"]]', 0, 0, 'shipped', 'NULL', 0, 'regular_order', '', '2025-05-12 05:30:04', '2025-05-12 05:30:04', 0, 0),
+(18, 435, 2, 84, NULL, 4, 0, 124668, 'Dominion Care N95 Mask White', '', 5, 1, 0, 190, NULL, '0', 0, 0, 0, 190, NULL, 419, '[[\"received\",\"12-05-2025 08:30:04am\"]]', 0, 0, 'received', 'NULL', 0, 'regular_order', '', '2025-05-12 05:30:04', '2025-05-12 05:30:04', 0, 0),
+(19, 435, 2, 85, NULL, 4, 0, 301739, 'Dominion Care N95 Mask White', '', 5, 1, 0, 190, NULL, '0', 0, 0, 0, 190, NULL, 0, '[[\"received\",\"14-05-2025 02:37:35pm\"]]', 0, 0, 'received', 'NULL', 0, 'regular_order', '', '2025-05-14 11:37:35', '2025-05-14 11:37:35', 0, 0);
+
 -- --------------------------------------------------------
 
 --
@@ -1547,6 +1777,22 @@ CREATE TABLE `order_trackings` (
   `aftership_data` text COLLATE utf8mb4_unicode_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Дамп даних таблиці `order_trackings`
+--
+
+INSERT INTO `order_trackings` (`id`, `order_id`, `shiprocket_order_id`, `shipment_id`, `courier_company_id`, `awb_code`, `pickup_status`, `pickup_scheduled_date`, `pickup_token_number`, `status`, `others`, `pickup_generated_date`, `data`, `date`, `is_canceled`, `manifest_url`, `label_url`, `invoice_url`, `order_item_id`, `courier_agency`, `tracking_id`, `parcel_id`, `url`, `created_at`, `updated_at`, `carrier_id`, `tracking_number`, `aftership_tracking_id`, `aftership_data`) VALUES
+(17, 74, 0, 0, 0, 'NULL', 0, '', '', 0, '', '', '', '', 0, '', '', '', '1', 'nova-poshta', '20400448337282', 1, '', '2025-04-21 06:19:40', '2025-04-21 06:19:40', NULL, NULL, NULL, NULL),
+(18, 75, 0, 0, 0, 'NULL', 0, '', '', 0, '', '', '', '', 0, '', '', '', '3', 'nova-poshta', '20400449882799', 2, '', '2025-04-21 07:27:42', '2025-04-21 07:27:42', NULL, NULL, NULL, NULL),
+(19, 75, 0, 0, 0, 'NULL', 0, '', '', 0, '', '', '', '2025-04-21 10:32:55', 0, '', '', '', '3', 'nova-poshta', '20451146567291', NULL, '', '2025-04-21 07:32:55', '2025-04-21 07:32:55', 'nova-poshta', '20451146567291', NULL, NULL),
+(20, 76, 0, 0, 0, 'NULL', 0, '', '', 0, '', '', '', '', 0, '', '', '', '4', 'nova-poshta', '20400448822277', 3, '', '2025-04-21 08:16:03', '2025-04-21 08:16:03', NULL, NULL, NULL, NULL),
+(21, 76, 0, 0, 0, 'NULL', 0, '', '', 0, '', '', '', '2025-04-21 11:18:38', 0, '', '', '', '4', 'nova-poshta', '20451146567291', NULL, '', '2025-04-21 08:18:38', '2025-04-21 08:18:38', 'nova-poshta', '20451146567291', NULL, NULL),
+(22, 77, 0, 0, 0, 'NULL', 0, '', '', 0, '', '', '', '', 0, '', '', '', '5', 'nova-poshta', '20400448822277', 4, '', '2025-04-21 08:40:56', '2025-04-21 08:40:56', NULL, NULL, NULL, NULL),
+(23, 77, 0, 0, 0, 'NULL', 0, '', '', 0, '', '', '', '2025-04-21 12:36:55', 0, '', '', '', '5', 'nova-poshta', '20451146567291', NULL, '', '2025-04-21 09:36:55', '2025-04-21 09:36:55', 'nova-poshta', '20451146567291', NULL, NULL),
+(24, 81, 0, 0, 0, 'NULL', 0, '', '', 0, '', '', '', '', 0, '', '', '', '14', 'gpost', '32784623876', 5, '', '2025-05-06 13:14:31', '2025-05-06 13:14:31', NULL, NULL, NULL, NULL),
+(25, 84, 0, 0, 0, 'NULL', 0, '', '', 0, '', '', '', '', 0, '', '', '', '17', 'dpe-za', '20400449882799', 7, 'https://dept-4zgn.vercel.app/', '2025-05-13 05:31:51', '2025-05-13 05:31:51', NULL, NULL, NULL, NULL),
+(26, 82, 0, 0, 0, 'NULL', 0, '', '', 0, '', '', '', '', 0, '', '', '', '15', 'india-post', '20400449882799', 6, 'https://dept-4zgn.vercel.app/', '2025-05-13 12:12:29', '2025-05-13 12:12:29', NULL, NULL, NULL, NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -1583,6 +1829,19 @@ CREATE TABLE `parcels` (
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+--
+-- Дамп даних таблиці `parcels`
+--
+
+INSERT INTO `parcels` (`id`, `store_id`, `order_id`, `delivery_boy_id`, `name`, `type`, `status`, `active_status`, `otp`, `delivery_charge`, `created_at`, `updated_at`) VALUES
+(1, 2, 74, NULL, 'Pay with wallet', 'regular_order', '[[\"received\",\"2025-04-21 09:19:23am\"],[\"processed\",\"2025-04-21 09:19:23am\"],[\"shipped\",\"21-04-2025 09:23:44am\"],[\"delivered\",\"21-04-2025 09:24:20am\"]]', 'delivered', 675337, 0, '2025-04-21 06:19:23', '2025-04-21 06:19:23'),
+(2, 2, 75, NULL, 'test items', 'regular_order', '[[\"received\",\"2025-04-21 10:27:25am\"],[\"processed\",\"2025-04-21 10:27:25am\"],[\"shipped\",\"21-04-2025 10:28:12am\"],[\"delivered\",\"21-04-2025 10:28:32am\"]]', 'delivered', 725533, 0, '2025-04-21 07:27:25', '2025-04-21 07:27:25'),
+(3, 2, 76, NULL, 'full', 'regular_order', '[[\"received\",\"2025-04-21 11:15:42am\"],[\"processed\",\"2025-04-21 11:15:42am\"],[\"shipped\",\"21-04-2025 11:16:14am\"],[\"delivered\",\"21-04-2025 11:16:27am\"]]', 'delivered', 579258, 0, '2025-04-21 08:15:42', '2025-04-21 08:15:42'),
+(4, 2, 77, NULL, 'test items', 'regular_order', '[[\"received\",\"2025-04-21 11:40:36am\"],[\"processed\",\"2025-04-21 11:40:36am\"],[\"shipped\",\"21-04-2025 11:41:11am\"],[\"delivered\",\"21-04-2025 11:41:22am\"]]', 'delivered', 580575, 0, '2025-04-21 08:40:36', '2025-04-21 08:40:36'),
+(5, 2, 81, NULL, 'test', 'regular_order', '[[\"received\",\"2025-05-06 04:12:28pm\"],[\"processed\",\"2025-05-06 04:12:28pm\"]]', 'processed', 259185, 0, '2025-05-06 13:12:28', '2025-05-06 13:12:28'),
+(6, 2, 82, NULL, 'test', 'regular_order', '[[\"received\",\"2025-05-07 03:43:04pm\"],[\"processed\",\"2025-05-07 03:43:04pm\"],[\"shipped\",\"13-05-2025 03:12:46pm\"],[\"delivered\",\"13-05-2025 03:13:12pm\"]]', 'delivered', 263724, 0, '2025-05-07 12:43:04', '2025-05-07 12:43:04'),
+(7, 2, 84, NULL, 'one part', 'regular_order', '[[\"received\",\"2025-05-13 07:42:36am\"],[\"processed\",\"2025-05-13 07:42:36am\"],[\"shipped\",\"13-05-2025 08:32:11am\"]]', 'shipped', 939624, 0, '2025-05-13 04:42:36', '2025-05-13 04:42:36');
+
 -- --------------------------------------------------------
 
 --
@@ -1600,6 +1859,19 @@ CREATE TABLE `parcel_items` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Дамп даних таблиці `parcel_items`
+--
+
+INSERT INTO `parcel_items` (`id`, `store_id`, `parcel_id`, `order_item_id`, `product_variant_id`, `unit_price`, `quantity`, `created_at`, `updated_at`) VALUES
+(1, 2, 1, 1, 4, 140, 1, NULL, NULL),
+(2, 2, 2, 3, 12, 100, 1, NULL, NULL),
+(3, 2, 3, 4, 13, 90, 1, NULL, NULL),
+(4, 2, 4, 5, 12, 100, 1, NULL, NULL),
+(5, 2, 5, 14, 5, 190, 1, NULL, NULL),
+(6, 2, 6, 15, 6, 800, 1, NULL, NULL),
+(7, 2, 7, 17, 4, 140, 1, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -2040,12 +2312,12 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `store_id`, `product_identity`, `category_id`, `seller_id`, `tax`, `row_order`, `type`, `stock_type`, `name`, `short_description`, `slug`, `indicator`, `cod_allowed`, `download_allowed`, `download_type`, `download_link`, `minimum_order_quantity`, `quantity_step_size`, `total_allowed_quantity`, `is_prices_inclusive_tax`, `is_returnable`, `is_cancelable`, `cancelable_till`, `is_attachment_required`, `image`, `other_images`, `video_type`, `video`, `tags`, `warranty_period`, `guarantee_period`, `made_in`, `hsn_code`, `brand`, `sku`, `stock`, `availability`, `rating`, `no_of_ratings`, `description`, `extra_description`, `deliverable_type`, `deliverable_zipcodes`, `city_deliverable_type`, `deliverable_cities`, `deliverable_zones`, `pickup_location`, `status`, `minimum_free_delivery_order_qty`, `delivery_charges`, `created_at`, `updated_at`) VALUES
-(6, 2, NULL, 4, 4, '', 0, 'variable_product', NULL, '1100 Watt Dry Non-Stick soleplate Iron', '1100 Watt Iron; with Non-Stick soleplate ensures that your garments do not stick to the plate even when the temperature is high.\r\nThe 3-speed control knob of the grinder helps you get the right consistency as per your requirement. The iron also has a temperature setting knob that helps you adjust its temperature as per the fabric type.', '1100-watt-dry-non-stick-soleplate-iron', 0, 0, 0, '', '', 1, 1, 5, 0, 1, 1, 'received', 0, '/media/image-(7)-1741687662_4236.jpg', 'null', '', '', '', '', '', 'China', '', '', NULL, NULL, NULL, 5, 12, '<ul class=\"a-unordered-list a-vertical a-spacing-mini\">\r\n<li class=\"a-spacing-mini\"><span class=\"a-list-item\">1100 Watt Iron; with Non-Stick soleplate ensures that your garments do not stick to the plate even when the temperature is high.</span></li>\r\n<li class=\"a-spacing-mini\"><span class=\"a-list-item\">The 3-speed control knob of the grinder helps you get the right consistency as per your requirement. The iron also has a temperature setting knob that helps you adjust its temperature as per the fabric type.</span></li>\r\n</ul>', '', 0, NULL, 1, '', '', '', 1, 0, 0, '2025-03-30 13:14:59', '2025-04-14 21:24:17'),
+(6, 2, NULL, 4, 4, '', 0, 'variable_product', NULL, '1100 Watt Dry Non-Stick soleplate Iron', '1100 Watt Iron; with Non-Stick soleplate ensures that your garments do not stick to the plate even when the temperature is high.\r\nThe 3-speed control knob of the grinder helps you get the right consistency as per your requirement. The iron also has a temperature setting knob that helps you adjust its temperature as per the fabric type.', '1100-watt-dry-non-stick-soleplate-iron', 0, 0, 0, '', '', 1, 1, 5, 0, 1, 1, 'received', 0, '/media/image-(7)-1741687662_4236.jpg', 'null', '', '', '', '', '', 'China', '', '', NULL, NULL, NULL, 5, 13, '<ul class=\"a-unordered-list a-vertical a-spacing-mini\">\r\n<li class=\"a-spacing-mini\"><span class=\"a-list-item\">1100 Watt Iron; with Non-Stick soleplate ensures that your garments do not stick to the plate even when the temperature is high.</span></li>\r\n<li class=\"a-spacing-mini\"><span class=\"a-list-item\">The 3-speed control knob of the grinder helps you get the right consistency as per your requirement. The iron also has a temperature setting knob that helps you adjust its temperature as per the fabric type.</span></li>\r\n</ul>', '', 0, NULL, 1, '', '', '', 1, 0, 0, '2025-03-30 13:14:59', '2025-04-21 13:29:02'),
 (7, 2, NULL, 4, 1, '', 0, 'simple_product', NULL, 'Stainless Steel Water Bottle', 'Color: Silver; Material: Stainless Steel; Package Content: 1 - Piece Super Water Bottle (1000 ml); Dimension in cms (L x W x H): 7.8 x 7.8 x 27.4\r\nSingle Wall Fridge Steel Bottle with inside outside stainless steel made of grade 304, which is rust free\r\nThis stainless steel bottle comes with a string to provide ease of carrying', 'stainless-steel-water-bottle', 0, 0, 0, '', '', 1, 1, 5, 0, 1, 1, 'processed', 0, '/media/image-(3)-1741790261_8201.webp', 'null', '', '', '', '', '', '', '', '2', NULL, NULL, NULL, 4, 3, '<ul class=\"a-unordered-list a-vertical a-spacing-mini\">\r\n<li class=\"a-spacing-mini\"><span class=\"a-list-item\">Color: Silver; Material: Stainless Steel; Package Content: 1 - Piece Super Water Bottle (1000 ml); Dimension in cms (L x W x H): 7.8 x 7.8 x 27.4</span></li>\r\n<li class=\"a-spacing-mini\"><span class=\"a-list-item\">Single Wall Fridge Steel Bottle with inside outside stainless steel made of grade 304, which is rust free</span></li>\r\n<li class=\"a-spacing-mini\"><span class=\"a-list-item\">This stainless steel bottle comes with a string to provide ease of carrying</span></li>\r\n<li class=\"a-spacing-mini\"><span class=\"a-list-item\">This bottle is easy to clean and maintain, Use a mild detergent or dish wash liquid and clean on the inside with a bottle brush</span></li>\r\n<li class=\"a-spacing-mini\"><span class=\"a-list-item\">This Bottle is unique in shape, it has leak proof technology, which make this product easy to carry at school, travelling and work, it is Odour Free and 100 percent Food Grade</span></li>\r\n</ul>', '', 0, NULL, 1, '', '', '', 1, 0, 0, '2025-04-01 04:26:14', '2025-04-11 08:43:43'),
-(8, 2, NULL, 8, 4, '', 0, 'simple_product', '0', 'CoviSelf Covid 19 Rapid Antigen Self Test Kit', 'It is an in vitro diagnostic procedure for detecting COVID-19 antigen through nasal swab samples from people who have or don\'t have signs, or who have any epidemiological grounds to suspect COVID-19', 'coviself-covid-19-rapid-antigen-self-test-kit', 0, 0, 0, '', '', 1, 1, 100, 0, 0, 1, 'received', 0, '/media/image-(7)-1744092565_8039.png', 'null', 'youtube', 'https://www.youtube.com/watch?v=6FoKaX3PKMo', '', '', '', '', '', '', 'sku', 43, 1, 4.5714285714286, 7, '<p>x</p>', '', 0, NULL, 1, '', '', '', 1, 0, 1, '2025-04-08 03:14:25', '2025-04-14 14:51:23'),
-(9, 2, NULL, 8, 4, '', 0, 'simple_product', '0', 'Dominion Care N95 Mask White', 'Ideal for those who are receptive to allergies arising from dust, pollen and smoke\r\nProtects from inhaling dust, pollen and mould spores which could cause health complications \r\nMask is made of soft fabric that is gentle on the skin and also provides a comfortable fit', 'dominion-care-n95-mask-white', 0, 0, 0, '', '', 1, 1, 100, 0, 0, 1, 'received', 0, '/media/image-(8)-1744093052_5608.png', 'null', '', '', '', '', '', '', '', '', 'sku', 77, 1, 4, 7, '', '', 0, NULL, 1, '', '', '', 1, 0, 0, '2025-04-08 03:17:46', '2025-04-14 14:51:23'),
-(10, 2, NULL, 11, 4, '', 0, 'simple_product', NULL, 'Graphic Printed Drop-Shoulder Sleeves Relaxed Fit Pure Cotton T-shirt', 'Graphic Printed Drop-Shoulder Sleeves Relaxed Fit Pure Cotton T-shirt', 'graphic-printed-drop-shoulder-sleeves-relaxed-fit-pure-cotton-t-shirt', 0, 0, 0, '', '', 1, 1, 0, 0, 1, 1, 'received', 0, '/media/image-(18)-1744094925_6367.jpg', 'null', '', '', '', '', '', '', '', '', NULL, NULL, NULL, 0, 0, '<h1 class=\"pdp-name\">Graphic Printed Drop-Shoulder Sleeves Relaxed Fit Pure Cotton T-shirt</h1>', '', 0, NULL, 1, '', '', '', 2, 0, 0, '2025-04-08 03:54:22', '2025-04-08 06:54:22'),
-(11, 2, NULL, 12, 4, '', 0, 'simple_product', NULL, 'Women Bone Brown Pumps', 'Women Bone Brown Pumps', 'women-bone-brown-pumps', 0, 0, 0, '', '', 1, 1, 0, 0, 1, 1, 'received', 0, '/media/image-(22)-1744095415_5993.jpg', 'null', '', '', '', '', '', '', '', '', NULL, NULL, NULL, 0, 0, '', '', 0, NULL, 1, '', '', '', 2, 0, 0, '2025-04-08 03:57:05', '2025-04-08 06:57:05');
+(8, 2, NULL, 8, 4, '', 0, 'simple_product', '0', 'CoviSelf Covid 19 Rapid Antigen Self Test Kit', 'It is an in vitro diagnostic procedure for detecting COVID-19 antigen through nasal swab samples from people who have or don\'t have signs, or who have any epidemiological grounds to suspect COVID-19', 'coviself-covid-19-rapid-antigen-self-test-kit', 0, 0, 0, '', '', 1, 1, 100, 0, 0, 1, 'received', 0, '/media/image-(7)-1744092565_8039.png', 'null', 'youtube', 'https://www.youtube.com/watch?v=6FoKaX3PKMo', '', '', '', '', '', '', 'sku', 40, 1, 5, 8, '<p>x</p>', '', 0, NULL, 1, '', '', '', 1, 0, 1, '2025-04-08 03:14:25', '2025-05-12 08:30:04'),
+(9, 2, NULL, 8, 4, '', 0, 'simple_product', '0', 'Dominion Care N95 Mask White', 'Ideal for those who are receptive to allergies arising from dust, pollen and smoke\r\nProtects from inhaling dust, pollen and mould spores which could cause health complications \r\nMask is made of soft fabric that is gentle on the skin and also provides a comfortable fit', 'dominion-care-n95-mask-white', 0, 0, 0, '', '', 1, 1, 100, 0, 0, 1, 'received', 0, '/media/image-(8)-1744093052_5608.png', 'null', '', '', '', '', '', '', '', '', 'sku', 71, 1, 4, 7, '', '', 0, NULL, 1, '', '', '', 1, 0, 0, '2025-04-08 03:17:46', '2025-05-14 14:37:35'),
+(10, 2, NULL, 11, 4, '', 0, 'simple_product', NULL, 'Graphic Printed Drop-Shoulder Sleeves Relaxed Fit Pure Cotton T-shirt', 'Graphic Printed Drop-Shoulder Sleeves Relaxed Fit Pure Cotton T-shirt', 'graphic-printed-drop-shoulder-sleeves-relaxed-fit-pure-cotton-t-shirt', 0, 0, 0, '', '', 1, 1, 0, 0, 1, 1, 'received', 0, '/media/image-(18)-1744094925_6367.jpg', 'null', '', '', '', '', '', '', '', '', NULL, NULL, NULL, 0, 0, '<h1 class=\"pdp-name\">Graphic Printed Drop-Shoulder Sleeves Relaxed Fit Pure Cotton T-shirt</h1>', '', 0, NULL, 1, '', '', '', 1, 0, 0, '2025-04-08 03:54:22', '2025-05-06 17:05:56'),
+(11, 2, NULL, 12, 4, '', 0, 'simple_product', NULL, 'Women Bone Brown Pumps', 'Women Bone Brown Pumps', 'women-bone-brown-pumps', 0, 0, 0, '', '', 1, 1, 0, 0, 1, 1, 'received', 0, '/media/image-(22)-1744095415_5993.jpg', 'null', '', '', '', '', '', '', '', '', NULL, NULL, NULL, 0, 0, '', '', 2, NULL, 1, '', '1', '', 1, 0, 100, '2025-04-08 03:57:05', '2025-05-16 13:27:26');
 
 -- --------------------------------------------------------
 
@@ -2070,7 +2342,8 @@ CREATE TABLE `product_approvals` (
 INSERT INTO `product_approvals` (`id`, `product_id`, `manager_id`, `approved_at`, `created_at`, `updated_at`, `status`) VALUES
 (1, 6, 413, '2025-03-30 13:15:26', '2025-03-30 13:15:26', '2025-03-30 13:15:26', 'approved'),
 (2, 9, 413, '2025-04-08 03:31:41', '2025-04-08 03:31:41', '2025-04-08 03:31:41', 'approved'),
-(3, 8, 413, '2025-04-08 03:31:43', '2025-04-08 03:31:43', '2025-04-08 03:31:43', 'approved');
+(3, 8, 413, '2025-04-08 03:31:43', '2025-04-08 03:31:43', '2025-04-08 03:31:43', 'approved'),
+(4, 11, 413, '2025-04-29 14:07:43', '2025-04-29 14:07:43', '2025-04-29 14:07:43', 'approved');
 
 -- --------------------------------------------------------
 
@@ -2112,7 +2385,7 @@ INSERT INTO `product_attributes` (`id`, `product_id`, `attribute_value_ids`, `cr
 (3, 8, '', '2025-04-08 03:14:25', '2025-04-08 03:14:25'),
 (4, 9, '', '2025-04-08 03:17:46', '2025-04-08 03:17:46'),
 (5, 10, '', '2025-04-08 03:54:22', '2025-04-08 03:54:22'),
-(6, 11, '', '2025-04-08 03:57:05', '2025-04-08 03:57:05');
+(6, 11, '', '2025-04-08 03:57:05', '2025-05-16 10:27:26');
 
 -- --------------------------------------------------------
 
@@ -2153,6 +2426,14 @@ CREATE TABLE `product_ratings` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Дамп даних таблиці `product_ratings`
+--
+
+INSERT INTO `product_ratings` (`id`, `user_id`, `product_id`, `rating`, `images`, `title`, `comment`, `advantages`, `disadvantages`, `created_at`, `updated_at`) VALUES
+(2, 413, 8, 5, '[\"review_image\\/image_1745227517_0.jpg\"]', NULL, 'The best test', NULL, 'No', '2025-04-21 06:25:17', '2025-04-21 06:25:17'),
+(3, 413, 6, 5, '[]', NULL, 'all good', NULL, NULL, '2025-04-21 07:29:02', '2025-04-21 07:29:02');
+
 -- --------------------------------------------------------
 
 --
@@ -2187,9 +2468,9 @@ CREATE TABLE `product_variants` (
 INSERT INTO `product_variants` (`id`, `product_id`, `attribute_value_ids`, `attribute_set`, `price`, `special_price`, `dealer_price`, `sku`, `stock`, `weight`, `height`, `breadth`, `length`, `images`, `availability`, `status`, `created_at`, `updated_at`) VALUES
 (3, 7, NULL, NULL, 50, 0, 40, NULL, NULL, 0, 0, 0, 0, NULL, NULL, 1, '2025-04-01 04:26:14', '2025-04-01 07:26:14'),
 (4, 8, NULL, NULL, 140, 0, 120, NULL, NULL, 0, 0, 0, 0, NULL, NULL, 1, '2025-04-08 03:14:25', '2025-04-08 06:14:25'),
-(5, 9, NULL, NULL, 200, 0, 180, NULL, NULL, 0, 0, 0, 0, NULL, NULL, 1, '2025-04-08 03:17:46', '2025-04-08 06:17:46'),
+(5, 9, NULL, NULL, 200, 190, 180, NULL, NULL, 0, 0, 0, 0, NULL, NULL, 1, '2025-04-08 03:17:46', '2025-04-29 10:22:41'),
 (6, 10, NULL, NULL, 800, 0, 600, NULL, NULL, 0, 0, 0, 0, NULL, NULL, 1, '2025-04-08 03:54:22', '2025-04-08 06:54:22'),
-(9, 11, NULL, NULL, 8000, 0, 7500, NULL, NULL, 0, 0, 0, 0, NULL, NULL, 1, '2025-04-08 03:57:05', '2025-04-08 06:57:05'),
+(9, 11, NULL, NULL, 8000, 0, 7500, NULL, NULL, 0, 0, 0, 0, NULL, NULL, 1, '2025-04-08 03:57:05', '2025-05-16 13:27:26'),
 (12, 6, '1', NULL, 100, 0, 80, '', 0, 0, 0, 0, 0, '[\"\\/media\\/image-(7)-1741687662_4236.jpg\"]', 0, 1, '2025-04-08 04:41:17', '2025-04-08 07:41:17'),
 (13, 6, '2', NULL, 90, 0, 70, '', 0, 0, 0, 0, 0, '[\"\\/media\\/image-(7)-1741687662_4236.jpg\"]', 0, 1, '2025-04-08 04:41:17', '2025-04-08 07:41:17');
 
@@ -2245,7 +2526,9 @@ INSERT INTO `referral_codes` (`id`, `code`, `product_id`, `dealer_id`, `created_
 (1, 'eTI9d4OT', 6, 413, '2025-03-30 14:06:52', '2025-03-30 14:06:52'),
 (2, '30Evj5nU', 7, 413, '2025-04-02 07:58:25', '2025-04-02 07:58:25'),
 (3, 'raRWomv6', 9, 413, '2025-04-08 03:33:02', '2025-04-08 03:33:02'),
-(4, 'aYIDvPtn', 8, 413, '2025-04-09 11:20:19', '2025-04-09 11:20:19');
+(4, 'aYIDvPtn', 8, 413, '2025-04-09 11:20:19', '2025-04-09 11:20:19'),
+(10, 'fwgSuus4', 10, 435, '2025-05-12 11:05:55', '2025-05-12 11:05:55'),
+(11, 'YVpNPeDC', 7, 435, '2025-05-17 03:15:03', '2025-05-17 03:15:03');
 
 -- --------------------------------------------------------
 
@@ -2274,6 +2557,15 @@ CREATE TABLE `return_requests` (
   `order_tracking_id` int(11) DEFAULT NULL,
   `return_method` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Дамп даних таблиці `return_requests`
+--
+
+INSERT INTO `return_requests` (`id`, `user_id`, `product_id`, `product_variant_id`, `order_id`, `order_item_id`, `status`, `remarks`, `created_at`, `updated_at`, `delivery_status`, `reason`, `application_type`, `refund_amount`, `refund_method`, `description`, `evidence_path`, `order_tracking_id`, `return_method`) VALUES
+(30, 413, 6, 12, 75, 3, 4, NULL, '2025-04-21 07:30:16', '2025-04-21 07:34:02', 'received', 'no_longer_needed', 'return_and_refund', 80.00, 'wallet', 'fdgdf gdsf gdsfg dfs gdsf g', '[\"return_evidences\\/kLLjR3XB75NrsddNvyO0BHvJDkpfsSYj1bxAJJz0.jpg\"]', 19, NULL),
+(31, 413, 6, 13, 76, 4, 4, NULL, '2025-04-21 08:17:55', '2025-04-21 08:19:00', 'received', 'defective', 'return_and_refund', 90.00, 'original_payment', 'dgdfgfdg', '[\"return_evidences\\/X028KYBMOwTb5KQLpuwIch0USmdVdbMfvXAZfADJ.jpg\"]', 21, NULL),
+(32, 413, 6, 12, 77, 5, 4, NULL, '2025-04-21 08:41:56', '2025-04-21 09:52:41', 'received', 'no_longer_needed', 'return_and_refund', 100.00, 'wallet', ' ewrweqr wqe rwe', '[\"return_evidences\\/iivz1yxDIVVLGy5PMrWBbKmY0Feh2j9mrD9ZREwc.jpg\"]', 23, NULL);
 
 -- --------------------------------------------------------
 
@@ -2427,6 +2719,14 @@ CREATE TABLE `seller_ratings` (
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Дамп даних таблиці `seller_ratings`
+--
+
+INSERT INTO `seller_ratings` (`id`, `seller_id`, `store_id`, `order_id`, `user_id`, `comment`, `quality_of_service`, `on_time_delivery`, `relevance_price_availability`, `created_at`, `updated_at`) VALUES
+(1, 4, 2, 74, 413, 'All rigth!', 4, 5, 5, '2025-04-21 06:25:17', '2025-04-21 06:25:17'),
+(2, 4, 2, 75, 413, 'good', 5, 5, 5, '2025-04-21 07:29:02', '2025-04-21 07:29:02');
+
 -- --------------------------------------------------------
 
 --
@@ -2472,8 +2772,8 @@ CREATE TABLE `seller_store` (
 --
 
 INSERT INTO `seller_store` (`id`, `seller_id`, `user_id`, `store_id`, `slug`, `category_ids`, `store_name`, `store_description`, `logo`, `store_thumbnail`, `other_documents`, `disk`, `store_url`, `no_of_ratings`, `rating`, `bank_name`, `bank_code`, `account_name`, `account_number`, `address_proof`, `tax_name`, `tax_number`, `permissions`, `commission`, `latitude`, `longitude`, `city`, `zipcode`, `status`, `created_at`, `updated_at`) VALUES
-(129, 1, 416, 2, 'meet-electronics', '4,3', 'Meet Electronics', '', '/image-1741258884_8408.png', '/image-1741258884_5675.png', '[]', 'public', 'starbucks', 0, 0, '165156', '165156', '1561651', '874111', '/image-1741258884_7169.png', '', '', '{\"require_products_approval\":1,\"customer_privacy\":1,\"view_order_otp\":1}', 5, '', '', 0, 0, 1, '2025-03-06 11:01:24', '2025-03-06 11:01:24'),
-(131, 4, 419, 2, 'myshop', '', 'MyShop', 'Store short description...', '/favicon-150x150-1741605297_3710.jpg', '/image-(2)-1741605297_5169.jpg', '[\"1715440476401-1741605297_6023.jpg\"]', 'public', 'myshop', 1, 4, 'Privatbank', '123456', 'MyAccountLong', '1111111111111111', '/ujbh5uoci8-1741605297_8525.png', '', '', '{\"require_products_approval\":1,\"customer_privacy\":1,\"view_order_otp\":1}', 0, NULL, NULL, 1, 1, 1, '2025-03-10 11:14:57', '2025-04-14 15:24:17');
+(129, 1, 416, 2, 'meet-electronics', '4,3', 'Meet Electronics', '', '/raj-mar-1746272242_5075.jpg', '/image-1741258884_5675.png', '[]', 'public', 'starbucks', 0, 0, '165156', '165156', '1561651', '874111', '/image-1741258884_7169.png', '', '', '{\"require_products_approval\":1,\"customer_privacy\":1,\"view_order_otp\":1}', 0, NULL, NULL, 0, 0, 1, '2025-03-06 11:01:24', '2025-03-06 11:01:24'),
+(131, 4, 419, 2, 'myshop', '', 'MyShop', 'Store short description...', '/smith-store-1746272182_6867.jpg', '/image-(2)-1741605297_5169.jpg', '[\"1715440476401-1741605297_6023.jpg\"]', 'public', 'myshop', 2, 4.83, 'Privatbank', '123456', 'MyAccountLong', '1111111111111111', '/ujbh5uoci8-1741605297_8525.png', '', '', '{\"require_products_approval\":1,\"customer_privacy\":1,\"view_order_otp\":1}', 0, NULL, NULL, 1, 1, 1, '2025-03-10 11:14:57', '2025-04-21 07:29:02');
 
 -- --------------------------------------------------------
 
@@ -2494,7 +2794,7 @@ CREATE TABLE `settings` (
 --
 
 INSERT INTO `settings` (`id`, `variable`, `value`, `created_at`, `updated_at`) VALUES
-(1, 'system_settings', '{\"app_name\":\"eShop Pro\",\"support_number\":\"919876543210\",\"support_email\":\"support@ezeemart.com\",\"logo\":\"/media/eshop-logo-1740037256_3875.png\",\"favicon\":\"/media/favicon-32x32-1740039763_1134.png\",\"on_boarding_image\":[\"/media/image-(1)-1740039826_1164.jpg\",\"/media/image-1740039816_3906.jpg\"],\"on_boarding_video\":\"\",\"storage_type\":\"local\",\"on_boarding_media_type\":\"image\",\"current_version_of_android_app\":\"1.0.0\",\"current_version_of_ios_app\":\"1.0.0\",\"current_version_of_android_app_for_seller\":\"1.0.0\",\"current_version_of_ios_app_for_seller\":\"1.0.0\",\"current_version_of_android_app_for_delivery_boy\":\"1.0.0\",\"current_version_of_ios_app_for_delivery_boy\":\"1.0.0\",\"order_delivery_otp_system\":1,\"system_timezone\":\"Asia/Kolkata\",\"minimum_cart_amount\":\"10\",\"maximum_item_allowed_in_cart\":\"10\",\"low_stock_limit\":\"7\",\"max_days_to_return_item\":\"14\",\"delivery_boy_bonus\":\"11\",\"enable_cart_button_on_product_list_view\":1,\"version_system_status\":1,\"expand_product_image\":1,\"tax_name\":\"GST\",\"tax_number\":\"123456\",\"google\":0,\"facebook\":0,\"apple\":0,\"refer_and_earn_status\":1,\"minimum_refer_and_earn_amount\":\"10\",\"minimum_refer_and_earn_bonus\":\"10\",\"refer_and_earn_method\":\"percentage\",\"max_refer_and_earn_amount\":\"10\",\"number_of_times_bonus_given_to_customer\":\"1\",\"wallet_balance_status\":1,\"wallet_balance_amount\":\"9999\",\"authentication_method\":\"telegram\",\"store_currency\":null,\"single_seller_order_system\":0,\"customer_app_maintenance_status\":0,\"seller_app_maintenance_status\":0,\"delivery_boy_app_maintenance_status\":0,\"message_for_customer_app\":null,\"message_for_seller_app\":\"test testtesttesttes tt esttesttesttestt esttesttesttesttes  ttesttest  testtesttesttesttes ttesttesttesttesttesttesttest\",\"message_for_delivery_boy_app\":\"test\",\"sidebar_color\":null,\"sidebar_type\":null,\"navbar_fixed\":0,\"theme_mode\":0,\"tg_bot_user_name\":\"auth_eshop_bot\",\"tg_bot_token\":\"7987880585:AAE4gcMyqMB9YGYcEq4qPXp3BnpPCQc-hJI\"}', '2023-07-20 06:43:44', '2025-03-30 08:14:47'),
+(1, 'system_settings', '{\"app_name\":\"eShop Pro\",\"support_number\":\"919876543210\",\"support_email\":\"support@ezeemart.com\",\"logo\":\"/media/alny-logo-1745305897_8012.png\",\"favicon\":\"/media/favicon-32x32-1740039763_1134.png\",\"on_boarding_image\":[\"/media/image-(1)-1740039826_1164.jpg\",\"/media/image-1740039816_3906.jpg\"],\"on_boarding_video\":\"\",\"storage_type\":\"local\",\"on_boarding_media_type\":\"image\",\"current_version_of_android_app\":\"1.0.0\",\"current_version_of_ios_app\":\"1.0.0\",\"current_version_of_android_app_for_seller\":\"1.0.0\",\"current_version_of_ios_app_for_seller\":\"1.0.0\",\"current_version_of_android_app_for_delivery_boy\":\"1.0.0\",\"current_version_of_ios_app_for_delivery_boy\":\"1.0.0\",\"order_delivery_otp_system\":1,\"system_timezone\":\"Asia/Kolkata\",\"minimum_cart_amount\":\"10\",\"maximum_item_allowed_in_cart\":\"10\",\"low_stock_limit\":\"7\",\"max_days_to_return_item\":\"14\",\"delivery_boy_bonus\":\"11\",\"enable_cart_button_on_product_list_view\":1,\"version_system_status\":1,\"expand_product_image\":1,\"tax_name\":\"GST\",\"tax_number\":\"123456\",\"google\":0,\"facebook\":0,\"apple\":0,\"refer_and_earn_status\":1,\"minimum_refer_and_earn_amount\":\"10\",\"minimum_refer_and_earn_bonus\":\"10\",\"refer_and_earn_method\":\"percentage\",\"max_refer_and_earn_amount\":\"10\",\"number_of_times_bonus_given_to_customer\":\"1\",\"wallet_balance_status\":1,\"wallet_balance_amount\":\"9999\",\"authentication_method\":\"telegram\",\"store_currency\":null,\"single_seller_order_system\":0,\"customer_app_maintenance_status\":0,\"seller_app_maintenance_status\":0,\"delivery_boy_app_maintenance_status\":0,\"message_for_customer_app\":null,\"message_for_seller_app\":\"test testtesttesttes tt esttesttesttestt esttesttesttesttes  ttesttest  testtesttesttesttes ttesttesttesttesttesttesttest\",\"message_for_delivery_boy_app\":\"test\",\"sidebar_color\":null,\"sidebar_type\":null,\"navbar_fixed\":0,\"theme_mode\":0,\"tg_bot_user_name\":\"auth_eshop_bot\",\"tg_bot_token\":\"7987880585:AAE4gcMyqMB9YGYcEq4qPXp3BnpPCQc-hJI\"}', '2023-07-20 06:43:44', '2025-04-22 07:12:13'),
 (2, 'payment_method', '{\"phonepe_method\":0,\"phonepe_mode\":\"sandbox\",\"phonepe_marchant_id\":null,\"phonepe_salt_index\":null,\"phonepe_salt_key\":null,\"paypal_method\":0,\"paypal_mode\":\"sandbox\",\"paypal_business_email\":\"demchukv@gmail.com\",\"paypal_client_id\":\"54234534543\",\"currency_code\":\"AUD\",\"razorpay_method\":0,\"razorpay_mode\":null,\"razorpay_key_id\":null,\"razorpay_secret_key\":null,\"razorpay_webhook_secret_key\":null,\"midtrans_method\":0,\"midtrans_payment_mode\":null,\"midtrans_client_key\":null,\"midtrans_server_key\":null,\"midtrans_merchant_id\":null,\"paystack_method\":0,\"paystack_key_id\":null,\"paystack_secret_key\":null,\"stripe_method\":1,\"stripe_payment_mode\":\"test\",\"stripe_publishable_key\":\"pk_test_51R4fSvPZOOv7SC5xXxSDaWuZKEXVZgv5juMZDcUjJkbJxM7BxdrdByddBUwRoS81zLjw2O4yEU0STdofCHGq6jIr00VPZ4MjxP\",\"stripe_secret_key\":\"sk_test_51R4fSvPZOOv7SC5xheWLmfXQMyQgaRQWi45rP8gvZCu20Q3UZW9bHD3FQnOS9IPjP49qEYVQ0trsXA77ohqaXIfl00Ph4aeS7k\",\"stripe_webhook_secret_key\":\"whsec_SpZjUBPmPnOxWITq5HezyRHXg1XUFAvQ\",\"stripe_currency_code\":\"USD\",\"flutterwave_method\":0,\"flutterwave_public_key\":null,\"flutterwave_secret_key\":null,\"flutterwave_encryption_key\":null,\"flutterwave_currency_code\":null,\"flutterwave_webhook_secret_key\":null,\"fatoorah_method\":0,\"myfatoorah_token\":null,\"myfatoorah_payment_mode\":null,\"myfatoorah_language\":null,\"myfatoorah__webhook_url\":null,\"myfatoorah_country\":null,\"myfatoorah__successUrl\":null,\"myfatoorah__errorUrl\":null,\"myfatoorah__secret_key\":null,\"direct_bank_transfer_method\":0,\"account_name\":null,\"account_number\":null,\"bank_name\":null,\"bank_code\":null,\"notes\":null,\"cod_method\":0}', '2023-07-26 07:16:42', '2025-04-03 06:50:16'),
 (3, 'shipping_method', '{\"local_shipping_method\":0,\"shiprocket_shipping_method\":0,\"email\":\"demchukv@gmail.com\",\"password\":\"@0124\",\"webhook_token\":\"kfdj9udnjJKLH09fdsjfdgkfsdgds\",\"standard_shipping_free_delivery\":0,\"minimum_free_delivery_order_amount\":\"10\",\"couriers_list_method\":1,\"aftership_apikey\":\"asat_4e9d8a34f8d24cbaa1dcc95aebec1c3b\",\"aftership_secret\":\"cc2a224411045626e671b5704d884cd6\"}', '2023-07-26 10:17:16', '2025-03-28 13:14:24'),
 (4, 'email_settings', '{\"email\":\"\",\"password\":\"\",\"smtp_host\":\"\",\"smtp_port\":\"587\",\"email_content_type\":\"html\",\"smtp_encryption\":\"tls\"}', '2023-07-26 15:51:09', '2025-01-10 10:34:18'),
@@ -2544,8 +2844,8 @@ CREATE TABLE `sliders` (
 --
 
 INSERT INTO `sliders` (`id`, `store_id`, `type`, `type_id`, `link`, `image`, `created_at`, `updated_at`) VALUES
-(3, 2, 'categories', 4, '', '/media/e1-image-1741257993_7561.jpg', '2025-03-06 11:21:54', '2025-03-06 11:21:54'),
-(4, 2, 'categories', 3, '', '/media/e2-image-1741257993_7393.jpg', '2025-03-06 11:22:13', '2025-03-06 11:22:13');
+(6, 2, 'default', 0, '', '/media/main-banner-1745327397_8718.png', '2025-04-22 10:10:10', '2025-04-22 10:10:10'),
+(7, 2, 'categories', 3, '', '/media/main-banner-2-1745327397_7814.png', '2025-04-22 10:11:09', '2025-04-22 11:45:34');
 
 -- --------------------------------------------------------
 
@@ -2566,7 +2866,7 @@ CREATE TABLE `storage_types` (
 --
 
 INSERT INTO `storage_types` (`id`, `name`, `is_default`, `created_at`, `updated_at`) VALUES
-(1, 'public', 0, '2025-01-10 10:46:12', '2025-01-10 10:46:12');
+(1, 'public', 1, '2025-01-10 10:46:12', '2025-05-10 12:58:42');
 
 -- --------------------------------------------------------
 
@@ -2611,7 +2911,7 @@ CREATE TABLE `stores` (
 --
 
 INSERT INTO `stores` (`id`, `name`, `slug`, `description`, `image`, `banner_image`, `banner_image_for_most_selling_product`, `stack_image`, `login_image`, `half_store_logo`, `disk`, `is_single_seller_order_system`, `is_default_store`, `note_for_necessary_documents`, `primary_color`, `secondary_color`, `store_settings`, `hover_color`, `active_color`, `background_color`, `status`, `rating`, `no_of_ratings`, `delivery_charge_type`, `delivery_charge_amount`, `minimum_free_delivery_amount`, `product_deliverability_type`, `created_at`, `updated_at`) VALUES
-(2, 'ALNY Store', 'alny-store', 'All kinds products', '/image-1741257671_2420.webp', '/e1-image-1741257671_1856.jpg', '/e-image-1741257671_9613.jpg', '/e2-image-1741257671_5036.jpg', '/e1-image-1741257671_7009.jpg', '/eshop-logo-1741257671_7376.png', 'public', 0, 1, '', '#0040ff', '#3d587f', '{\"store_style\":\"header_style_1\",\"product_style\":\"style_1\",\"category_section_title\":\"Categories\",\"category_style\":\"category_style_1\",\"category_card_style\":\"category_card_style_1\",\"brand_style\":\"brands_style_1\",\"offer_slider_style\":\"slider_style_1\"}', '#fc7b03', '#fc7b03', '#ffffff', 1, 0, 0, 'global_delivery_charge', 10, 0, 'city_wise_deliverability', '2025-03-06 10:41:11', '2025-04-09 11:32:27');
+(2, 'ALNY Store', 'alny-store', 'All kinds products', '/image-1741257671_2420.webp', '/headphones-banner-1745307593_5573.png', '/headphones-banner-1745307911_3016.png', '/e2-image-1741257671_5036.jpg', '/e1-image-1741257671_7009.jpg', '/alny-logo-1745307249_1930.png', 'public', 0, 1, '', '#2a3029', '#7ebb44', '{\"store_style\":\"header_style_1\",\"product_style\":\"style_1\",\"category_section_title\":\"Categories\",\"category_style\":\"category_style_1\",\"category_card_style\":\"category_card_style_1\",\"brand_style\":\"brands_style_2\",\"offer_slider_style\":\"slider_style_1\"}', '#fc7b03', '#fc7b03', '#ffffff', 1, 0, 0, 'global_delivery_charge', 10, 0, 'city_wise_deliverability', '2025-03-06 10:41:11', '2025-04-23 06:19:07');
 
 -- --------------------------------------------------------
 
@@ -2685,6 +2985,15 @@ CREATE TABLE `tickets` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Дамп даних таблиці `tickets`
+--
+
+INSERT INTO `tickets` (`id`, `ticket_type_id`, `user_id`, `subject`, `email`, `description`, `status`, `created_at`, `updated_at`) VALUES
+(1, 30, 413, 'Test ticket', 'demchukv@gmail.com', 'I have problem. Please, help me.', 2, '2025-05-02 04:35:05', '2025-05-02 04:35:55'),
+(2, 30, 428, 'asdfsdfdfs', 'demchukv@gmail.com', 'sadff adsfdas fsad f', 2, '2025-05-02 11:17:52', '2025-05-02 11:19:17'),
+(3, 30, 433, 'asdfsdfdfs', 'volodya2@yahoo.com', 'sadff adsfdas fsad f', 2, '2025-05-03 08:48:16', '2025-05-03 08:49:23');
+
 -- --------------------------------------------------------
 
 --
@@ -2714,13 +3023,6 @@ CREATE TABLE `ticket_types` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Дамп даних таблиці `ticket_types`
---
-
-INSERT INTO `ticket_types` (`id`, `title`, `created_at`, `updated_at`) VALUES
-(30, 'Services', '2025-03-01 11:39:27', '2025-03-01 11:39:27');
 
 -- --------------------------------------------------------
 
@@ -2776,6 +3078,29 @@ CREATE TABLE `transactions` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Дамп даних таблиці `transactions`
+--
+
+INSERT INTO `transactions` (`id`, `transaction_type`, `user_id`, `order_id`, `order_item_id`, `type`, `txn_id`, `payu_txn_id`, `amount`, `fee`, `status`, `currency_code`, `payer_email`, `message`, `transaction_date`, `is_refund`, `refund_amount`, `refund_status`, `refund_id`, `created_at`, `updated_at`) VALUES
+(1, 'wallet', 413, '74', 0, 'debit', 'WALLET-1745227103', NULL, 140, 0, 'success', NULL, NULL, 'Used against Order Placement', '2025-04-21 09:18:23', 0, 0.00, NULL, NULL, '2025-04-21 06:18:23', '2025-04-21 06:18:23'),
+(2, 'transaction', 413, '74', NULL, 'wallet', 'WALLET-74-1745227104', NULL, 140, 0, 'success', NULL, NULL, 'Paid with wallet', '2025-04-21 06:18:24', 0, 0.00, NULL, NULL, '2025-04-21 06:18:24', '2025-04-21 06:18:24'),
+(3, 'wallet', 413, '75', 0, 'debit', 'WALLET-1745231216', NULL, 100, 0, 'success', NULL, NULL, 'Used against Order Placement', '2025-04-21 10:26:56', 0, 0.00, NULL, NULL, '2025-04-21 07:26:56', '2025-04-21 07:26:56'),
+(4, 'transaction', 413, '75', NULL, 'wallet', 'WALLET-75-1745231217', NULL, 100, 0, 'success', NULL, NULL, 'Paid with wallet', '2025-04-21 07:26:57', 0, 0.00, NULL, NULL, '2025-04-21 07:26:57', '2025-04-21 07:26:57'),
+(5, 'wallet', 413, '', 3, 'credit', 'WALLET-1745231642', NULL, 100, 0, 'success', NULL, NULL, 'Refund Amount Credited for Order Item ID  : 3', '2025-04-21 10:34:02', 0, 0.00, NULL, NULL, '2025-04-21 07:34:02', '2025-04-21 07:34:02'),
+(6, 'transaction', 413, '76', NULL, 'stripe', 'pi_3RGIJPPZOOv7SC5x1zY85C9Y', NULL, 90, 3, 'success', NULL, NULL, 'Payment Successfully', '2025-04-21 08:14:58', 1, 93.00, 'succeeded', 're_3RGIJPPZOOv7SC5x1SCcJHRQ', '2025-04-21 08:14:58', '2025-04-21 08:19:03'),
+(7, 'wallet', 413, '77', 0, 'debit', 'WALLET-1745235500', NULL, 100, 0, 'success', NULL, NULL, 'Used against Order Placement', '2025-04-21 11:38:20', 0, 0.00, NULL, NULL, '2025-04-21 08:38:20', '2025-04-21 08:38:20'),
+(8, 'transaction', 413, '77', NULL, 'wallet', 'WALLET-77-1745235500', NULL, 100, 0, 'success', NULL, NULL, 'Paid with wallet', '2025-04-21 08:38:20', 0, 0.00, NULL, NULL, '2025-04-21 08:38:20', '2025-04-21 08:38:20'),
+(9, 'wallet', 413, '', 5, 'credit', 'WALLET-1745239962', NULL, 100, 0, 'success', NULL, NULL, 'Refund Amount Credited for Order Item ID  : 5', '2025-04-21 12:52:42', 0, 0.00, NULL, NULL, '2025-04-21 09:52:42', '2025-04-21 09:52:42'),
+(10, 'wallet', 413, '78', 0, 'debit', 'WALLET-1746099504', NULL, 340, 0, 'success', NULL, NULL, 'Used against Order Placement', '2025-05-01 11:38:24', 0, 0.00, NULL, NULL, '2025-05-01 08:38:24', '2025-05-01 08:38:24'),
+(11, 'transaction', 413, '78', NULL, 'wallet', 'WALLET-78-1746099504', NULL, 340, 0, 'success', NULL, NULL, 'Paid with wallet', '2025-05-01 08:38:24', 0, 0.00, NULL, NULL, '2025-05-01 08:38:24', '2025-05-01 08:38:24'),
+(12, 'wallet', 413, '', 8, 'credit', 'WALLET-1746099582', NULL, 50, 0, 'success', NULL, NULL, 'Refund Amount Credited for Order Item ID  : 8', '2025-05-01 11:39:42', 0, 0.00, NULL, NULL, '2025-05-01 08:39:42', '2025-05-01 08:39:42'),
+(16, 'transaction', 435, '82', NULL, 'stripe', 'pi_3RMA6ZPZOOv7SC5x1DvVbLpg', NULL, 800, 24.2, 'success', NULL, NULL, 'Payment Successfully', '2025-05-07 12:41:59', 0, 0.00, NULL, NULL, '2025-05-07 12:41:59', '2025-05-07 12:41:59'),
+(17, 'transaction', 435, '83', NULL, 'stripe', 'pi_3RMRL0PZOOv7SC5x1WH5zgO8', NULL, 800, 24.2, 'success', NULL, NULL, 'Payment Successfully', '2025-05-08 07:06:02', 0, 0.00, NULL, NULL, '2025-05-08 07:06:02', '2025-05-08 07:06:02'),
+(18, 'transaction', 435, '84', NULL, 'stripe', 'pi_3RNrkKPZOOv7SC5x0hNRh46w', NULL, 330, 10.16, 'success', NULL, NULL, 'Payment Successfully', '2025-05-12 05:30:04', 0, 0.00, NULL, NULL, '2025-05-12 05:30:04', '2025-05-12 05:30:04'),
+(19, 'wallet', 435, '', 16, 'credit', 'WALLET-1747139220', NULL, 800, 0, 'success', NULL, NULL, 'Refund Amount Credited for Order Item ID  : 16', '2025-05-13 12:27:00', 0, 0.00, NULL, NULL, '2025-05-13 09:27:00', '2025-05-13 09:27:00'),
+(20, 'transaction', 435, '85', NULL, 'stripe', 'pi_3ROgR6PZOOv7SC5x0EHe3WGX', NULL, 190, 5.98, 'success', NULL, NULL, 'Payment Successfully', '2025-05-14 11:37:35', 0, 0.00, NULL, NULL, '2025-05-14 11:37:35', '2025-05-14 11:37:35');
 
 -- --------------------------------------------------------
 
@@ -2868,13 +3193,12 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `role_id`, `ip_address`, `username`, `password`, `email`, `mobile`, `image`, `disk`, `balance`, `activation_selector`, `activation_code`, `forgotten_password_selector`, `forgotten_password_code`, `forgotten_password_time`, `remember_selector`, `remember_token`, `created_on`, `last_login`, `active`, `company`, `address`, `bonus_type`, `bonus`, `cash_received`, `dob`, `country_code`, `city`, `area`, `street`, `pincode`, `serviceable_zipcodes`, `serviceable_cities`, `serviceable_zones`, `apikey`, `referral_code`, `friends_code`, `fcm_id`, `latitude`, `longitude`, `type`, `front_licence_image`, `back_licence_image`, `status`, `is_notification_on`, `created_at`, `updated_at`, `active_status`, `avatar`, `dark_mode`, `messenger_color`, `first_name`, `last_name`, `telegram_id`, `telegram_username`, `birthdate`) VALUES
 (1, 1, NULL, 'admin', '$2y$12$OyVep4C3a3xfjC/5365CO.SDyJlMYTSBlnk3VgXeAGP0dqgaUEs7m', 'admin@gmail.com', '9876543210', NULL, '', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, 'percentage_per_order_item', NULL, 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'phone', NULL, NULL, 0, 1, '2025-01-10 04:06:55', '2025-01-10 10:28:59', 0, 'avatar.png', 0, NULL, '', '', '0', '', NULL),
-(402, 1, NULL, 'super', '$2y$10$5M./nl.rG3eS34J/uwsnZ.NKu01LizjqQKWe0XArtGLLgZyMAj9jO', 'demchukv@gmail.com', '0963926935', '/cat-1740038499_1102.jpg', 'public', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, 'percentage_per_order_item', NULL, 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, 'VYnP7s3kuyEh', NULL, NULL, NULL, NULL, 'phone', NULL, NULL, 0, 1, '2025-02-20 07:18:48', '2025-04-07 13:30:08', 1, 'avatar.png', 0, NULL, '', '', '0', '', NULL),
-(413, 8, NULL, 'demchukv', '$2y$10$YX7UWj/HxOIVagtWfKkHBeXZ3ew4XvH3jADgXArJbqIkANhMBIP6K', 'demchukv@windowslive.com', '963926935', 'user_image/8iws0gg6ZC8WmvaPI1astmhowr6qAp0dkXx4GmrU.jpg', '', 700, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'percentage_per_order_item', NULL, 0.00, NULL, 380, 'Lviv', NULL, 'Vernadsky str., 32', '79000', NULL, '', NULL, NULL, 'jTbZcukEwLjf', NULL, NULL, NULL, NULL, 'phone', NULL, NULL, 0, 1, '2025-02-24 09:18:32', '2025-04-18 16:36:16', 0, 'avatar.png', 0, NULL, 'Володимир', 'Демчук', '395113944', 'demchukv', NULL),
-(416, 4, NULL, 'John Doe', '$2y$10$59G85N8ZLjAsYNr8Q1tvDedII/odzVqgL0p3X1uMtqLCH7gF0rmuO', 'johndoe@gmail.com', '8787878787', '/image-1741258884_2697.png', '', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, 'bhuj', 'percentage_per_order_item', NULL, 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'phone', NULL, NULL, 0, 1, '2025-03-06 09:01:24', '2025-04-11 13:19:25', 1, 'avatar.png', 0, NULL, '', '', '0', '', NULL),
-(419, 4, NULL, 'mykoladv', '$2y$10$gmQsdKsW/AK4OimftkRbTekvKErQ6hEu2HmT9.zkG2ERHbrkS/U4m', 'demchuk.mykolav@gmail.com', '972744776', '', '', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, 'Vernadsky Str., 32', 'percentage_per_order_item', NULL, 0.00, NULL, 380, '1', NULL, NULL, '1', NULL, '', NULL, NULL, 'gcm1UBj2FjS3', 'jTbZcukEwLjf', NULL, NULL, NULL, 'phone', NULL, NULL, 0, 1, '2025-03-10 09:14:57', '2025-04-16 07:46:47', 0, 'avatar.png', 0, NULL, 'Микола', 'Демчук', '6623707993', 'mykoladv', NULL),
-(420, 2, NULL, '779313986', '$2y$10$AjYL2HzcSJqSzCpwPZW0D.6UYoKFnR76i/BiG83wEIbp2GSbSXeq2', 'demchuknv75@gmail.com', '964313140', NULL, '', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, 'percentage_per_order_item', NULL, 0.00, NULL, 380, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, '6wEj5gJ9au66', 'jTbZcukEwLjf', NULL, NULL, NULL, 'phone', NULL, NULL, 0, 1, '2025-03-30 14:08:19', '2025-03-31 09:25:19', 1, 'avatar.png', 0, NULL, 'Natalia', 'Demchuk', '779313986', '779313986', NULL),
-(421, 2, NULL, '6814867950', '$2y$10$7X7AjB7n1rDYbrIQS219mOTw47O30jx5r5p1mYZKI3GZUKC4DMOtu', 'demchuk.volodymyr@lnu.edu.ua', '963237058', NULL, '', 50, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, 'percentage_per_order_item', NULL, 0.00, NULL, 380, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, 'nvkHdKkhRt0X', 'jTbZcukEwLjf', NULL, NULL, NULL, 'phone', NULL, NULL, 0, 1, '2025-03-31 03:01:13', '2025-04-08 07:06:58', 1, 'avatar.png', 0, NULL, 'Volodymyr', 'Demchuk', '6814867950', '6814867950', '2025-04-17'),
-(422, 2, NULL, 'Slipitin', '$2y$10$8oQeqDgcQAfNeLI0aQNoa.wPmdYqb5yP68T55vZDU/VT3NcAVnKR6', 'luso1111115@gmail.com', '557130831', NULL, '', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, 'percentage_per_order_item', NULL, 0.00, NULL, 995, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, 'UnL06HhL96oB', NULL, NULL, NULL, NULL, 'phone', NULL, NULL, 0, 1, '2025-04-07 10:31:04', '2025-04-08 07:06:54', 1, 'avatar.png', 0, NULL, 'Luka', 'Sopromadze', '1064580895', 'Slipitin', NULL);
+(402, 1, NULL, 'super', '$2y$10$5M./nl.rG3eS34J/uwsnZ.NKu01LizjqQKWe0XArtGLLgZyMAj9jO', 'demchukv@gmail.com', '0963926935', '/cat-1740038499_1102.jpg', 'public', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, 'percentage_per_order_item', NULL, 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, 'VYnP7s3kuyEh', NULL, NULL, NULL, NULL, 'phone', NULL, NULL, 0, 1, '2025-02-20 07:18:48', '2025-05-07 15:44:49', 1, 'avatar.png', 0, NULL, '', '', '0', '', NULL),
+(413, 8, NULL, 'demchukv', '$2y$10$YX7UWj/HxOIVagtWfKkHBeXZ3ew4XvH3jADgXArJbqIkANhMBIP6K', 'demchukv@windowslive.com', '963926935', 'user_image/8iws0gg6ZC8WmvaPI1astmhowr6qAp0dkXx4GmrU.jpg', '', 270, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'percentage_per_order_item', NULL, 0.00, NULL, 380, 'Lviv', NULL, 'Vernadsky str., 32', '79000', NULL, '', NULL, NULL, 'jTbZcukEwLjf', NULL, NULL, NULL, NULL, 'phone', NULL, NULL, 0, 1, '2025-02-24 09:18:32', '2025-05-02 09:09:43', 0, 'avatar.png', 0, NULL, 'Володимир', 'Демчук', '395113944', 'demchukv', NULL),
+(416, 4, NULL, 'John Doe', '$2y$10$59G85N8ZLjAsYNr8Q1tvDedII/odzVqgL0p3X1uMtqLCH7gF0rmuO', 'johndoe@gmail.com', '8787878787', '', '', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, 'bhuj', 'percentage_per_order_item', NULL, 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'phone', NULL, NULL, 0, 1, '2025-03-06 09:01:24', '2025-05-03 11:37:22', 1, 'avatar.png', 0, NULL, '', '', '0', '', NULL),
+(419, 4, NULL, 'mykoladv', '$2y$10$gmQsdKsW/AK4OimftkRbTekvKErQ6hEu2HmT9.zkG2ERHbrkS/U4m', 'demchuk.mykolav@gmail.com', '972744776', '', '', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, 'Vernadsky Str., 32', 'percentage_per_order_item', NULL, 0.00, NULL, 380, '1', NULL, NULL, '1', NULL, '', NULL, NULL, 'gcm1UBj2FjS3', 'jTbZcukEwLjf', NULL, NULL, NULL, 'phone', NULL, NULL, 0, 1, '2025-03-10 09:14:57', '2025-05-13 15:16:26', 1, 'avatar.png', 0, NULL, 'Микола', 'Демчук', '6623707993', 'mykoladv', NULL),
+(422, 2, NULL, 'Slipitin', '$2y$10$8oQeqDgcQAfNeLI0aQNoa.wPmdYqb5yP68T55vZDU/VT3NcAVnKR6', 'luso1111115@gmail.com', '557130831', NULL, '', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, 'percentage_per_order_item', NULL, 0.00, NULL, 995, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, 'UnL06HhL96oB', NULL, NULL, NULL, NULL, 'phone', NULL, NULL, 0, 1, '2025-04-07 10:31:04', '2025-05-16 13:27:51', 1, 'avatar.png', 0, NULL, 'Luka', 'Sopromadze', '1064580895', 'Slipitin', NULL),
+(435, 7, NULL, 'v_tochku_com_ua', '$2y$10$3WbV9bYXATwgdP.eGNwg1.675FLriKFWNc1ty4AnES7Ze3FyHnOgG', 'volodya2@yahoo.com', '0963237058', NULL, '', 800, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'percentage_per_order_item', NULL, 0.00, NULL, 380, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, 'N6voDFBcepb5', NULL, NULL, NULL, NULL, 'phone', NULL, NULL, 0, 1, '2025-05-07 12:38:42', '2025-05-16 13:36:04', 0, 'avatar.png', 0, NULL, 'Volodymyr', 'Demchuk', '6814867950', 'v_tochku_com_ua', '2025-05-22');
 
 -- --------------------------------------------------------
 
@@ -2969,8 +3293,7 @@ CREATE TABLE `user_statuses` (
 --
 
 INSERT INTO `user_statuses` (`id`, `user_id`, `type`, `status`, `passport`, `tax_id`, `photos`, `message`, `notes`, `created_at`, `updated_at`) VALUES
-(1, 421, 'dealer', 'rejected', NULL, NULL, '[]', NULL, NULL, '2025-04-07 05:38:48', '2025-04-07 05:40:52'),
-(2, 421, 'dealer', 'rejected', NULL, NULL, '[]', NULL, NULL, '2025-04-07 06:00:59', '2025-04-07 06:04:38');
+(5, 435, 'dealer', 'approved', NULL, NULL, '[]', NULL, NULL, '2025-05-07 12:44:43', '2025-05-07 12:45:24');
 
 -- --------------------------------------------------------
 
@@ -3670,7 +3993,7 @@ ALTER TABLE `zones`
 -- AUTO_INCREMENT для таблиці `addresses`
 --
 ALTER TABLE `addresses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT для таблиці `areas`
@@ -3712,13 +4035,13 @@ ALTER TABLE `brands`
 -- AUTO_INCREMENT для таблиці `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=110;
 
 --
 -- AUTO_INCREMENT для таблиці `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=92;
 
 --
 -- AUTO_INCREMENT для таблиці `category_sliders`
@@ -3772,7 +4095,7 @@ ALTER TABLE `combo_product_ratings`
 -- AUTO_INCREMENT для таблиці `commission_distributions`
 --
 ALTER TABLE `commission_distributions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=376;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=496;
 
 --
 -- AUTO_INCREMENT для таблиці `countries`
@@ -3808,13 +4131,13 @@ ALTER TABLE `digital_orders_mails`
 -- AUTO_INCREMENT для таблиці `disputs`
 --
 ALTER TABLE `disputs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT для таблиці `disput_messages`
 --
 ALTER TABLE `disput_messages`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT для таблиці `failed_jobs`
@@ -3832,7 +4155,7 @@ ALTER TABLE `faqs`
 -- AUTO_INCREMENT для таблиці `favorites`
 --
 ALTER TABLE `favorites`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT для таблиці `fund_transfers`
@@ -3850,7 +4173,7 @@ ALTER TABLE `images`
 -- AUTO_INCREMENT для таблиці `languages`
 --
 ALTER TABLE `languages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT для таблиці `login_attempts`
@@ -3862,7 +4185,7 @@ ALTER TABLE `login_attempts`
 -- AUTO_INCREMENT для таблиці `media`
 --
 ALTER TABLE `media`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=126;
 
 --
 -- AUTO_INCREMENT для таблиці `migrations`
@@ -3892,7 +4215,7 @@ ALTER TABLE `offer_sliders`
 -- AUTO_INCREMENT для таблиці `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
 
 --
 -- AUTO_INCREMENT для таблиці `order_bank_transfers`
@@ -3904,19 +4227,19 @@ ALTER TABLE `order_bank_transfers`
 -- AUTO_INCREMENT для таблиці `order_charges`
 --
 ALTER TABLE `order_charges`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
 -- AUTO_INCREMENT для таблиці `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT для таблиці `order_trackings`
 --
 ALTER TABLE `order_trackings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT для таблиці `otps`
@@ -3928,13 +4251,13 @@ ALTER TABLE `otps`
 -- AUTO_INCREMENT для таблиці `parcels`
 --
 ALTER TABLE `parcels`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT для таблиці `parcel_items`
 --
 ALTER TABLE `parcel_items`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT для таблиці `payment_requests`
@@ -3970,7 +4293,7 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT для таблиці `product_approvals`
 --
 ALTER TABLE `product_approvals`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT для таблиці `product_approval_comments`
@@ -3994,7 +4317,7 @@ ALTER TABLE `product_faqs`
 -- AUTO_INCREMENT для таблиці `product_ratings`
 --
 ALTER TABLE `product_ratings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT для таблиці `product_variants`
@@ -4012,13 +4335,13 @@ ALTER TABLE `promo_codes`
 -- AUTO_INCREMENT для таблиці `referral_codes`
 --
 ALTER TABLE `referral_codes`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT для таблиці `return_requests`
 --
 ALTER TABLE `return_requests`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT для таблиці `roles`
@@ -4054,13 +4377,13 @@ ALTER TABLE `seller_data`
 -- AUTO_INCREMENT для таблиці `seller_invites`
 --
 ALTER TABLE `seller_invites`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT для таблиці `seller_ratings`
 --
 ALTER TABLE `seller_ratings`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT для таблиці `seller_store`
@@ -4078,7 +4401,7 @@ ALTER TABLE `settings`
 -- AUTO_INCREMENT для таблиці `sliders`
 --
 ALTER TABLE `sliders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT для таблиці `storage_types`
@@ -4114,7 +4437,7 @@ ALTER TABLE `themes`
 -- AUTO_INCREMENT для таблиці `tickets`
 --
 ALTER TABLE `tickets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT для таблиці `ticket_messages`
@@ -4138,7 +4461,7 @@ ALTER TABLE `time_slots`
 -- AUTO_INCREMENT для таблиці `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT для таблиці `updates`
@@ -4150,7 +4473,7 @@ ALTER TABLE `updates`
 -- AUTO_INCREMENT для таблиці `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=423;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=436;
 
 --
 -- AUTO_INCREMENT для таблиці `users_groups`
@@ -4180,7 +4503,7 @@ ALTER TABLE `user_permissions`
 -- AUTO_INCREMENT для таблиці `user_statuses`
 --
 ALTER TABLE `user_statuses`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT для таблиці `wallet_transactions`

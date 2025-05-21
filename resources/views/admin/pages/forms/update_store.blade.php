@@ -246,7 +246,8 @@
                                                 </div>
                                                 @if ($data->image && !empty($data->image))
                                                     <div class="col-md-4">
-                                                        <label for="" class="text-danger">*Only Choose When Update is
+                                                        <label for="" class="text-danger">*Only Choose When Update
+                                                            is
                                                             necessary</label>
                                                         <div class="container-fluid row image-upload-section">
                                                             <div
@@ -289,7 +290,8 @@
 
                                                 @if ($data->banner_image && !empty($data->banner_image))
                                                     <div class="col-md-4">
-                                                        <label  for="" class="text-danger">*Only Choose When Update is
+                                                        <label for="" class="text-danger">*Only Choose When Update
+                                                            is
                                                             necessary</label>
                                                         <div class="container-fluid row image-upload-section">
                                                             <div
@@ -348,7 +350,8 @@
                                                     </div>
                                                     @if ($data->banner_image_for_most_selling_product && !empty($data->banner_image_for_most_selling_product))
                                                         <div class="col-md-4">
-                                                            <label for="" class="text-danger">*Only Choose When Update is
+                                                            <label for="" class="text-danger">*Only Choose When
+                                                                Update is
                                                                 necessary</label>
                                                             <div class="container-fluid row image-upload-section">
                                                                 <div
@@ -393,7 +396,8 @@
                                                     </div>
                                                     @if ($data->stack_image && !empty($data->stack_image))
                                                         <div class="col-md-4">
-                                                            <label for="" class="text-danger">*Only Choose When Update is
+                                                            <label for="" class="text-danger">*Only Choose When
+                                                                Update is
                                                                 necessary</label>
                                                             <div class="container-fluid row image-upload-section">
                                                                 <div
@@ -437,7 +441,8 @@
                                                     </div>
                                                     @if ($data->login_image && !empty($data->login_image))
                                                         <div class="col-md-4">
-                                                            <label for="" class="text-danger">*Only Choose When Update is
+                                                            <label for="" class="text-danger">*Only Choose When
+                                                                Update is
                                                                 necessary</label>
                                                             <div class="container-fluid row image-upload-section">
                                                                 <div
@@ -481,7 +486,8 @@
                                                     </div>
                                                     @if ($data->half_store_logo && !empty($data->half_store_logo))
                                                         <div class="col-md-4">
-                                                            <label for="" class="text-danger">*Only Choose When Update is
+                                                            <label for="" class="text-danger">*Only Choose When
+                                                                Update is
                                                                 necessary</label>
                                                             <div class="container-fluid row image-upload-section">
                                                                 <div
@@ -902,7 +908,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
                                             <div class="mb-3 col-md-4">
                                                 <div class="row">
                                                     <div class="col-md-9">
@@ -920,7 +925,24 @@
                                                     </div>
                                                 </div>
                                             </div>
-
+                                            <div class="mb-3 col-md-4">
+                                                <div class="row">
+                                                    <div class="col-md-9">
+                                                        <label class="form-label"
+                                                            for="contractual_delivery_charge_switch">
+                                                            {{ labels('admin_labels.contractual_delivery', 'Contractual Delivery') }}
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-check form-switch float-end">
+                                                            <input class="form-check-input" type="radio"
+                                                                id="contractual_delivery_charge_switch"
+                                                                name="delivery_charge_type"
+                                                                <?= isset($data->delivery_charge_type) && $data->delivery_charge_type != 'null' && $data->delivery_charge_type == 'contractual_delivery_charge' ? 'checked' : '' ?>>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="row">
                                             @php

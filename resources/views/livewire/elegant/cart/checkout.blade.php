@@ -1,4 +1,5 @@
 <div id="page-content">
+
     <x-utility.breadcrumbs.breadcrumbTwo :$bread_crumb />
 
     {{-- {{ dd($payment_method) }} --}}
@@ -12,7 +13,7 @@
                     <div class="col-lg-6 col-md-6 col-sm-12">
                         @if ($cart_data['cart_items'][0]['type'] != 'digital_product')
 
-                            <div class="block mb-3 shipping-address mb-4">
+                            <div class="block shipping-address mb-4">
                                 <div class="address-book-section dashboard-content">
                                     <div class="address-select-box active">
                                         <div class="address-box bg-block">
@@ -76,7 +77,7 @@
                                 </div>
                             </div>
                             @if ($time_slot_config->is_time_slots_enabled == 10)
-                                <div class="block mb-3 order-comments mb-4">
+                                <div class="block order-comments mb-4">
                                     <div class="block-content">
                                         <h3 class="title mb-3 text-uppercase">
                                             {{ labels('front_messages.time_slot', 'Time Slot') }}</h3>
@@ -110,7 +111,7 @@
                             <input type="hidden" id="is_time_slots_enabled" value="0">
                             <input type="hidden" id="delivery_starts_from" value="0">
                             <input type="hidden" id="delivery_ends_in" value="0">
-                            <div class="block mb-3 order-comments mb-4">
+                            <div class="block order-comments mb-4">
                                 <div class="block-content">
                                     <h3 class="title mb-3 text-uppercase">
                                         {{ labels('front_messages.order_comment', 'Order Comment') }}</h3>
@@ -125,7 +126,7 @@
                                 </div>
                             </div>
                         @else
-                            <div class="block mb-3 order-comments mb-4">
+                            <div class="block order-comments mb-4">
                                 <div class="block-content">
                                     <h3 class="title mb-3 text-uppercase">
                                         {{ labels('front_messages.email', 'Email') }}</h3>
@@ -136,149 +137,156 @@
                         @endif
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12">
-                        <!--Pay with wallet-->
-                        <div class="block mb-3 payment-methods mb-4">
-                            <div class="block-content">
-                                <h3 class="title mb-3 text-uppercase">
-                                    {{ labels('front_messages.pay_with_wallet', 'Pay With Wallet') }}</h3>
-                                <div class="payment-accordion">
-                                    <div class="widget-content filter-size filterDD">
-                                        <label
-                                            class="d-flex align-items-center justify-content-start swatchLbl py-2 gap-3"
-                                            for="wallet-pay" data-bs-toggle="tooltip" data-bs-placement="top"
-                                            title="Pay With Wallet">
-                                            <input type="checkbox" value="" id="wallet-pay"
-                                                data-wallet-balance="{{ $wallet_balance }}">
-                                            <div class="image payment-image">
-                                                <img class="blur-up lazyload"
-                                                    data-src="{{ asset('frontend/elegant/svgs/wallet.svg') }}"
-                                                    src="{{ asset('frontend/elegant/svgs/wallet.svg') }}"
-                                                    alt="quotes" width="80" height="70" />
-                                            </div>
-                                            <div>
-                                                <p class="fw-600 fs-6 m-0">
-                                                    {{ labels('front_messages.wallet', 'Wallet') }}
-                                                </p>
-                                                <p class="fw-400 m-0">
-                                                    {{ labels('front_messages.balance', 'Balance') }}:
-                                                    {{ currentCurrencyPrice($wallet_balance, true) }}
-                                                </p>
-                                            </div>
-                                        </label>
+                        @if ($delivery_charge_type != 'contractual_delivery_charge')
+                            <!--Pay with wallet-->
+                            <div class="block payment-methods mb-4">
+                                <div class="block-content">
+                                    <h3 class="title mb-3 text-uppercase">
+                                        {{ labels('front_messages.pay_with_wallet', 'Pay With Wallet') }}</h3>
+                                    <div class="payment-accordion">
+                                        <div class="widget-content filter-size filterDD">
+                                            <label
+                                                class="d-flex align-items-center justify-content-start swatchLbl py-2 gap-3"
+                                                for="wallet-pay" data-bs-toggle="tooltip" data-bs-placement="top"
+                                                title="Pay With Wallet">
+                                                <input type="checkbox" value="" id="wallet-pay"
+                                                    data-wallet-balance="{{ $wallet_balance }}">
+                                                <div class="image payment-image">
+                                                    <img class="blur-up lazyload"
+                                                        data-src="{{ asset('frontend/elegant/svgs/wallet.svg') }}"
+                                                        src="{{ asset('frontend/elegant/svgs/wallet.svg') }}"
+                                                        alt="quotes" width="80" height="70" />
+                                                </div>
+                                                <div>
+                                                    <p class="fw-600 fs-6 m-0">
+                                                        {{ labels('front_messages.wallet', 'Wallet') }}
+                                                    </p>
+                                                    <p class="fw-400 m-0">
+                                                        {{ labels('front_messages.balance', 'Balance') }}:
+                                                        {{ currentCurrencyPrice($wallet_balance, true) }}
+                                                    </p>
+                                                </div>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!--Payment Methods-->
-                        <div wire:ignore class="block mb-3 payment-methods mb-4 payment-type">
-                            <div class="block-content">
-                                <h3 class="title mb-3 text-uppercase">
-                                    {{ labels('front_messages.payment_methods', 'Payment Methods') }}</h3>
-                                <div class="payment-accordion">
-                                    <div>
-                                        @php
-                                            if (is_string($payment_method)) {
-                                                $payment_method = json_decode($payment_method);
-                                            }
-                                        @endphp
+                            <!--Payment Methods-->
+                            <div wire:ignore class="block payment-methods mb-4 payment-type">
+                                <div class="block-content">
+                                    <h3 class="title mb-3 text-uppercase">
+                                        {{ labels('front_messages.payment_methods', 'Payment Methods') }}</h3>
+                                    <div class="payment-accordion">
+                                        <div>
+                                            @php
+                                                if (is_string($payment_method)) {
+                                                    $payment_method = json_decode($payment_method);
+                                                }
+                                            @endphp
+                                        </div>
+                                        @if ($payment_method->cod_method == 1)
+                                            <div class="form-check mb-2 d-flex align-items-center">
+                                                <input class="form-check-input" type="radio" name="payment_method"
+                                                    id="cod" value="cod">
+                                                <label class="form-check-label d-flex align-items-center ps-2"
+                                                    for="cod" title="COD">
+                                                    <div class="image payment-image">
+                                                        <img class="blur-up lazyload"
+                                                            data-src="{{ asset('frontend/elegant/images/logo/cod.png') }}"
+                                                            src="{{ asset('frontend/elegant/images/logo/cod.png') }}"
+                                                            alt="cash on Delivery" />
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        @endif
+                                        @if ($payment_method->phonepe_method == 1)
+                                            <div class="form-check mb-2 d-flex align-items-center">
+                                                <input class="form-check-input" type="radio" name="payment_method"
+                                                    id="phonepe" value="phonepe">
+                                                <label class="form-check-label d-flex align-items-center ps-2"
+                                                    for="phonepe" value="phonepe" title="Phonepe">
+                                                    <div class="image payment-image">
+                                                        <img class="blur-up lazyload"
+                                                            data-src="{{ asset('frontend/elegant/images/logo/PhonePe_Logo.png') }}"
+                                                            src="{{ asset('frontend/elegant/images/logo/PhonePe_Logo.png') }}"
+                                                            alt="PhonePe" />
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        @endif
+                                        @if ($payment_method->paypal_method == 1)
+                                            <div class="form-check mb-2 d-flex align-items-center">
+                                                <input class="form-check-input" type="radio" name="payment_method"
+                                                    id="paypal-payment" value="paypal">
+                                                <label class="form-check-label d-flex align-items-center ps-2"
+                                                    for="paypal-payment" value="paypal" title="Paypal">
+                                                    <div class="image payment-image">
+                                                        <img class="blur-up lazyload"
+                                                            data-src="{{ asset('frontend/elegant/images/logo/paypal-Logo.png') }}"
+                                                            src="{{ asset('frontend/elegant/images/logo/paypal-Logo.png') }}"
+                                                            alt="Paypal" />
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        @endif
+                                        @if ($payment_method->paystack_method == 1)
+                                            <div class="form-check mb-2 d-flex align-items-center">
+                                                <input class="form-check-input" type="radio" name="payment_method"
+                                                    id="paystack-payment" value="paystack">
+                                                <label class="form-check-label d-flex align-items-center ps-2"
+                                                    for="paystack-payment" value="paystack" title="Paystack">
+                                                    <div class="image payment-image">
+                                                        <img class="blur-up lazyload"
+                                                            data-src="{{ asset('frontend/elegant/images/logo/Paystack_Logo.png') }}"
+                                                            src="{{ asset('frontend/elegant/images/logo/Paystack_Logo.png') }}"
+                                                            alt="Paystack" />
+                                                    </div>
+                                                </label>
+                                            </div>
+                                            <input type="hidden" name="paystack_public_key" id="paystack_public_key"
+                                                value="{{ $payment_method->paystack_key_id ?? '' }}" />
+                                        @endif
+                                        @if ($payment_method->stripe_method == 1)
+                                            <div class="form-check mb-2 d-flex align-items-center">
+                                                <input class="form-check-input" type="radio" name="payment_method"
+                                                    id="stripe-payment" value="stripe">
+                                                <label class="form-check-label d-flex align-items-center ps-2"
+                                                    for="stripe-payment" value="stripe" title="stripe">
+                                                    <div class="image payment-image">
+                                                        <img class="blur-up lazyload"
+                                                            data-src="{{ asset('frontend/elegant/images/logo/stripe_logo.png') }}"
+                                                            src="{{ asset('frontend/elegant/images/logo/stripe_logo.png') }}"
+                                                            alt="stripe" />
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        @endif
+                                        @if ($payment_method->razorpay_method == 1)
+                                            <div class="form-check mb-2 d-flex align-items-center">
+                                                <input class="form-check-input" type="radio" name="payment_method"
+                                                    id="razorpay-payment" value="razorpay">
+                                                <label class="form-check-label d-flex align-items-center ps-2"
+                                                    for="razorpay-payment" value="razorpay" title="razorpay">
+                                                    <div class="image payment-image">
+                                                        <img class="blur-up lazyload"
+                                                            data-src="{{ asset('frontend/elegant/images/logo/razorpay_logo.png') }}"
+                                                            src="{{ asset('frontend/elegant/images/logo/razorpay_logo.png') }}"
+                                                            alt="razorpay" />
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        @endif
                                     </div>
-                                    @if ($payment_method->cod_method == 1)
-                                        <div class="form-check mb-2 d-flex align-items-center">
-                                            <input class="form-check-input" type="radio" name="payment_method"
-                                                id="cod" value="cod">
-                                            <label class="form-check-label d-flex align-items-center ps-2"
-                                                for="cod" title="COD">
-                                                <div class="image payment-image">
-                                                    <img class="blur-up lazyload"
-                                                        data-src="{{ asset('frontend/elegant/images/logo/cod.png') }}"
-                                                        src="{{ asset('frontend/elegant/images/logo/cod.png') }}"
-                                                        alt="cash on Delivery" />
-                                                </div>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    @if ($payment_method->phonepe_method == 1)
-                                        <div class="form-check mb-2 d-flex align-items-center">
-                                            <input class="form-check-input" type="radio" name="payment_method"
-                                                id="phonepe" value="phonepe">
-                                            <label class="form-check-label d-flex align-items-center ps-2"
-                                                for="phonepe" value="phonepe" title="Phonepe">
-                                                <div class="image payment-image">
-                                                    <img class="blur-up lazyload"
-                                                        data-src="{{ asset('frontend/elegant/images/logo/PhonePe_Logo.png') }}"
-                                                        src="{{ asset('frontend/elegant/images/logo/PhonePe_Logo.png') }}"
-                                                        alt="PhonePe" />
-                                                </div>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    @if ($payment_method->paypal_method == 1)
-                                        <div class="form-check mb-2 d-flex align-items-center">
-                                            <input class="form-check-input" type="radio" name="payment_method"
-                                                id="paypal-payment" value="paypal">
-                                            <label class="form-check-label d-flex align-items-center ps-2"
-                                                for="paypal-payment" value="paypal" title="Paypal">
-                                                <div class="image payment-image">
-                                                    <img class="blur-up lazyload"
-                                                        data-src="{{ asset('frontend/elegant/images/logo/paypal-Logo.png') }}"
-                                                        src="{{ asset('frontend/elegant/images/logo/paypal-Logo.png') }}"
-                                                        alt="Paypal" />
-                                                </div>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    @if ($payment_method->paystack_method == 1)
-                                        <div class="form-check mb-2 d-flex align-items-center">
-                                            <input class="form-check-input" type="radio" name="payment_method"
-                                                id="paystack-payment" value="paystack">
-                                            <label class="form-check-label d-flex align-items-center ps-2"
-                                                for="paystack-payment" value="paystack" title="Paystack">
-                                                <div class="image payment-image">
-                                                    <img class="blur-up lazyload"
-                                                        data-src="{{ asset('frontend/elegant/images/logo/Paystack_Logo.png') }}"
-                                                        src="{{ asset('frontend/elegant/images/logo/Paystack_Logo.png') }}"
-                                                        alt="Paystack" />
-                                                </div>
-                                            </label>
-                                        </div>
-                                        <input type="hidden" name="paystack_public_key" id="paystack_public_key"
-                                            value="{{ $payment_method->paystack_key_id ?? '' }}" />
-                                    @endif
-                                    @if ($payment_method->stripe_method == 1)
-                                        <div class="form-check mb-2 d-flex align-items-center">
-                                            <input class="form-check-input" type="radio" name="payment_method"
-                                                id="stripe-payment" value="stripe">
-                                            <label class="form-check-label d-flex align-items-center ps-2"
-                                                for="stripe-payment" value="stripe" title="stripe">
-                                                <div class="image payment-image">
-                                                    <img class="blur-up lazyload"
-                                                        data-src="{{ asset('frontend/elegant/images/logo/stripe_logo.png') }}"
-                                                        src="{{ asset('frontend/elegant/images/logo/stripe_logo.png') }}"
-                                                        alt="stripe" />
-                                                </div>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    @if ($payment_method->razorpay_method == 1)
-                                        <div class="form-check mb-2 d-flex align-items-center">
-                                            <input class="form-check-input" type="radio" name="payment_method"
-                                                id="razorpay-payment" value="razorpay">
-                                            <label class="form-check-label d-flex align-items-center ps-2"
-                                                for="razorpay-payment" value="razorpay" title="razorpay">
-                                                <div class="image payment-image">
-                                                    <img class="blur-up lazyload"
-                                                        data-src="{{ asset('frontend/elegant/images/logo/razorpay_logo.png') }}"
-                                                        src="{{ asset('frontend/elegant/images/logo/razorpay_logo.png') }}"
-                                                        alt="razorpay" />
-                                                </div>
-                                            </label>
-                                        </div>
-                                    @endif
                                 </div>
                             </div>
-                        </div>
-                        <div class="block mb-3 apply-code mb-4">
+                        @else
+                            <input type="hidden" name="payment_method" id="contractual" value="contractual">
+                            <div class="block payment-methods mb-4 alert alert-info" role="alert">You will be
+                                able to pay for the order
+                                after placing the order and agreeing on the delivery cost with the seller.</div>
+                        @endif
+                        <div class="block apply-code mb-4">
                             <div class="block-content">
                                 <h3 class="title mb-3 text-uppercase">
                                     {{ labels('front_messages.apply_promocode', 'Apply Promocode') }}</h3>
@@ -392,12 +400,15 @@
                                     <span class="col-6 col-sm-6 cart-subtotal-title cart-subtotal text-end"><span
                                             class="money">{{ currentCurrencyPrice($cart_data['sub_total'], true) }}</span>
                                 </div>
-                                <div class="row g-0 border-bottom py-2">
-                                    <span
-                                        class="col-6 col-sm-6 cart-subtotal-title"><strong>{{ labels('front_messages.delivery_charge', 'Delivery Charge') }}</strong></span>
-                                    <span class="col-6 col-sm-6 cart-subtotal-title cart-subtotal text-end"><span
-                                            class="money">{{ currentCurrencyPrice($cart_data['delivery_charge'], true) }}</span>
-                                </div>
+
+                                @if ($product_availability[0]['delivery_by'] != 'custom_courier')
+                                    <div class="row g-0 border-bottom py-2">
+                                        <span
+                                            class="col-6 col-sm-6 cart-subtotal-title"><strong>{{ labels('front_messages.delivery_charge', 'Delivery Charge') }}</strong></span>
+                                        <span class="col-6 col-sm-6 cart-subtotal-title cart-subtotal text-end"><span
+                                                class="money">{{ currentCurrencyPrice($cart_data['delivery_charge'], true) }}</span>
+                                    </div>
+                                @endif
                                 <div class="row g-0 border-bottom py-2 d-none coupon-box">
                                     <span
                                         class="col-6 col-sm-6 cart-subtotal-title"><strong>{{ labels('front_messages.coupon_discount', 'Coupon Discount') }}</strong></span>
@@ -567,20 +578,21 @@
         @endif
     </div>
 </div>
-
-@if ($payment_method->razorpay_method == 1)
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-@endif
-@if ($payment_method->paypal_method == 1)
-    <script
-        src="https://www.paypal.com/sdk/js?client-id={{ $payment_method->paypal_client_id }}&currency={{ $payment_method->currency_code }}">
-    </script>
-@endif
-@if ($payment_method->paystack_method == 1)
-    <script src="https://js.paystack.co/v1/inline.js"></script>
-@endif
-@if ($payment_method->stripe_method == 1)
-    <script src="https://js.stripe.com/v3/" data-navigate-once></script>
+@if ($delivery_charge_type != 'contractual_delivery_charge')
+    @if ($payment_method->razorpay_method == 1)
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    @endif
+    @if ($payment_method->paypal_method == 1)
+        <script
+            src="https://www.paypal.com/sdk/js?client-id={{ $payment_method->paypal_client_id }}&currency={{ $payment_method->currency_code }}">
+        </script>
+    @endif
+    @if ($payment_method->paystack_method == 1)
+        <script src="https://js.paystack.co/v1/inline.js"></script>
+    @endif
+    @if ($payment_method->stripe_method == 1)
+        <script src="https://js.stripe.com/v3/" data-navigate-once></script>
+    @endif
 @endif
 @push('scripts')
     <script>

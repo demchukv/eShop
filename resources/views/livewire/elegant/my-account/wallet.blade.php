@@ -38,6 +38,7 @@
                 <input type="hidden" name="mobile" id="mobile" value="{{ $user_info['mobile'] }}">
                 <input type="hidden" name="app_name" id="app_name" value="{{ $web_settings['site_title'] }}">
                 <input type="hidden" name="logo" id="logo" value="{{ getImageUrl($web_settings['logo']) }}">
+
                 <div wire:ignore.self class="modal fade" id="add_wallet_modal" tabindex="-1"
                     aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
@@ -333,6 +334,7 @@
         </div>
     </div>
 </div>
+
 @if ($payment_method->razorpay_method == 1)
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 @endif
@@ -347,6 +349,7 @@
 @if ($payment_method->stripe_method == 1)
     <script src="https://js.stripe.com/v3/" data-navigate-once></script>
 @endif
+
 <script>
     function user_wallet_credit_params(p) {
         return {

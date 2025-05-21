@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Response;
+
 use App\Models\Cart;
 use Inertia\Inertia;
 use App\Models\Address;
@@ -23,6 +26,7 @@ use App\Models\OrderItems;
 use App\Models\SellerData;
 use App\Models\User;
 use App\Http\Controllers\CommissionController;
+
 
 class CartController extends Controller
 {
@@ -114,7 +118,7 @@ class CartController extends Controller
 
         if (!empty($res)) {
             $res = collect($res)->map(function ($d) {
-
+                /** @var \App\Models\PickupLocation $d */
                 $d->pickup_location = $d->pickup_location ?? '';
                 $d->image = getMediaImageUrl($d->image);
                 $d->special_price = ($d->special_price != '' && $d->special_price != null && $d->special_price > 0 && $d->special_price < $d->price) ? $d->special_price : $d->price;
@@ -727,6 +731,7 @@ class CartController extends Controller
     public function get_delivery_charge(Request $request)
     {
         $settings = getSettings('shipping_method', true);
+        // dd($settings);
         $settings = json_decode($settings, true);
         $address_id = $request->input('address_id', null);
         $user_id = Auth::user()->id != '' ? Auth::user()->id : 0;
@@ -757,9 +762,6 @@ class CartController extends Controller
                     $local_shipping_cart[] = $cart[$i];
                 }
             }
-
-
-
 
             $error = empty($product_not_deliverable) ? false : true;
 
@@ -974,7 +976,7 @@ class CartController extends Controller
                 'delivery_time' => 'nullable',
             ]
         );
-        if ($request['is_wallet_used'] != 1 && $request['final_total'] != 0) {
+        if ($request['is_wallet_used'] != 1 && $request['final_total'] != 0 && $request['payment_method'] != 'contractual') {
             $validator = Validator::make(
                 $request->all(),
                 [
@@ -1005,11 +1007,13 @@ class CartController extends Controller
                 return response()->json($response);
             }
         }
+        // gei info about products in cart
         if ($request['product_type'] != 'digital_product') {
             $user_cart_data = getCartTotal($user_id, false, 0, "", $store_id);
         } else {
             $user_cart_data = getCartTotal($user_id, false, 0, $request['selected_address_id'], $store_id);
         }
+        // dd($user_cart_data);
         if (count($user_cart_data) <= 0) {
             $response = [
                 'error' => true,
@@ -1035,6 +1039,7 @@ class CartController extends Controller
             array_push($quantity, $cart_items['qty']);
         }
         $is_single_product_type = array_merge($check_single_product_type, $check_combo_single_product_type);
+        // dd($is_single_product_type);
         // CHECK FOR REGULAR PRODUCT
         $hasDigitalProduct = in_array('digital_product', $is_single_product_type);
         $hasSimpleOrVariableProduct = in_array('simple_product', $is_single_product_type) || in_array('variable_product', $is_single_product_type) || in_array('physical_product', $is_single_product_type);
@@ -1061,6 +1066,7 @@ class CartController extends Controller
                 return response()->json($response);
             }
         }
+
         if ($request['payment_method'] == 'razorpay') {
             $validator = Validator::make($request->all(), [
                 'razorpay_payment_id' => 'required',
@@ -1136,10 +1142,12 @@ class CartController extends Controller
         $city_id = $address[0]->city_id ?? "";
 
         $settings = getDeliveryChargeSetting($store_id);
+        // dd($settings);
         $product_availability = false;
         if (isset($settings[0]->product_deliverability_type) && !empty($settings[0]->product_deliverability_type)) {
             if ($settings[0]->product_deliverability_type == 'city_wise_deliverability') {
                 $product_availability = checkCartProductsDeliverable($user_id, '', '', $store_id, $city, $city_id);
+                // dd($product_availability);
             } else {
                 $product_availability = checkCartProductsDeliverable($user_id, $pincode, $zipcode_id, $store_id);
             }
@@ -1227,7 +1235,9 @@ class CartController extends Controller
                         return $response;
                     }
                 }
+
                 $res = placeOrder($data, 1);
+
                 if (!empty($res)) {
                     if ($res['error'] == true) {
                         $response = [
@@ -1237,10 +1247,6 @@ class CartController extends Controller
                         return response()->json($response);
                     }
 
-                    // Якщо замовлення створено, розподіляємо кошти по рахунках користувачів
-                    $data['order_id'] = $res['order_id'];
-                    $commissionController = new CommissionController();
-                    $commissionController->splitCommissionsBetweenUsers($data);
 
                     if ($data['payment_method'] == "bank_transfer" || $data['payment_method'] == 'stripe' || $data['payment_method'] == 'phonepe' || $data['payment_method'] == 'paypal' || $data['payment_method'] == 'paystack' || $data['payment_method'] == 'razorpay') {
                         if ($data['payment_method'] == 'phonepe') {
@@ -1286,7 +1292,7 @@ class CartController extends Controller
                             'status' => $status ?? "awaiting",
                             'txn_id' => $transaction_id ?? null,
                             'message' => $message ?? 'Payment Is Pending',
-                            'order_id' => $res['order_id'],
+                            'order_id' => implode(',', $res['order_ids']),
                             'user_id' => $user_id,
                             'type' => $data['payment_method'],
                             'amount' => $total,
@@ -1294,6 +1300,13 @@ class CartController extends Controller
                         ]);
                         Log::alert('Transaction data before store: ' . json_encode($data->all()));
                         $transactionController->store($data);
+
+                        // Якщо замовлення створено, розподіляємо кошти по рахунках користувачів
+                        foreach ($res['order_ids'] as $order_id) {
+                            $data['order_id'] = $order_id;
+                            $commissionController = new CommissionController();
+                            $commissionController->splitCommissionsBetweenUsers($data);
+                        }
                     }
                 }
 
@@ -1369,13 +1382,10 @@ class CartController extends Controller
                 'order_payment_currency_code' => $request['currency_code'] ?? "",
                 'razorpay_payment_id' => $request['razorpay_payment_id'] ?? ""
             ];
+
             $res = placeOrder($data, 1);
 
             if (!empty($res)) {
-                // Якщо замовлення створено, розподіляємо кошти по рахунках користувачів
-                $data['order_id'] = $res['order_id'];
-                $commissionController = new CommissionController();
-                $commissionController->splitCommissionsBetweenUsers($data);
 
                 if ($data['payment_method'] == "bank_transfer" || $data['payment_method'] == 'stripe' || $data['payment_method'] == 'phonepe' || $data['payment_method'] == 'paypal' || $data['payment_method'] == 'paystack' || $data['payment_method'] == 'razorpay') {
                     if ($data['payment_method'] == 'phonepe') {
@@ -1421,7 +1431,7 @@ class CartController extends Controller
                         'status' => $status ?? "awaiting",
                         'txn_id' => $transaction_id ?? null,
                         'message' => $message ?? 'Payment Is Pending',
-                        'order_id' => $res['order_id'],
+                        'order_id' => implode(",", $res['order_id']),
                         'user_id' => $user_id,
                         'type' => $data['payment_method'],
                         'amount' => $total,
@@ -1429,6 +1439,13 @@ class CartController extends Controller
                     ]);
                     Log::alert('Transaction data before store: ' . json_encode($data->all()));
                     $transactionController->store($data);
+
+                    // Якщо замовлення створено, розподіляємо кошти по рахунках користувачів
+                    foreach ($res['order_ids'] as $order_id) {
+                        $data['order_id'] = $order_id;
+                        $commissionController = new CommissionController();
+                        $commissionController->splitCommissionsBetweenUsers($data);
+                    }
                 }
             }
             return response()->json($res);
