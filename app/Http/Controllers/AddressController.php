@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 
+
 class AddressController extends Controller
 {
     public function getAddress($user_id = null, $id = null, $fetch_latest = false, $is_default = false)

@@ -29,7 +29,8 @@
                                     $for_checkout = 0;
                                 @endphp
                                 @foreach ($cart_data['cart_items'] as $cartItem)
-                                    <x-utility.cart.CardOne :$cartItem :$is_save_later_hide :$is_remove_from_cart :$for_checkout />
+                                    <x-utility.cart.CardOne :$cartItem :$is_save_later_hide :$is_remove_from_cart
+                                        :$for_checkout />
                                 @endforeach
                             </tbody>
                         </table>
@@ -49,7 +50,27 @@
 
                                 <p class="cart-shipping">Inclusive of all taxes & Shipping calculated at checkout</p>
                                 <a href="{{ customUrl('cart/checkout') }}" wire:navigate id="cartCheckout"
-                                    class="btn btn-lg my-4 checkout w-100">{{ labels('front_messages.proceed_to_checkout', 'Proceed To Checkout') }}</a>
+                                    class="btn btn-secondary btn-lg my-4 checkout w-100">{{ labels('front_messages.proceed_to_checkout', 'Proceed To Checkout') }}</a>
+
+                                <p class="cart-pay-methods-title">Payment methods</p>
+                                <div class="cart-pay-methods">
+                                    <img src="{{ asset('assets/img/icons/cards/visa.png') }}" width="45"
+                                        height="30" alt="Visa">
+                                    <img src="{{ asset('assets/img/icons/cards/mastercard.png') }}" width="45"
+                                        height="30" alt="MasterCard">
+                                    <img src="{{ asset('assets/img/icons/cards/maestro.png') }}" width="45"
+                                        height="30" alt="Maestro">
+                                    <img src="{{ asset('assets/img/icons/cards/american-express.png') }}"
+                                        width="45" height="30" alt="American Express">
+                                    <img src="{{ asset('assets/img/icons/cards/discover.png') }}" width="45"
+                                        height="30" alt="Discover">
+                                    <img src="{{ asset('assets/img/icons/cards/dinners-club.png') }}" width="45"
+                                        height="30" alt="Dinners Club">
+                                    <img src="{{ asset('assets/img/icons/cards/apple-pay.png') }}" width="45"
+                                        height="30" alt="ApplePay">
+                                    <img src="{{ asset('assets/img/icons/cards/google-pay.png') }}" width="45"
+                                        height="30" alt="GooglePay">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -81,9 +102,8 @@
                                                     data-src="{{ $product_img }}" src="{{ $product_img }}"
                                                     alt="{{ $item['name'] }}" title="{{ $item['name'] }}" />
                                                 <img class="hover rounded-0 blur-up lazyload"
-                                                    data-src="{{ $product_img }}"
-                                                    src="{{ $product_img }}" alt="{{ $item['name'] }}"
-                                                    title="{{ $item['name'] }}" />
+                                                    data-src="{{ $product_img }}" src="{{ $product_img }}"
+                                                    alt="{{ $item['name'] }}" title="{{ $item['name'] }}" />
                                             </a>
                                         </div>
                                         <div class="product-details text-center">

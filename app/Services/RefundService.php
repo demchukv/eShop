@@ -47,7 +47,8 @@ class RefundService
         $refund_amount = $returnRequest->refund_amount;
 
         if ($transaction->fee > 0 && $total_order_amount > 0) {
-            $refund_ratio = $refund_amount / $total_order_amount;
+            // $refund_ratio = $refund_amount / $total_order_amount;
+            $refund_ratio = $refund_amount / $transaction->amount;
             $proportional_fee = $transaction->fee * $refund_ratio;
             $refund_amount += $proportional_fee;
         }
@@ -89,11 +90,29 @@ class RefundService
                 ],
             ]);
 
-            $transaction->update([
+            // $transaction->update([
+            //     'refund_amount' => $refund_amount,
+            //     'refund_status' => 'pending',
+            //     'refund_id' => $refund->id,
+            //     'is_refund' => true,
+            // ]);
+            // Create a new transaction for the refund
+            Transaction::create([
+                'transaction_type' => 'transaction',
+                'user_id' => $transaction->user_id,
+                'order_id' => $orderItem->order_id,
+                'order_item_id' => $orderItem->id,
+                'type' => 'credit',
+                'txn_id' => $refund->id, // Use the refund ID as the transaction ID
+                'amount' => $refund_amount,
+                'fee' => 0, // Assuming no additional fee for the refund transaction
+                'status' => 'pending',
+                'currency_code' => $transaction->currency_code,
+                'is_refund' => true,
                 'refund_amount' => $refund_amount,
                 'refund_status' => 'pending',
                 'refund_id' => $refund->id,
-                'is_refund' => true,
+                'transaction_date' => now(),
             ]);
         } catch (\Exception $e) {
             Log::error('Stripe Refund Error: ' . $e->getMessage());

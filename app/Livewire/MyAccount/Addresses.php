@@ -13,7 +13,7 @@ use Livewire\Component;
 
 class Addresses extends Component
 {
-    protected $listeners = ['refreshComponent','deleteAddress'];
+    protected $listeners = ['refreshComponent', 'deleteAddress'];
 
     public function render(AddressController $addressController)
     {
@@ -24,6 +24,7 @@ class Addresses extends Component
             'addresses' => $res
         ])->title("Addresses |");
     }
+
 
     public function get_address($addressController)
     {
@@ -76,8 +77,21 @@ class Addresses extends Component
         $request['city_id'] = $city_id;
         $request['country_code'] = $country_code;
         $address_data = $request->only([
-            'user_id', 'name', 'type', 'mobile', 'alternate_mobile',
-            'address', 'landmark', 'city','city_id', 'pincode', 'country', 'state', 'latitude', 'longitude','country_code'
+            'user_id',
+            'name',
+            'type',
+            'mobile',
+            'alternate_mobile',
+            'address',
+            'landmark',
+            'city',
+            'city_id',
+            'pincode',
+            'country',
+            'state',
+            'latitude',
+            'longitude',
+            'country_code'
         ]);
         if (isset($request->address_id)) {
             $address_id = $request->address_id;

@@ -85,7 +85,7 @@
 
                 <!--Logo-->
                 {{-- <div class="logo col-5 col-sm-3 col-md-3 col-lg-2 align-self-center"> --}}
-                <div class="col-1 col-sm-1 col-md-1 col-lg-2 align-self-center">
+                <div class="col-4 col-sm-3 col-md-3 col-lg-2 align-self-center">
                     <div class="logo">
                         <a wire:navigate class="logoImg" href="{{ customUrl('home') }}"><img src="{{ $img }}"
                                 alt="{{ $settings->site_title }}" title="{{ $settings->site_title }}" /></a>
@@ -101,7 +101,7 @@
                 <!--End Category Menu Icon-->
 
                 <!--Menu-->
-                <div class="col-1 col-sm-1 col-md-1 col-lg-7 align-self-center d-menu-col">
+                <div class="col-1 col-sm-1 col-md-1 col-lg-6 align-self-center d-menu-col">
                     {{-- <div class="col-1 col-sm-1 col-md-1 col-lg-8 align-self-center d-menu-col"> --}}
                     <nav class="navigation" id="AccessibleNav">
                         <ul id="siteNav" class="site-nav medium center">
@@ -144,44 +144,10 @@
                 </div>
                 <!--End Menu-->
 
-                <!--Product Menu-->
-                <div class="product-menu" id="productMenu">
-                    <div class="container">
-                        <ul class="menu-list level-1">
-                            @foreach ($categories as $category)
-                                <li class="menu-item level-1">
-                                    <h6 class="menu-title"><a
-                                            href="{{ customUrl('categories/' . $category['slug'] . '/products') }}">{{ html_entity_decode($category['name']) }}</a>
-                                    </h6>
-                                    @if (!empty($category['children']))
-                                        <ul class="menu-list level-2">
-                                            @foreach ($category['children'] as $subCategory)
-                                                <li class="menu-item level-2">
-                                                    <a
-                                                        href="{{ customUrl('categories/' . $subCategory['slug'] . '/products') }}">{{ html_entity_decode($subCategory['name']) }}</a>
-                                                    @if (!empty($subCategory['children']))
-                                                        <ul class="menu-list level-3">
-                                                            @foreach ($subCategory['children'] as $childCategory)
-                                                                <li class="menu-item level-3">
-                                                                    <a
-                                                                        href="{{ customUrl('categories/' . $childCategory['slug'] . '/products') }}">{{ html_entity_decode($childCategory['name']) }}</a>
-                                                                </li>
-                                                            @endforeach
-                                                        </ul>
-                                                    @endif
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    @endif
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-                <!--End Product Menu-->
+
 
                 <!--Right Icon-->
-                <div class="col-7 col-sm-9 col-md-9 col-lg-2 align-self-center icons-col text-right">
+                <div class="col-7 col-sm-7 col-md-7 col-lg-3 align-self-center icons-col text-right">
                     <!--Search-->
                     <div class="search-parent iconset">
                         <div class="site-search" title="Search">
@@ -204,8 +170,7 @@
                                                     name="person-outline"
                                                     class="me-1"></ion-icon>{{ labels('front_messages.my_account', 'My Account') }}</a>
                                         </li>
-                                        <li><a href="{{ customUrl('orders') }}" wire:navigate><ion-icon
-                                                    name="cube-outline"
+                                        <li><a href="{{ customUrl('orders') }}" wire:navigate><ion-icon name="cube-outline"
                                                     class="me-1"></ion-icon>{{ labels('front_messages.my_orders', 'My Orders') }}</a>
                                         </li>
                                         <li><a href="{{ customUrl('my-account/wallet') }}" wire:navigate><ion-icon
@@ -266,6 +231,41 @@
             </div>
         </div>
     </header>
+    <!--Product Menu-->
+    <div class="product-menu" id="productMenu">
+        <div class="container">
+            <ul class="menu-list level-1">
+                @foreach ($categories as $category)
+                    <li class="menu-item level-1">
+                        <h6 class="menu-title"><a
+                                href="{{ customUrl('categories/' . $category['slug'] . '/products') }}">{{ html_entity_decode($category['name']) }}</a>
+                        </h6>
+                        @if (!empty($category['children']))
+                            <ul class="menu-list level-2">
+                                @foreach ($category['children'] as $subCategory)
+                                    <li class="menu-item level-2">
+                                        <a
+                                            href="{{ customUrl('categories/' . $subCategory['slug'] . '/products') }}">{{ html_entity_decode($subCategory['name']) }}</a>
+                                        @if (!empty($subCategory['children']))
+                                            <ul class="menu-list level-3">
+                                                @foreach ($subCategory['children'] as $childCategory)
+                                                    <li class="menu-item level-3">
+                                                        <a
+                                                            href="{{ customUrl('categories/' . $childCategory['slug'] . '/products') }}">{{ html_entity_decode($childCategory['name']) }}</a>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+    <!--End Product Menu-->
     <!--End Header-->
     <!--Mobile Menu-->
     <div class="mobile-nav-wrapper" role="navigation">

@@ -901,7 +901,7 @@ document.addEventListener("livewire:navigated", () => {
                 processData: false,
                 contentType: false,
                 success: (response) => {
-                    console.log("Pay for order popup response: ", response);
+                    console.log(response);
                     renderStripePopup(
                         response.client_secret,
                         response.publicKey

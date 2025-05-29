@@ -8,12 +8,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\Models\OrderItems;
 use Illuminate\Support\Facades\Auth;
-use LaravelDaily\Invoices\Invoice;
-use LaravelDaily\Invoices\Classes\Buyer;
-use LaravelDaily\Invoices\Classes\InvoiceItem;
-use LaravelDaily\Invoices\Classes\Party;
-use App\Models\CommissionDistribution;
-use App\Models\User;
 
 class OrderController extends Controller
 {

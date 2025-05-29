@@ -718,6 +718,7 @@ class Webhook extends Controller
                 $transaction = Transaction::where('refund_id', $refundId)->first();
                 if ($transaction) {
                     $transaction->update([
+                        'status' => $event->data->object->status,
                         'is_refund' => 1,
                         'refund_status' => $event->data->object->status,
                     ]);
@@ -736,6 +737,7 @@ class Webhook extends Controller
                 $transaction = Transaction::where('refund_id', $refundId)->first();
                 if ($transaction) {
                     $transaction->update([
+                        'status' => $event->data->object->status,
                         'refund_status' => $event->data->object->status,
                     ]);
                     Log::alert("Refund updated for transaction {$transaction->id}: status = {$event->data->object->status}");
@@ -749,24 +751,20 @@ class Webhook extends Controller
                 ]);
 
             case 'charge.refunded':
-                $paymentIntentId = $event->data->object->payment_intent; // Отримуємо Payment Intent ID
-                $transaction = Transaction::where('txn_id', $paymentIntentId)->first(); // Шукаємо за payment_intent
+                $refundId = $event->data->object->id;
+                $transaction = Transaction::where('refund_id', $refundId)->first();
 
                 if ($transaction) {
-                    $refundAmount = $event->data->object->amount_refunded / 100; // Переводимо з центів у долари
+                    $refundAmount = $event->data->object->amount_refunded / 100;
                     $transaction->update([
-                        'is_refund' => 1,
+                        'status' => 'succeeded',
+                        'is_refund' => true,
                         'refund_amount' => $refundAmount,
-                        'refund_status' => 'succeeded', // Оновлюємо статус
+                        'refund_status' => 'succeeded',
                     ]);
-
-                    // Оновлюємо статус замовлення, якщо є order_id
-                    // if (!empty($transaction->order_id)) {
-                    //     updateDetails(['active_status' => 'cancelled'], ['order_id' => $transaction->order_id], 'order_items');
-                    // }
                     Log::alert("Charge refunded for transaction {$transaction->id}: amount = {$refundAmount}");
                 } else {
-                    Log::alert("Charge refunded but no transaction found with payment_intent: {$paymentIntentId}");
+                    Log::alert("Charge refunded but no transaction found with refund_id: {$refundId}");
                 }
 
                 return response()->json([
