@@ -1,6 +1,7 @@
 <?php
 
 use App\Commands\StartCommand;
+use App\Commands\WeatherCommand;
 use Telegram\Bot\Commands\HelpCommand;
 
 return [
@@ -132,7 +133,8 @@ return [
     */
     'commands' => [
         // HelpCommand::class,
-        StartCommand::class
+        StartCommand::class,
+        WeatherCommand::class,
     ],
 
     /*

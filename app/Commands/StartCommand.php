@@ -2,6 +2,7 @@
 
 namespace App\Commands;
 
+use Telegram\Bot\Actions;
 use Telegram\Bot\Commands\Command;
 
 class StartCommand extends Command
@@ -13,6 +14,21 @@ class StartCommand extends Command
     {
         $this->replyWithMessage([
             'text' => 'Hello! Welcom to ALNY'
+        ]);
+
+        $this->replyWithChatAction([
+            'action' => Actions::TYPING
+        ]);
+
+        $response = '';
+        $commands = $this->getTelegram()->getCommands();
+
+        foreach ($commands as $name => $command) {
+            $response .= sprintf('/%s - %s' . PHP_EOL, $name, $command->getDescription());
+        }
+
+        $this->replyWithMessage([
+            'text' => $response
         ]);
     }
 }
