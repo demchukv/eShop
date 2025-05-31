@@ -4,6 +4,7 @@ use App\Http\Controllers\App\v1\ApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AfterShipApiController;
+use App\Http\Controllers\WebhookTelegramController;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,6 +63,7 @@ Route::get('get_zones', [ApiController::class, 'get_zones'])->name('get_zones');
 Route::get('test', [ApiController::class, 'test'])->name('test');
 
 Route::post('/aftership/webhook', [AfterShipApiController::class, 'handleWebhook'])->name('aftership.webhook');
+Route::post('/webhook_telegram', WebhookTelegramController::class)->name('webhook_telegram');
 
 // -------------------------------------------------------------------------------------
 

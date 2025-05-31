@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
 
+use App\Notifications\TelegramNotification;
+
 class Addresses extends Component
 {
     protected $listeners = ['refreshComponent', 'deleteAddress'];
@@ -18,6 +20,7 @@ class Addresses extends Component
     public function render(AddressController $addressController)
     {
         $user = Auth::user();
+        // $user->notify(new TelegramNotification());
         $res = $this->get_Address($addressController);
         return view('livewire.' . config('constants.theme') . '.my-account.addresses', [
             'user_info' => $user,

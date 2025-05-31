@@ -66,6 +66,7 @@ use LaravelDaily\Invoices\Invoice;
 use LaravelDaily\Invoices\Classes\Buyer;
 use LaravelDaily\Invoices\Classes\InvoiceItem;
 use LaravelDaily\Invoices\Classes\Party;
+use Telegram\Bot\Api;
 
 
 // generate unique slug
@@ -234,7 +235,7 @@ function getSettings($type = 'system_settings', $is_json = false, $for_user_web 
 
 
     if (session()->get('firebase_settings') == null) {
-        $firebase_settings = Setting::where('variable', 'firebase_settings')->first();
+        $firebase_settings = Setting::where('variable', "firebase_settings")->first();
         if ($firebase_settings != null) {
             session()->put("firebase_settings", $firebase_settings['value']);
         }
@@ -11017,4 +11018,13 @@ function returnRequestsCount($status, $seller_id = null)
     }
 
     return $query->count();
+}
+
+function sendTelegramMessage($chat_id, $message)
+{
+    $telegram = new Api(env('TELEGRAM_BOT_TOKEN'));
+    $telegram->sendMessage([
+        'chat_id' => $chat_id,
+        'text' => $message
+    ]);
 }

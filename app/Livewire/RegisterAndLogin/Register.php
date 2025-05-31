@@ -109,6 +109,7 @@ class Register extends Component
                 'message' => "Welcome " . $request['username'],
             ];
 
+
             try {
                 sendMailTemplate(to: $data['email'], template_key: "welcome", data: [
                     "username" => $data['username']

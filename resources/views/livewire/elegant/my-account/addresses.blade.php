@@ -14,6 +14,7 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
                     <!-- Address Book -->
                     <div class="h-100" id="address">
                         <div class="address-card mt-0 h-100">
+
                             <div class="top-sec d-flex-justify-center justify-content-between mb-4">
                                 <h2 class="mb-0">{{ labels('front_messages.address_book', 'Address Book') }}</h2>
                                 <button wire:ignore type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
@@ -34,11 +35,11 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
                                 @endif
                                 <div class="row g-4 row-cols-lg-3 row-cols-md-2 row-cols-sm-2 row-cols-1">
                                     @foreach ($addresses as $address)
-                                    @php
-                                        $address = json_decode(json_encode($address), true);
-                                    @endphp
-                                    <div
-                                    class="address-select-box {{ $address['is_default'] == 1 ? 'active' : '' }}">
+                                        @php
+                                            $address = json_decode(json_encode($address), true);
+                                        @endphp
+                                        <div
+                                            class="address-select-box {{ $address['is_default'] == 1 ? 'active' : '' }}">
                                             <div class="address-box bg-block">
                                                 <div class="top d-flex-justify-center justify-content-between mb-3">
                                                     <h5 class="m-0">{{ $address['name'] }}</h5>
@@ -122,7 +123,7 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
                                                         class="d-none">{{ labels(
                                                             'front_messages.alternative_mobile_number',
                                                             'Alternative
-                                                                                                                mobile number',
+                                                                                                                                                                        mobile number',
                                                         ) }}
                                                         <span class="required">*</span></label>
                                                     <input wire:model='alternate_mobile' name="alternate_mobile"

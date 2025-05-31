@@ -3,12 +3,17 @@
     <div class="container-fluid">
         @if ($payment_response == 'order_success')
             <div class="success-text checkout-card text-center mb-4 mb-md-5">
-                <i class="icon anm 
+                <i class="icon anm
                 anm-shield-check-r"></i>
-                <h2 class="mb-0">{{ labels('front_messages.order_processsed_successfully', 'Order Processsed Successfully') }}</h2>
-                <p class="m-1 fs-6 fw-400">{{ labels('front_messages.thank_you_for_shopping', 'Thank you for Shopping with Us') }}.</p>
-                <div class="d-flex justify-content-center align-item-center">
-                    <a wire:navigate href="{{ customUrl('products') }}" class="btn btn-primary">{{ labels('front_messages.continue_shopping', 'Continue Shopping') }}</a>
+                <h2 class="mb-0">
+                    {{ labels('front_messages.order_processsed_successfully', 'Order Processsed Successfully') }}</h2>
+                <p class="m-1 fs-6 fw-400">
+                    {{ labels('front_messages.thank_you_for_shopping', 'Thank you for Shopping with Us') }}.</p>
+                <div class="d-flex gap-3 justify-content-center align-item-center">
+                    <a wire:navigate href="{{ customUrl('products') }}"
+                        class="btn btn-primary">{{ labels('front_messages.continue_shopping', 'Continue Shopping') }}</a>
+                    <a wire:navigate href="{{ customUrl('orders') }}"
+                        class="btn btn-primary">{{ labels('front_messages.view_orders', 'View orders') }}</a>
                 </div>
             </div>
         @elseif ($payment_response == 'order_failed')
@@ -18,11 +23,12 @@
             </div>
         @elseif ($payment_response == 'wallet_success')
             <div class="success-text checkout-card text-center mb-4 mb-md-5">
-                <i class="icon anm 
+                <i class="icon anm
             anm-shield-check-r"></i>
                 <h2>{{ labels('front_messages.wallet_refill_successfully', 'Wallet Refill Successfully') }}</h2>
                 <div class="d-flex justify-content-center align-item-center">
-                    <a wire:navigate href="{{ customUrl('my-account/wallet') }}" class="btn btn-primary">{{ labels('front_messages.back_to_wallet', 'Back To Wallet') }}</a>
+                    <a wire:navigate href="{{ customUrl('my-account/wallet') }}"
+                        class="btn btn-primary">{{ labels('front_messages.back_to_wallet', 'Back To Wallet') }}</a>
                 </div>
             </div>
         @else
