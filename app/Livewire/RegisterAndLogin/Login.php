@@ -96,10 +96,12 @@ class Login extends Component
         \Illuminate\Support\Facades\Auth::login($user);
 
 
-        try {
-            sendTelegramMessage($user->telegram_id, 'A new sign-in');
-        } catch (\Throwable $th) {
-        }
+        sendTelegramMessage($user->telegram_id, '', [
+            "username" => $user->username,
+            "device" => $data['device'],
+            "currentDateTime" => $data['currentDateTime'],
+            "timeZone" => $data['timeZone']
+        ], 'user_login');
 
         try {
             sendMailTemplate(to: $user['email'], template_key: "user_login", data: [
@@ -160,10 +162,13 @@ class Login extends Component
         $validate['password'] = $this->password;
 
         if (Auth::attempt($validate)) {
-            try {
-                sendTelegramMessage($user->telegram_id, 'A new sign-in');
-            } catch (\Throwable $th) {
-            }
+            sendTelegramMessage($user->telegram_id, '', [
+                "username" => $user->username,
+                "device" => $data['device'],
+                "currentDateTime" => $data['currentDateTime'],
+                "timeZone" => $data['timeZone']
+            ], 'user_login');
+
             try {
                 sendMailTemplate(to: $user->email, template_key: "user_login", data: [
                     "username" => $user->username,

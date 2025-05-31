@@ -11020,11 +11020,30 @@ function returnRequestsCount($status, $seller_id = null)
     return $query->count();
 }
 
-function sendTelegramMessage($chat_id, $message)
+/**
+ * set one: $message or $template_key
+ */
+function sendTelegramMessage($chat_id, $message = '', $data = [], $template_key = '', $givenLanguage = '')
 {
+    if ($givenLanguage == "") {
+        $givenLanguage = session("locale") ?? "en";
+    }
+
+    if ($message == '') {
+        $viewpath = "components.utility.telegram_templates.$template_key.";
+        if (View::exists($viewpath . $givenLanguage)) {
+            $viewpath .= $givenLanguage;
+        } else {
+            $viewpath .= "en";
+        }
+        $message = view($viewpath, $data)->render();
+    }
+    \Log::debug('Telegram chat_id: ' . $chat_id . ', Message: ' . $message);
     $telegram = new Api(env('TELEGRAM_BOT_TOKEN'));
     $telegram->sendMessage([
         'chat_id' => $chat_id,
-        'text' => $message
+        'text' => $message,
+        'parse_mode' => 'HTML',
+        'disable_web_page_preview' => false
     ]);
 }
