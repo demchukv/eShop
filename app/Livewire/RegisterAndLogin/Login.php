@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Traits\ReferralCodeTrait;
+use App\Http\Controllers\App\v1\ApiController;
 
 class Login extends Component
 {
@@ -40,10 +41,12 @@ class Login extends Component
 
     public function telegram_get_user(Request $request)
     {
+        \Log::debug(json_encode($request->all()));
         $system_settings = getSettings('system_settings', true, true);
         $system_settings = json_decode($system_settings);
 
         $telegram_id = $request->id;
+        $fcm_id = $request->fcm_id;
         $validator = Validator::make([
             'telegram_id' => $telegram_id,
         ], [
@@ -96,6 +99,22 @@ class Login extends Component
         \Illuminate\Support\Facades\Auth::login($user);
 
 
+        \Log::debug('fcm_id = ' . $fcm_id);
+        // Оновлюємо fcm_id у базі даних
+        if ($fcm_id) {
+            try {
+                // Call update_fcm from ApiController
+                $apiController = new ApiController();
+                $fcmRequest = new Request([
+                    'user_id' => $user->id,
+                    'fcm_id' => $fcm_id,
+                ]);
+                $apiController->update_fcm($fcmRequest);
+            } catch (\Exception $e) {
+                Log::error('Failed to update FCM ID: ' . $e->getMessage());
+            }
+        }
+
         sendTelegramMessage($user->telegram_id, '', [
             "username" => $user->username,
             "device" => $data['device'],
@@ -112,6 +131,7 @@ class Login extends Component
             ]);
         } catch (\Throwable $th) {
         }
+
         return response()->json(['success' => false, 'message' => 'Login Successfully']);
         // return redirect('/');
     }
@@ -162,6 +182,22 @@ class Login extends Component
         $validate['password'] = $this->password;
 
         if (Auth::attempt($validate)) {
+            $fcmId = $request->input('fcm_id');
+            // Оновлюємо fcm_id у базі даних
+            if ($fcmId) {
+                try {
+                    // Call update_fcm from ApiController
+                    $apiController = new ApiController();
+                    $fcmRequest = new Request([
+                        'user_id' => $user->id,
+                        'fcm_id' => $fcmId,
+                    ]);
+                    $apiController->update_fcm($fcmRequest);
+                } catch (\Exception $e) {
+                    Log::error('Failed to update FCM ID: ' . $e->getMessage());
+                }
+            }
+
             sendTelegramMessage($user->telegram_id, '', [
                 "username" => $user->username,
                 "device" => $data['device'],

@@ -522,121 +522,178 @@ function fetchDetails($table, $where = NULL, $fields = '*', $limit = '', $offset
     return $res;
 }
 
+
 function sendNotification($fcmMsg, $registrationIDs_chunks, $customBodyFields = [], $title = "test title", $message = "test message", $type = "test type")
 {
-    $store_id = getStoreId();
-    $store_id = isset($store_id) && !empty($store_id) ? $store_id : $customBodyFields['store_id'];
-    // dd($store_id);
-    $project_id = Setting::where('variable', 'firebase_project_id')
-        ->value('value');
+    // Отримання store_id
+    $store_id = getStoreId() ?? $customBodyFields['store_id'] ?? null;
+    if (!$store_id) {
+        Log::warning('Store ID is not provided in sendNotification.');
+    }
 
-    $url = 'https://fcm.googleapis.com/v1/projects/' . $project_id . '/messages:send';
+    // Отримання Firebase Project ID
+    $project_id = Setting::where('variable', 'firebase_project_id')->value('value');
+    if (!$project_id) {
+        Log::error('Firebase Project ID not configured.');
+        return ['error' => true, 'message' => 'Firebase Project ID not configured.'];
+    }
 
-    $access_token = getAccessToken();
+    $url = "https://fcm.googleapis.com/v1/projects/{$project_id}/messages:send";
 
-    $fcmFields = [];
-    // dd($customBodyFields);
+    // Отримання токена доступу
+    try {
+        $access_token = getAccessToken();
+    } catch (\Exception $e) {
+        Log::error('Failed to obtain access token: ' . $e->getMessage());
+        return ['error' => true, 'message' => 'Failed to obtain access token.'];
+    }
 
-    foreach ($registrationIDs_chunks as $registrationIDs) {
-        foreach ($registrationIDs as $registrationID) {
-            if ($registrationID == "BLACKLISTED") {
-                continue;
+    // Об'єднання всіх токенів у одномірний масив і видалення недійсних
+    $registrationIDs = [];
+    foreach ($registrationIDs_chunks as $chunk) {
+        foreach ($chunk as $token) {
+            if ($token && $token !== 'BLACKLISTED') {
+                $registrationIDs[] = $token;
             }
-            if ($registrationID == "") {
-                continue;
-            }
-            $data = [
-                "message" => [
-                    "token" => $registrationID,
-                    "notification" => [
-                        "title" => $customBodyFields['title'],
-                        "body" => $customBodyFields['body'],
-                    ],
-                    "data" => $customBodyFields,
-                    "android" => [
-                        "notification" => [
-                            'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
-                        ],
-                        "data" => [
-                            "title" => $title,
-                            "body" => $message,
-                            "type" => $customBodyFields['type'],
-                            "store_id" => strval($store_id),
-                        ]
-                    ],
-                    "apns" => [
-                        "headers" => [
-                            "apns-priority" => "10"
-                        ],
-                        "payload" => [
-                            "aps" => [
-                                "alert" => [
-                                    "title" => $customBodyFields['title'],
-                                    "body" => $customBodyFields['body'],
-                                ],
-                                "user_id" => isset($customBodyFields['user_id']) ? $customBodyFields['user_id'] : '',
-                                "store_id" => strval($store_id),
-                                "data" => $customBodyFields,
-                            ]
-                        ]
-                    ],
-                ]
-            ];
-            // dd($data);
-            $encodedData = json_encode($data);
-            $headers = [
-                'Authorization: Bearer ' . $access_token,
-                'Content-Type: application/json',
-            ];
-
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-            curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-
-            // Disabling SSL Certificate support temporarily
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
-            // Execute post
-            $result = curl_exec($ch);
-
-            if ($result == FALSE) {
-                die('Curl failed: ' . curl_error($ch));
-            }
-            // Close connection
-            curl_close($ch);
         }
     }
 
-    return $fcmFields;
+    if (empty($registrationIDs)) {
+        Log::warning('No valid registration IDs provided for sending notifications.');
+        return ['error' => true, 'message' => 'No valid registration IDs provided.'];
+    }
+
+    // Підготовка даних повідомлення
+    $notification_data = [
+        'title' => $customBodyFields['title'] ?? $title,
+        'body' => $customBodyFields['body'] ?? $message,
+    ];
+
+    $data_payload = array_merge($customBodyFields, [
+        'type' => $customBodyFields['type'] ?? $type,
+        'store_id' => (string) ($store_id ?? ''),
+        'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+    ]);
+
+    // Видаляємо notification-поля з data, щоб уникнути дублювання
+    unset($data_payload['title'], $data_payload['body']);
+
+    // Результати відправки
+    $results = ['success' => 0, 'failed' => [], 'invalid_tokens' => []];
+
+    foreach ($registrationIDs as $token) {
+        $message = [
+            'message' => [
+                'token' => $token,
+                'notification' => $notification_data,
+                'data' => array_map('strval', $data_payload),
+                'android' => [
+                    'notification' => [
+                        'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                    ],
+                ],
+                'apns' => [
+                    'headers' => [
+                        'apns-priority' => '10',
+                    ],
+                    'payload' => [
+                        'aps' => [
+                            'alert' => $notification_data,
+                            'sound' => 'default',
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        // Додавання зображення, якщо є
+        if (!empty($customBodyFields['image'])) {
+            $message['message']['notification']['image'] = $customBodyFields['image'];
+            $message['message']['android']['notification']['image'] = $customBodyFields['image'];
+            $message['message']['apns']['payload']['aps']['mutable-content'] = 1;
+            $message['message']['apns']['payload']['image'] = $customBodyFields['image'];
+        }
+
+        $encodedData = json_encode($message);
+        if ($encodedData === false) {
+            Log::error('Failed to encode message for token: ' . $token);
+            $results['failed'][] = ['token' => $token, 'error' => 'JSON encoding failed'];
+            continue;
+        }
+
+        $headers = [
+            'Authorization: Bearer ' . $access_token,
+            'Content-Type: application/json',
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
+
+        $result = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if ($result === false) {
+            $error = curl_error($ch);
+            Log::error('cURL failed for token ' . $token . ': ' . $error);
+            $results['failed'][] = ['token' => $token, 'error' => $error];
+        } elseif ($http_code >= 400) {
+            $response = json_decode($result, true);
+            $error_message = $response['error']['message'] ?? 'Unknown error';
+            Log::error('FCM error for token ' . $token . ': ' . $error_message);
+
+            // Перевірка на недійсний токен
+            if (in_array($http_code, [404, 400]) && strpos($error_message, 'not registered') !== false) {
+                $results['invalid_tokens'][] = $token;
+            } else {
+                $results['failed'][] = ['token' => $token, 'error' => $error_message];
+            }
+        } else {
+            $results['success']++;
+        }
+
+        curl_close($ch);
+    }
+
+    // Логування результатів
+    if (!empty($results['invalid_tokens'])) {
+        Log::warning('Invalid FCM tokens detected: ' . implode(', ', $results['invalid_tokens']));
+    }
+    if (!empty($results['failed'])) {
+        Log::error('Failed to send notifications to some tokens: ' . json_encode($results['failed']));
+    }
+
+    return [
+        'error' => !empty($results['failed']) || !empty($results['invalid_tokens']),
+        'message' => $results['success'] > 0 ? 'Notifications sent successfully to ' . $results['success'] . ' devices.' : 'No notifications were sent.',
+        'success_count' => $results['success'],
+        'failed' => $results['failed'],
+        'invalid_tokens' => $results['invalid_tokens'],
+    ];
 }
+
 function getAccessToken()
 {
-    // Fetch the file name from the settings table
-    $file_name = DB::table('settings')
-        ->where('variable', 'service_account_file')
-        ->value('value');
-
-    // Construct the file path in the storage/app/public directory
+    $file_name = DB::table('settings')->where('variable', 'service_account_file')->value('value');
     $file_path = storage_path('app/public/' . $file_name);
 
-    // Check if the file exists
     if (!file_exists($file_path)) {
         throw new \Exception('Service account file not found.');
     }
 
-    // Initialize the Google Client
     $client = new Client();
     $client->setAuthConfig($file_path);
     $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
 
-    // Fetch the access token
     $accessToken = $client->fetchAccessTokenWithAssertion()['access_token'];
     return $accessToken;
 }
+
 
 function deleteDetails($where, $table)
 {

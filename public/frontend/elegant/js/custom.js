@@ -1,4 +1,5 @@
 "use strict";
+
 $.ajaxSetup({
     headers: {
         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
@@ -123,89 +124,182 @@ function onTelegramRegister(user) {
     });
 }
 
+
+
 function onTelegramAuth(user) {
-    $.ajax({
-        type: "post",
-        url: appUrl + "register/check-telegram",
-        data: {
-            user,
-            check_type: "login",
-        },
-        success: function (response) {
-            if (response.error == true) {
-                iziToast.error({
-                    message: response.message,
+    // Функція для отримання Firebase конфігурації
+    function getFirebaseConfig() {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                type: "get",
+                url: appUrl + "settings/get-firebase-credentials",
+                dataType: "json",
+                success: function (firebaseResponse) {
+                    resolve(firebaseResponse);
+                },
+                error: function (error) {
+                    console.error("Failed to fetch Firebase credentials:", error);
+                    reject(error);
+                }
+            });
+        });
+    }
+
+    // Функція для отримання FCM токена
+    function getFcmToken(firebaseConfig) {
+        return new Promise((resolve) => {
+            const config = {
+                apiKey: firebaseConfig.apiKey,
+                authDomain: firebaseConfig.authDomain,
+                projectId: firebaseConfig.projectId,
+                databaseURL: firebaseConfig.databaseURL,
+                storageBucket: firebaseConfig.storageBucket,
+                messagingSenderId: firebaseConfig.messagingSenderId,
+                appId: firebaseConfig.appId,
+                measurementId: firebaseConfig.measurementId,
+            };
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(config);
+            }
+
+            const messaging = firebase.messaging();
+
+            if (Notification.permission === "denied") {
+                iziToast.warning({
+                    message: "Notifications blocked. Please enable them in browser settings.",
                     position: "topRight",
                 });
+                console.log("Notifications blocked.");
+                resolve(null);
             } else {
-                // $.ajax({
-                //     type: "get",
-                //     url: appUrl + "settings/get-firebase-credentials",
-                //     dataType: "json",
-                //     success: function (response) {
-                //         const firebaseConfig = {
-                //             apiKey: response.apiKey,
-                //             authDomain: response.authDomain,
-                //             projectId: response.projectId,
-                //             databaseURL: response.databaseURL,
-                //             storageBucket: response.storageBucket,
-                //             messagingSenderId: response.messagingSenderId,
-                //             appId: response.appId,
-                //             measurementId: response.measurementId,
-                //         };
-                //         console.log(firebaseConfig);
-                //         firebase.initializeApp(firebaseConfig);
-                //         const messaging = firebase.messaging();
-                //         console.log(messaging);
-                //         messaging.requestPermission()
-                //             .then(() => messaging.getToken())
-                //             .then(token => console.log("FCM Token:", token))
-                //             .catch(error => console.error("FCM Error:", error));
-                //     }
-                // });
-
-                $.ajax({
-                    type: "post",
-                    url: appUrl + "login/telegram-get-user",
-                    data: {
-                        id: response.user.id,
-                        first_name: response.user.first_name,
-                        last_name: response.user.last_name,
-                        username: response.user.username,
-                        photo_url: response.user.photo_url,
-                        auth_date: response.user.auth_date,
-                        hash: response.user.hash,
-                    },
-                    success: function (response) {
-                        if (response.error == true) {
-                            iziToast.error({
-                                message: response.message,
-                                position: "topRight",
-                            });
+                Notification.requestPermission()
+                    .then((permission) => {
+                        if (permission === "granted") {
+                            return messaging.getToken({ vapidKey: firebaseConfig.vapidKey });
                         } else {
-                            iziToast.success({
-                                message: response.message,
-                                position: "topRight",
-                            });
-                            Livewire.navigate("/my-account");
+                            console.log("Notification permission denied:", permission);
+                            if (permission === "denied") {
+                                iziToast.warning({
+                                    message: "Notifications blocked. Please enable them in browser settings.",
+                                    position: "topRight",
+                                });
+                            }
+                            resolve(null);
                         }
-                    },
-                    error: function (response) {
+                    })
+                    .then((fcmToken) => {
+                        if (fcmToken) {
+                            console.log("FCM Token:", fcmToken);
+                            resolve(fcmToken);
+                        } else {
+                            resolve(null);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("FCM Error:", error);
+                        resolve(null);
+                    });
+            }
+        });
+    }
+
+    // Функція для перевірки Telegram авторизації
+    function checkTelegramAuth() {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                type: "post",
+                url: appUrl + "register/check-telegram",
+                data: {
+                    user,
+                    check_type: "login",
+                },
+                success: function (response) {
+                    if (response.error) {
                         iziToast.error({
-                            message: "Error checking Telegram auth",
+                            message: response.message,
                             position: "topRight",
                         });
-                    },
-                });
-            }
-        },
-        error: function (response) {
-            iziToast.error({
-                message: "Error checking Telegram auth",
-                position: "topRight",
+                        reject(response.message);
+                    } else {
+                        resolve(response);
+                    }
+                },
+                error: function (error) {
+                    iziToast.error({
+                        message: "Error checking Telegram auth",
+                        position: "topRight",
+                    });
+                    reject(error);
+                }
             });
-        },
-    });
+        });
+    }
+
+    // Функція для відправки даних на сервер
+    function sendTelegramUserData(response, fcmToken) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                type: "post",
+                url: appUrl + "login/telegram-get-user",
+                data: {
+                    id: response.user.id,
+                    fcm_id: fcmToken,
+                    first_name: response.user.first_name,
+                    last_name: response.user.last_name,
+                    username: response.user.username,
+                    photo_url: response.user.photo_url,
+                    auth_date: response.user.auth_date,
+                    hash: response.user.hash,
+                },
+                success: function (response) {
+                    if (response.error) {
+                        iziToast.error({
+                            message: response.message,
+                            position: "topRight",
+                        });
+                        reject(response.message);
+                    } else {
+                        iziToast.success({
+                            message: response.message,
+                            position: "topRight",
+                        });
+                        Livewire.navigate("/my-account");
+                        resolve();
+                    }
+                },
+                error: function (error) {
+                    iziToast.error({
+                        message: "Error checking Telegram auth",
+                        position: "topRight",
+                    });
+                    reject(error);
+                }
+            });
+        });
+    }
+
+    // Основна логіка
+    async function init() {
+        try {
+            // Перевірка Telegram авторизації
+            const telegramResponse = await checkTelegramAuth();
+
+            // Отримання Firebase конфігурації
+            const firebaseConfig = await getFirebaseConfig();
+
+            // Отримання FCM токена
+            const fcmToken = await getFcmToken(firebaseConfig);
+
+            // Відправка даних на сервер
+            await sendTelegramUserData(telegramResponse, fcmToken);
+        } catch (error) {
+            console.error("Error in onTelegramAuth:", error);
+        }
+    }
+
+    // Запуск основної логіки
+    init();
 }
 
 function FirebaseAuth() {

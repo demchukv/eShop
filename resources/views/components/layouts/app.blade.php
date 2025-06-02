@@ -129,7 +129,7 @@
                 await loadScript("{{ asset('frontend/elegant/js/custom.js') }}"); // Раніше
                 await loadScript("{{ asset('frontend/elegant/js/product-menu.js') }}"); // Раніше
                 await loadScript("{{ asset('frontend/elegant/js/firebase-app.js') }}");
-                // await loadScript("{{ asset('frontend/elegant/js/firebase-messaging.js') }}");
+                await loadScript("https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js", true);
                 await loadScript("{{ asset('frontend/elegant/js/firebase-firestore.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/bootstrap-table.min.js') }}");
                 await loadScript("{{ asset('frontend/elegant/js/bootstrap-table-export.min.js') }}");
