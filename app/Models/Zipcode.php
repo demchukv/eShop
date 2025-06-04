@@ -19,6 +19,6 @@ class Zipcode extends Model
 
     public function cities()
     {
-        return $this->hasMany(cities::class);
+        return $this->belongsTo(City::class, 'city_id');
     }
 }
