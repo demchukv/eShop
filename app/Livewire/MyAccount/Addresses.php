@@ -20,7 +20,6 @@ class Addresses extends Component
     public function render(AddressController $addressController)
     {
         $user = Auth::user();
-        // $user->notify(new TelegramNotification());
         $res = $this->get_Address($addressController);
         return view('livewire.' . config('constants.theme') . '.my-account.addresses', [
             'user_info' => $user,
@@ -35,6 +34,7 @@ class Addresses extends Component
         $res = $addressController->getAddress($user->id);
         return $res;
     }
+
 
     public function add_address(Request $request)
     {

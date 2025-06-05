@@ -15,6 +15,7 @@ use App\Http\Controllers\Seller\MediaController as SellerMediaController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\StoreController;
 use App\Http\Controllers\SellerInviteController;
+use App\Http\Controllers\AddressAutocompleteController;
 
 // ---------------------------------------------------------------------------------------------------------------------------
 Route::get('/clear-cache', function () {
@@ -169,3 +170,9 @@ Route::middleware('auth', 'role:manager,super_admin')->group(function () {
 Route::get('/seller-register/success', \App\Livewire\Sellers\SellerRegisterSuccess::class)->name('seller.register.success');
 Route::get('/seller-register/{link}', \App\Livewire\Sellers\SellerTelegramVerify::class)->name('seller.telegram.verify');
 Route::get('/seller-register/{link}/complete', \App\Livewire\Sellers\SellerRegister::class)->name('seller.register.complete');
+
+// GeoDB routes
+Route::get('/autocomplete/countries', [AddressAutocompleteController::class, 'getCountries'])->name('autocomplete.countries');
+Route::get('/autocomplete/regions', [AddressAutocompleteController::class, 'getRegions'])->name('autocomplete.regions');
+Route::get('/autocomplete/cities', [AddressAutocompleteController::class, 'getCities'])->name('autocomplete.cities');
+Route::get('/autocomplete/zipcodes', [AddressAutocompleteController::class, 'getZipcodes'])->name('autocomplete.zipcodes');

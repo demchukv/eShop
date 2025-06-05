@@ -2,25 +2,23 @@
 
 namespace App\Models;
 
-use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent;
 
 class City extends Model
 {
-    use HasApiTokens, HasFactory, Notifiable;
-
     protected $fillable = [
         'name',
+        'native_name',
         'country_id',
+        'region_id',
         'minimum_free_delivery_order_amount',
         'delivery_charges',
     ];
 
     public function country()
     {
-        return $this->belongsTo(Country::class, 'country_id');
+        return $this->belongsTo(Country::class);
     }
 
     public function region()

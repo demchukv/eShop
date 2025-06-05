@@ -3,14 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent;
 
 class Region extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'name',
+        'native_name',
         'admin1_code',
         'country_id',
         'minimum_free_delivery_order_amount',

@@ -76,6 +76,7 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
                                     @endforeach
                                 </div>
                             </div>
+
                             <!-- New Address Modal -->
                             <div wire:ignore.self class="modal fade" id="addNewModal" tabindex="-1"
                                 aria-labelledby="addNewModalLabel" aria-hidden="true">
@@ -123,7 +124,7 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
                                                         class="d-none">{{ labels(
                                                             'front_messages.alternative_mobile_number',
                                                             'Alternative
-                                                                                                                                                                        mobile number',
+                                                                                                                                                                                                                                mobile number',
                                                         ) }}
                                                         <span class="required">*</span></label>
                                                     <input wire:model='alternate_mobile' name="alternate_mobile"
