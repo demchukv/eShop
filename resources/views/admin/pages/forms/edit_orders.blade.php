@@ -104,7 +104,11 @@
                             </div>
                             <div class="d-flex mt-2 align-items-center">
                                 <span class="body-default me-1">{{ labels('admin_labels.address', 'Address') }}:</span>
-                                <span class="caption text-muted">{{ $order_detls[0]->address }}</span>
+                                <span class="caption text-muted"><a href="javascript:void(0)" class="address-link"
+                                        data-bs-toggle="modal" data-bs-target="#addressModal"
+                                        data-zipcode-id="{{ $order_detls[0]->zipcode_id }}">
+                                        {{ $order_detls[0]->address }}
+                                    </a></span>
                             </div>
                         </div>
                         <div>
@@ -1180,4 +1184,8 @@
             </div>
         </div>
     </div>
+
+    {{-- modal for detailed address info --}}
+    <x-address-modal />
+
 @endsection

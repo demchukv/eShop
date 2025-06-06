@@ -2391,7 +2391,8 @@ document.addEventListener("livewire:navigated", () => {
             ajax: {
                 url: appUrl + url,
                 dataType: 'json',
-                delay: 250,
+                delay: 500,
+                timeout: 5000, // 5 sec
                 data: function (params) {
                     let query = {
                         q: params.term || ''
@@ -2410,11 +2411,14 @@ document.addEventListener("livewire:navigated", () => {
                 cache: true,
                 error: function (xhr, status, error) {
                     console.error(`Select2 [${selector}] error:`, { status, error, response: xhr.responseJSON });
-                    iziToast.error({
-                        message: xhr.responseJSON?.message || 'Failed to load data',
-                        position: "topRight",
-                    });
+                    if (textStatus !== 'abort') {
+                        iziToast.error({
+                            message: xhr.responseJSON?.message || 'Failed to load data',
+                            position: "topRight",
+                        });
+                    }
                 }
+
             }
         });
     }

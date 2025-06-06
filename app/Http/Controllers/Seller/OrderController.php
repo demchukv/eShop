@@ -24,6 +24,7 @@ use LaravelDaily\Invoices\Classes\InvoiceItem;
 use LaravelDaily\Invoices\Classes\Party;
 use App\Http\Controllers\AfterShipApiController;
 
+
 class OrderController extends Controller
 {
     public function index()
@@ -584,6 +585,7 @@ class OrderController extends Controller
                 array_push($items, $temp);
             }
             $order_detls = $res;
+
             $sellers_id = collect($res)->pluck('seller_id')->unique()->values()->all();
             foreach ($sellers_id as $id) {
                 $query = DB::table('seller_store as ss')

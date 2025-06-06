@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Http\Request;
+use App\Models\ZipcodeData;
 
 class AddressController extends Controller
 {
@@ -47,5 +49,55 @@ class AddressController extends Controller
         });
 
         return $addresses->toArray();
+    }
+
+    public function getAddressDetails(Request $request)
+    {
+        try {
+            $zipcodeId = $request->query('zipcode_id');
+
+            if (!$zipcodeId) {
+                return response()->json([
+                    'error' => true,
+                    'message' => 'Zipcode ID is required.'
+                ], 400);
+            }
+
+            // Кешування на 24 години
+            $cacheKey = 'address_details_' . $zipcodeId;
+            $zipcodeData = Cache::remember($cacheKey, now()->addHours(24), function () use ($zipcodeId) {
+                return ZipcodeData::where('id', $zipcodeId)->first();
+            });
+
+            // $zipcodeData = ZipcodeData::where('id', $zipcodeId)->first();
+
+            if (!$zipcodeData) {
+                return response()->json([
+                    'error' => true,
+                    'message' => 'Zipcode data not found.'
+                ], 404);
+            }
+
+            // Витягування даних із поля data
+            $data = $zipcodeData->data ?? [];
+
+            return response()->json([
+                'error' => false,
+                'data' => [
+                    'country' => $data['country'] ?? null,
+                    'region' => $data['state'] ?? $data['district'] ?? null,
+                    'city' => $data['city'] ?? null,
+                    'zipcode' => $data['postcode'] ?? null,
+                    'street' => $data['formatted'] ?? $data['address_line2'] ?? null,
+                    'latitude' => $data['lat'] ?? null,
+                    'longitude' => $data['lon'] ?? null,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Failed to retrieve address details: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

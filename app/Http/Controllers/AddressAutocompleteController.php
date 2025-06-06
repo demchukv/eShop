@@ -16,6 +16,7 @@ class AddressAutocompleteController extends Controller
 {
     protected $client;
     protected $geoapifyClient;
+    public $minPopulation = 500;
 
     public function __construct()
     {
@@ -25,10 +26,16 @@ class AddressAutocompleteController extends Controller
                 'x-rapidapi-key' => env('GEODB_API_KEY'),
                 'x-rapidapi-host' => 'wft-geo-db.p.rapidapi.com',
             ],
+            'delay' => 1000,
+            'tries' => 3, // 3 спроби
+            'retry_delay' => 1000, // Затримка 1 секунда між спробами
         ]);
 
         $this->geoapifyClient = new Client([
             'base_uri' => 'https://api.geoapify.com/',
+            'delay' => 1000,
+            'tries' => 3, // 3 спроби
+            'retry_delay' => 1000, // Затримка 1 секунда між спробами
         ]);
     }
 
@@ -169,8 +176,8 @@ class AddressAutocompleteController extends Controller
         $query = $request->input('q');
         $country = Country::findOrFail($countryId);
         $iso2 = $country->iso2;
-        $region = Region::findOrFail($regionId);
-        $admin1Code = $region->admin1_code;
+        $region = $regionId ? Region::findOrFail($regionId) : null;
+        $admin1Code = $region ? $region->admin1_code : null;
 
         // Build query for local database
         $citiesQuery = City::where('country_id', $countryId)
@@ -187,13 +194,41 @@ class AddressAutocompleteController extends Controller
             ->limit(10)
             ->get();
 
+        // If no cities and region matches query, treat region as city
+        if ($cities->isEmpty() && $regionId && str_starts_with(strtolower($region->name), strtolower($query))) {
+            // Check if region is already in cities
+            $existingCity = City::where('country_id', $countryId)
+                ->where('region_id', $regionId)
+                ->where('name', $region->name)
+                ->first();
+
+            if (!$existingCity) {
+                // Add region as city
+                $citiesBatch = [
+                    [
+                        'name' => $region->name,
+                        'native_name' => $region->native_name,
+                        'country_id' => $countryId,
+                        'region_id' => $regionId,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                ];
+                $this->insertOrUpdateCities($citiesBatch);
+            }
+
+            // Re-query to include newly added city
+            $cities = $citiesQuery->select('id', 'name AS text', 'native_name')
+                ->limit(10)
+                ->get();
+        }
+
         // If no cities or data is stale (>30 days), fetch from API
         if ($cities->isEmpty() || $this->isDataStale($countryId, 'cities', $regionId)) {
             try {
                 $offset = 0;
                 $limit = 10;
                 $citiesBatch = [];
-                // $regions = Region::where('country_id', $countryId)->pluck('id', 'admin1_code');
 
                 $endpoint = $regionId
                     ? "v1/geo/countries/{$iso2}/regions/{$admin1Code}/cities"
@@ -202,7 +237,7 @@ class AddressAutocompleteController extends Controller
                 // Fetch English names
                 $responseEn = $this->client->get($endpoint, [
                     'query' => [
-                        'minPopulation' => 1000,
+                        'minPopulation' => $this->minPopulation,
                         'namePrefix' => $query,
                         'limit' => $limit,
                         'offset' => $offset,
@@ -212,27 +247,11 @@ class AddressAutocompleteController extends Controller
                 $dataEn = json_decode($responseEn->getBody(), true);
                 $citiesEn = $dataEn['data'] ?? [];
 
-                // Fetch native names
-                // $languageCode = $iso2 === 'UA' ? 'uk' : 'en';
-                // $responseNative = $this->client->get($endpoint, [
-                //     'query' => [
-                //         'minPopulation' => 1000,
-                //         'namePrefix' => $query,
-                //         'limit' => $limit,
-                //         'offset' => $offset,
-                //         'languageCode' => $languageCode,
-                //     ],
-                // ]);
-                // $dataNative = json_decode($responseNative->getBody(), true);
-                // $citiesNative = $dataNative['data'] ?? [];
-
                 $totalCount = $dataEn['metadata']['totalCount'] ?? 0;
 
                 foreach ($citiesEn as $index => $cityEn) {
-                    $nativeName = $citiesNative[$index]['name'] ?? $cityEn['name'];
                     $citiesBatch[] = [
                         'name' => $cityEn['name'],
-                        // 'native_name' => $nativeName !== $cityEn['name'] ? $nativeName : null,
                         'country_id' => $countryId,
                         'region_id' => $regionId,
                         'created_at' => now(),
@@ -248,6 +267,32 @@ class AddressAutocompleteController extends Controller
                 $cities = $citiesQuery->select('id', 'name AS text', 'native_name')
                     ->limit(10)
                     ->get();
+
+                // If still empty and region matches query, ensure region is treated as city
+                if ($cities->isEmpty() && $regionId && str_starts_with(strtolower($region->name), strtolower($query))) {
+                    $existingCity = City::where('country_id', $countryId)
+                        ->where('region_id', $regionId)
+                        ->where('name', $region->name)
+                        ->first();
+
+                    if (!$existingCity) {
+                        $citiesBatch = [
+                            [
+                                'name' => $region->name,
+                                'native_name' => $region->native_name,
+                                'country_id' => $countryId,
+                                'region_id' => $regionId,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]
+                        ];
+                        $this->insertOrUpdateCities($citiesBatch);
+
+                        $cities = $citiesQuery->select('id', 'name AS text', 'native_name')
+                            ->limit(10)
+                            ->get();
+                    }
+                }
             } catch (\Exception $e) {
                 \Log::error("Error fetching cities for {$iso2}: " . $e->getMessage());
                 return response()->json(['error' => 'Failed to fetch cities'], 500);

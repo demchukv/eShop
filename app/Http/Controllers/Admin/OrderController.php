@@ -824,7 +824,6 @@ class OrderController extends Controller
                 })->toArray();
             // dd($payment_distribution);
 
-
             $sellers = $seller;
             $bank_transfer = isset($bank_transfer) ? $bank_transfer : [];
             $transaction_search_res = isset($transaction_search_res) ? $transaction_search_res : [];

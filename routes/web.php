@@ -176,3 +176,5 @@ Route::get('/autocomplete/countries', [AddressAutocompleteController::class, 'ge
 Route::get('/autocomplete/regions', [AddressAutocompleteController::class, 'getRegions'])->name('autocomplete.regions');
 Route::get('/autocomplete/cities', [AddressAutocompleteController::class, 'getCities'])->name('autocomplete.cities');
 Route::get('/autocomplete/zipcodes', [AddressAutocompleteController::class, 'getZipcodes'])->name('autocomplete.zipcodes');
+
+Route::get('/address/details', [App\Http\Controllers\AddressController::class, 'getAddressDetails'])->name('address.details')->middleware(['auth:web,admin,seller']);
