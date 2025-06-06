@@ -2242,21 +2242,22 @@ document.addEventListener("livewire:navigated", () => {
         });
     });
 
+    // Оновлення логіки збереження адреси
     $(".add_address").on("click", function () {
         let name = $("#name").val();
-        $(".add_address").html("Add Address");
         let type = $("#type").val();
         let mobile = $("#mobile").val();
         let alternate_mobile = $("#alternate_mobile").val();
         let address = $("#form_address").val();
         let landmark = $("#landmark").val();
-        let city_list = $("#city_list").val();
-        let postcode = $("#postcode").val();
-        let state = $("#state").val();
-        let country = $("#country_list").val();
+        let country_id = $("#country_list").val();
+        let region_id = $("#region_list").val();
+        let city_id = $("#city_list").val();
+        let zipcode_id = $("#zipcode_list").val();
         let latitude = $("#latitude").val();
         let longitude = $("#longitude").val();
         let address_id = $("#edit_address_id").val();
+
         $.ajax({
             type: "POST",
             url: appUrl + "addresses/add_address",
@@ -2267,10 +2268,10 @@ document.addEventListener("livewire:navigated", () => {
                 alternate_mobile: alternate_mobile,
                 address: address,
                 landmark: landmark,
-                city: city_list,
-                pincode: postcode,
-                state: state,
-                country: country,
+                country_id: country_id,
+                region_id: region_id,
+                city_id: city_id,
+                zipcode_id: zipcode_id,
                 latitude: latitude,
                 longitude: longitude,
                 address_id: address_id,
@@ -2290,26 +2291,17 @@ document.addEventListener("livewire:navigated", () => {
                     message: response.message,
                     position: "topRight",
                 });
-                Livewire.dispatch("refreshComponent");
                 $("#addNewModal").modal("hide");
+                setTimeout(() => {
+                    $(".modal-backdrop").remove();
+                    $("body").removeClass("modal-open");
+                }, 500);
+                Livewire.dispatch("refreshComponent");
             },
         });
     });
-    $("#addNewModal").on("hidden.bs.modal", function () {
-        $("#name").val("");
-        $("#type").val("");
-        $("#mobile").val("");
-        $("#alternate_mobile").val("");
-        $("#form_address").val("");
-        $("#landmark").val("");
-        $("#city_list").val("");
-        $("#postcode").val("");
-        $("#state").val("");
-        $("#country_list").val("");
-        $("#latitude").val("");
-        $("#longitude").val("");
-        $("#edit_address_id").val("");
-    });
+
+    // Оновлення логіки редагування адреси
     $(".edit-address-btn").on("click", function () {
         var addressId = $(this).data("address-id");
         $("#edit_address_id").val(addressId);
@@ -2318,28 +2310,61 @@ document.addEventListener("livewire:navigated", () => {
             method: "GET",
             data: { address_id: addressId },
             success: function (response) {
-                var country = new Option(response.country, false, false, false);
-                $("#country_list").append(country).trigger("change");
-
-                var city = new Option(response.city, false, false, false);
-                $("#city_list").append(city).trigger("change");
-
+                // Заповнення полів форми
                 $("#name").val(response.name);
                 $("#type").val(response.type);
                 $("#mobile").val(response.mobile);
                 $("#alternate_mobile").val(response.alternate_mobile);
                 $("#form_address").val(response.address);
                 $("#landmark").val(response.landmark);
-                $("#postcode").val(response.pincode);
-                $("#state").val(response.state);
                 $("#latitude").val(response.latitude);
                 $("#longitude").val(response.longitude);
                 $(".add_address").html("Update Address");
+
+                // Додавання країни
+                var countryOption = new Option(response.country_name, response.country_id, true, true);
+                $("#country_list").append(countryOption).trigger("change");
+
+                // Додавання регіону після вибору країни
+                setTimeout(() => {
+                    var regionOption = new Option(response.region_name, response.region_id, true, true);
+                    $("#region_list").append(regionOption).trigger("change");
+
+                    // Додавання міста після вибору регіону
+                    setTimeout(() => {
+                        var cityOption = new Option(response.city_name, response.city_id, true, true);
+                        $("#city_list").append(cityOption).trigger("change");
+
+                        // Додавання поштового індексу після вибору міста
+                        setTimeout(() => {
+                            var zipcodeOption = new Option(response.zipcode, response.zipcode_id, true, true);
+                            $("#zipcode_list").append(zipcodeOption).trigger("change");
+                        }, 500);
+                    }, 500);
+                }, 500);
             },
             error: function (xhr, status, error) {
                 console.error(error);
             },
         });
+    });
+
+    // Очищення форми після закриття модального вікна
+    $("#addNewModal").on("hidden.bs.modal", function () {
+        $("#name").val("");
+        $("#type").val("");
+        $("#mobile").val("");
+        $("#alternate_mobile").val("");
+        $("#form_address").val("");
+        $("#landmark").val("");
+        $("#country_list").val(null).trigger("change");
+        $("#region_list").val(null).trigger("change").prop("disabled", true);
+        $("#city_list").val(null).trigger("change").prop("disabled", true);
+        $("#zipcode_list").val(null).trigger("change").prop("disabled", true);
+        $("#latitude").val("");
+        $("#longitude").val("");
+        $("#edit_address_id").val("");
+        $(".add_address").html("Add Address");
     });
 
     $(document).on("click", ".delete_address", function (e) {
@@ -2356,53 +2381,121 @@ document.addEventListener("livewire:navigated", () => {
         });
     });
 
-    $(".city_list").select2({
-        ajax: {
-            url: appUrl + "my-account/get_Cities",
-            type: "GET",
-            dataType: "json",
-            delay: 250,
-            data: function (params) {
-                return {
-                    search: params.term,
-                };
-            },
-            processResults: function (response) {
-                return {
-                    results: response,
-                };
-            },
-            cache: true,
-        },
-        dropdownParent: $(".city_list_div"),
-        minimumInputLength: 1,
-        placeholder: "Search for City",
-    });
-    // Call the function for each select element
+
+    function initializeSelect2(selector, url, placeholder, container, extraParams = () => ({})) {
+        $(selector).select2({
+            placeholder: placeholder,
+            allowClear: true,
+            dropdownParent: container,
+            minimumInputLength: 2,
+            ajax: {
+                url: appUrl + url,
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    let query = {
+                        q: params.term || ''
+                    };
+                    const additionalParams = typeof extraParams === 'function' ? extraParams() : extraParams;
+                    $.extend(query, additionalParams);
+                    console.log(`Select2 [${selector}] request:`, { url: appUrl + url, query });
+                    return query;
+                },
+                processResults: function (data) {
+                    console.log(`Select2 [${selector}] response:`, data);
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true,
+                error: function (xhr, status, error) {
+                    console.error(`Select2 [${selector}] error:`, { status, error, response: xhr.responseJSON });
+                    iziToast.error({
+                        message: xhr.responseJSON?.message || 'Failed to load data',
+                        position: "topRight",
+                    });
+                }
+            }
+        });
+    }
+
+    // Ініціалізація Select2 для країн
     initializeSelect2(
         "#country_list",
-        "my-account/get_Countries",
+        "autocomplete/countries",
         "Search for countries",
         $(".country_list_div")
     );
+
+    // Ініціалізація Select2 для регіонів
     initializeSelect2(
-        "#edit-country_list",
-        "my-account/get_Countries",
-        "Search for countries",
-        $(".edit-country_list_div")
+        "#region_list",
+        "autocomplete/regions",
+        "Search for region",
+        $(".region_list_div"),
+        () => {
+            const country_id = $("#country_list").val();
+            console.log('Region extraParams:', { country_id });
+            return { country_id };
+        }
     );
+
+    // Ініціалізація Select2 для міст
     initializeSelect2(
         "#city_list",
-        "my-account/get_Cities",
-        "Search for City",
-        $(".city_list_div")
+        "autocomplete/cities",
+        "Search for city",
+        $(".city_list_div"),
+        () => ({
+            country_id: $("#country_list").val(),
+            region_id: $("#region_list").val()
+        })
     );
+
+    // Ініціалізація Select2 для поштових індексів
     initializeSelect2(
-        "#edit-city_list",
-        "my-account/get_Cities",
-        "Search for City",
-        $(".edit-city_list_div")
+        "#zipcode_list",
+        "autocomplete/zipcodes",
+        "Search for postcode",
+        $(".zipcode_list_div"),
+        () => ({
+            city_id: $("#city_list").val()
+        })
     );
+
+    // Обробники змін
+    $("#country_list").on("change", function () {
+        let country_id = $(this).val();
+        if (country_id) {
+            $("#region_list").prop("disabled", false).val(null).trigger("change");
+            $("#city_list").prop("disabled", true).val(null).trigger("change");
+            $("#zipcode_list").prop("disabled", true).val(null).trigger("change");
+        } else {
+            $("#region_list").prop("disabled", true).val(null).trigger("change");
+            $("#city_list").prop("disabled", true).val(null).trigger("change");
+            $("#zipcode_list").prop("disabled", true).val(null).trigger("change");
+        }
+    });
+
+    $("#region_list").on("change", function () {
+        let region_id = $(this).val();
+        if (region_id) {
+            $("#city_list").prop("disabled", false).val(null).trigger("change");
+            $("#zipcode_list").prop("disabled", true).val(null).trigger("change");
+        } else {
+            $("#city_list").prop("disabled", true).val(null).trigger("change");
+            $("#zipcode_list").prop("disabled", true).val(null).trigger("change");
+        }
+    });
+
+    $("#city_list").on("change", function () {
+        let city_id = $(this).val();
+        if (city_id) {
+            $("#zipcode_list").prop("disabled", false).val(null).trigger("change");
+        } else {
+            $("#zipcode_list").prop("disabled", true).val(null).trigger("change");
+        }
+    });
 
     // user wallet transaction table
     let $table = $("#user_wallet_transactions");
@@ -3107,30 +3200,7 @@ $(window).on("keydown", function (e) {
     }
 });
 
-function initializeSelect2(selector, url, placeholder, dropdownParent) {
-    $(selector).select2({
-        ajax: {
-            url: appUrl + url,
-            type: "GET",
-            dataType: "json",
-            delay: 250,
-            data: function (params) {
-                return {
-                    search: params.term,
-                };
-            },
-            processResults: function (response) {
-                return {
-                    results: response,
-                };
-            },
-            cache: true,
-        },
-        dropdownParent: dropdownParent,
-        minimumInputLength: 1,
-        placeholder: placeholder,
-    });
-}
+
 
 $(".delete_rating").on("click", function () {
     $(".review_rating").rating("clear");

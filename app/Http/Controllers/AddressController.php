@@ -34,6 +34,7 @@ class AddressController extends Controller
 
         $addresses = $query->get();
         $addresses = $addresses->map(function ($address) {
+            $address->area = $address->area == "NULL" ? '' : $address->area;
             $zipcode = $address->pincode ?? null;
 
             $zipcode_id = fetchDetails('zipcodes', ['zipcode' => $zipcode], 'id');

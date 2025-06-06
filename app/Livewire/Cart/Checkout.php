@@ -39,6 +39,7 @@ class Checkout extends Component
         $store_id = $this->store_id;
         $addressController = app(AddressController::class);
         $addresses = $addressController->getAddress($this->user_id);
+
         $default_address = [];
         if (!empty($addresses)) {
             if (isset($this->selected_address_id) && !empty($this->selected_address_id)) {

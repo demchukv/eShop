@@ -3,15 +3,17 @@
 namespace App\Livewire\MyAccount;
 
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\AddressAutocompleteController;
 use App\Models\Address;
+use App\Models\Country;
+use App\Models\Region;
 use App\Models\City;
+use App\Models\Zipcode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
-
-use App\Notifications\TelegramNotification;
 
 class Addresses extends Component
 {
@@ -27,14 +29,12 @@ class Addresses extends Component
         ])->title("Addresses |");
     }
 
-
-    public function get_address($addressController)
+    public function get_Address($addressController)
     {
         $user = Auth::user();
         $res = $addressController->getAddress($user->id);
         return $res;
     }
-
 
     public function add_address(Request $request)
     {
@@ -43,19 +43,20 @@ class Addresses extends Component
             $request->all(),
             [
                 'name' => 'required|string',
-                'type' => 'required',
+                'type' => 'required|in:home,office',
                 'mobile' => 'required|digits_between:1,16|numeric',
                 'alternate_mobile' => 'nullable|digits_between:1,16|numeric',
-                'address' => 'required',
-                'landmark' => 'required',
-                'city' => 'required',
-                'pincode' => 'required|numeric',
-                'state' => 'required',
-                'country' => 'required',
-                'latitude' => '',
-                'longitude' => '',
+                'address' => 'required|string',
+                'landmark' => 'required|string',
+                'country_id' => 'required|exists:countries,id',
+                'region_id' => 'required|exists:regions,id',
+                'city_id' => 'required|exists:cities,id',
+                'zipcode_id' => 'required|exists:zipcodes,id',
+                'latitude' => 'nullable|numeric',
+                'longitude' => 'nullable|numeric',
             ]
         );
+
         if ($validator->fails()) {
             $errors = $validator->errors();
             $response['error'] = true;
@@ -63,52 +64,47 @@ class Addresses extends Component
             return $response;
         }
 
-        // Fetch city_id based on the selected city name
-        $request['user_id'] = $user_id;
-        $cityName = $request['city'];
-        $city = City::where('name', $cityName)->first();
-        $city_id = $city ? $city->id : null;
-        // Fetch country_code based on the selected country name
-        $countryName = $request['country'];
-        $country = DB::table('countries')
-            ->select('*')
-            ->where('name', $countryName)
-            ->first();
+        // Fetch details
+        $country = Country::findOrFail($request->country_id);
+        $region = Region::findOrFail($request->region_id);
+        $city = City::findOrFail($request->city_id);
+        $zipcode = Zipcode::findOrFail($request->zipcode_id);
 
-        $country_code = $country ? $country->phonecode : null;
-        // Add city_id and country_code to address data
-        $request['city_id'] = $city_id;
-        $request['country_code'] = $country_code;
-        $address_data = $request->only([
-            'user_id',
-            'name',
-            'type',
-            'mobile',
-            'alternate_mobile',
-            'address',
-            'landmark',
-            'city',
-            'city_id',
-            'pincode',
-            'country',
-            'state',
-            'latitude',
-            'longitude',
-            'country_code'
-        ]);
+        // Prepare address data
+        $address_data = [
+            'user_id' => $user_id,
+            'name' => $request->name,
+            'type' => $request->type,
+            'mobile' => $request->mobile,
+            'alternate_mobile' => $request->alternate_mobile,
+            'address' => $request->address,
+            'landmark' => $request->landmark,
+            'country_id' => $request->country_id,
+            'country' => $country->name,
+            'country_code' => $country->phonecode,
+            'region_id' => $request->region_id,
+            'state' => $region->name, // Використовуємо state для сумісності з фронтендом
+            'city_id' => $request->city_id,
+            'city' => $city->name,
+            'zipcode_id' => $request->zipcode_id,
+            'pincode' => $zipcode->zipcode,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+        ];
+
         if (isset($request->address_id)) {
             $address_id = $request->address_id;
             $res = updateDetails($address_data, ['id' => $address_id], 'addresses');
             if (!$res) {
                 $response = [
                     'error' => true,
-                    'message' => 'Failed to add address. Please try again.'
+                    'message' => 'Failed to update address. Please try again.'
                 ];
                 return $response;
             }
             $response = [
                 'error' => false,
-                'message' => 'Address Updated successfully!'
+                'message' => 'Address updated successfully!'
             ];
             return $response;
         } else {
@@ -131,14 +127,30 @@ class Addresses extends Component
     public function edit_address(Request $request)
     {
         $addressId = $request->input('address_id');
-        $address_data = Address::find($addressId);
-        return $address_data;
+        $address = Address::findOrFail($addressId);
+        return [
+            'name' => $address->name,
+            'type' => $address->type,
+            'mobile' => $address->mobile,
+            'alternate_mobile' => $address->alternate_mobile,
+            'address' => $address->address,
+            'landmark' => $address->landmark,
+            'country_id' => $address->country_id,
+            'country_name' => $address->country,
+            'region_id' => $address->region_id,
+            'region_name' => $address->state,
+            'city_id' => $address->city_id,
+            'city_name' => $address->city,
+            'zipcode_id' => $address->zipcode_id,
+            'zipcode' => $address->pincode,
+            'latitude' => $address->latitude,
+            'longitude' => $address->longitude,
+        ];
     }
 
     public function deleteAddress($address_id)
     {
         $user = Auth::user();
-
         $data = [
             'user_id' => $user->id,
             'id' => $address_id,
@@ -151,11 +163,11 @@ class Addresses extends Component
         $user = Auth::user();
         $address = Address::where('id', $address_id)->where('user_id', $user->id)->first();
         if ($address) {
-            // Update the is_default status for all addresses of the user
             Address::where('user_id', $user->id)->update(['is_default' => 0]);
             updateDetails(['is_default' => '1'], ['id' => $address_id], 'addresses');
         }
     }
+
     public function refreshComponent()
     {
         $this->dispatch('$refresh');

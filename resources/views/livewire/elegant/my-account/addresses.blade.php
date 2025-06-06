@@ -78,7 +78,152 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
                             </div>
 
                             <!-- New Address Modal -->
+                            <!-- У Modal для додавання/редагування адреси -->
                             <div wire:ignore.self class="modal fade" id="addNewModal" tabindex="-1"
+                                aria-labelledby="addNewModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h2 class="modal-title" id="addNewModalLabel">
+                                                {{ labels('front_messages.address_details', 'Address details') }}
+                                            </h2>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="form-row row-cols-lg-2 row-cols-md-2 row-cols-sm-1 row-cols-1">
+                                                <div class="form-group">
+                                                    <label for="name"
+                                                        class="d-none">{{ labels('front_messages.name', 'Name') }}</label>
+                                                    <input wire:model='name' name="name" placeholder="Name"
+                                                        value="" id="name" type="text" />
+                                                </div>
+                                                <div class="form-group" wire:ignore>
+                                                    <label for="address-type"
+                                                        class="d-none">{{ labels('front_messages.address_type', 'Address type') }}
+                                                        <span class="required">*</span></label>
+                                                    <select name="type" id="type">
+                                                        <option value="">
+                                                            {{ labels('front_messages.select_address_type', 'Select Address type') }}
+                                                        </option>
+                                                        <option value="home">
+                                                            {{ labels('front_messages.home', 'Home') }}</option>
+                                                        <option value="office">
+                                                            {{ labels('front_messages.office', 'Office') }}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="mobile"
+                                                        class="d-none">{{ labels('front_messages.mobile_number', 'Mobile number') }}
+                                                        <span class="required">*</span></label>
+                                                    <input wire:model='mobile' name="mobile"
+                                                        placeholder="Mobile number" value="" id="mobile"
+                                                        type="number">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="alternate_mobile"
+                                                        class="d-none">{{ labels('front_messages.alternative_mobile_number', 'Alternative mobile number') }}</label>
+                                                    <input wire:model='alternate_mobile' name="alternate_mobile"
+                                                        placeholder="Alternative mobile number" value=""
+                                                        id="alternate_mobile" type="number">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="address"
+                                                        class="d-none">{{ labels('front_messages.address', 'Address') }}
+                                                        <span class="required">*</span></label>
+                                                    <input wire:model='address' name="address" placeholder="Address"
+                                                        id="form_address" type="text" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="landmark"
+                                                        class="d-none">{{ labels('front_messages.landmark', 'Landmark') }}</label>
+                                                    <input wire:model='landmark' name="landmark"
+                                                        placeholder="Landmark" value="" id="landmark"
+                                                        type="text" />
+                                                </div>
+                                                <!-- Випадаючий список для країн -->
+                                                <div class="form-group country_list_div">
+                                                    <div wire:ignore>
+                                                        <label for="country"
+                                                            class="d-none">{{ labels('front_messages.country', 'Country') }}
+                                                            <span class="required">*</span></label>
+                                                        <select class="col-md-12 form-control country_list"
+                                                            id="country_list" name="country">
+                                                            <option value="">
+                                                                {{ labels('front_messages.select_country', 'Select Country') }}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <!-- Випадаючий список для регіонів -->
+                                                <div class="form-group region_list_div">
+                                                    <div wire:ignore>
+                                                        <label for="region"
+                                                            class="d-none">{{ labels('front_messages.region', 'Region') }}
+                                                            <span class="required">*</span></label>
+                                                        <select class="col-md-12 form-control region_list"
+                                                            id="region_list" name="region" disabled>
+                                                            <option value="">
+                                                                {{ labels('front_messages.select_region', 'Select Region') }}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <!-- Випадаючий список для міст -->
+                                                <div class="form-group city_list_div">
+                                                    <div wire:ignore>
+                                                        <label for="city"
+                                                            class="d-none">{{ labels('front_messages.city', 'City') }}
+                                                            <span class="required">*</span></label>
+                                                        <select class="col-md-12 form-control city_list"
+                                                            id="city_list" name="city" disabled>
+                                                            <option value="">
+                                                                {{ labels('front_messages.select_city', 'Select City') }}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <!-- Випадаючий список для поштових індексів -->
+                                                <div class="form-group zipcode_list_div">
+                                                    <div wire:ignore>
+                                                        <label for="zipcode"
+                                                            class="d-none">{{ labels('front_messages.post_code', 'Post Code') }}
+                                                            <span class="required">*</span></label>
+                                                        <select class="col-md-12 form-control zipcode_list"
+                                                            id="zipcode_list" name="zipcode" disabled>
+                                                            <option value="">
+                                                                {{ labels('front_messages.select_postcode', 'Select Post Code') }}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="latitude"
+                                                        class="d-none">{{ labels('front_messages.latitude', 'Latitude') }}</label>
+                                                    <input wire:model='latitude' name="latitude"
+                                                        placeholder="Latitude" value="" id="latitude"
+                                                        type="text">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="longitude"
+                                                        class="d-none">{{ labels('front_messages.longitude', 'Longitude') }}</label>
+                                                    <input wire:model='longitude' name="longitude"
+                                                        placeholder="Longitude" value="" id="longitude"
+                                                        type="text">
+                                                </div>
+                                            </div>
+                                            <input type="hidden" name="edit_address_id" id="edit_address_id"
+                                                value="">
+                                            <div class="modal-footer justify-content-center">
+                                                <button type="submit" class="btn btn-primary m-0 add_address">
+                                                    <span>{{ labels('front_messages.add_address', 'Add Address') }}</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{-- <div wire:ignore.self class="modal fade" id="addNewModal" tabindex="-1"
                                 aria-labelledby="addNewModalLabel" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered modal-lg">
                                     <div class="modal-content">
@@ -89,7 +234,6 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
                                                 aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            {{-- <form class="add-address-from"> --}}
                                             <div class="form-row row-cols-lg-2 row-cols-md-2 row-cols-sm-1 row-cols-1">
                                                 <div class="form-group">
                                                     <label for="name"
@@ -123,8 +267,7 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
                                                     <label for="alternate_mobile"
                                                         class="d-none">{{ labels(
                                                             'front_messages.alternative_mobile_number',
-                                                            'Alternative
-                                                                                                                                                                                                                                mobile number',
+                                                            'Alternative mobile number',
                                                         ) }}
                                                         <span class="required">*</span></label>
                                                     <input wire:model='alternate_mobile' name="alternate_mobile"
@@ -203,11 +346,10 @@ $bread_crumb['page_main_bread_crumb'] = labels('front_messages.addresses', 'Addr
                                                 <button type="submit"
                                                     class="btn btn-primary m-0 add_address"><span>{{ labels('front_messages.add_address', 'Add Address') }}</span></button>
                                             </div>
-                                            {{-- </form> --}}
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
                             <!-- End New Address Modal -->
                         </div>
                     </div>

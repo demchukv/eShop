@@ -15,6 +15,7 @@ use Carbon\Carbon;
 class AddressAutocompleteController extends Controller
 {
     protected $client;
+    protected $geoapifyClient;
 
     public function __construct()
     {
@@ -24,6 +25,10 @@ class AddressAutocompleteController extends Controller
                 'x-rapidapi-key' => env('GEODB_API_KEY'),
                 'x-rapidapi-host' => 'wft-geo-db.p.rapidapi.com',
             ],
+        ]);
+
+        $this->geoapifyClient = new Client([
+            'base_uri' => 'https://api.geoapify.com/',
         ]);
     }
 
@@ -118,8 +123,6 @@ class AddressAutocompleteController extends Controller
                         // 'native_name' => $nativeName !== $regionEn['name'] ? $nativeName : null,
                         'admin1_code' => $regionEn['isoCode'] ?? null,
                         'country_id' => $countryId,
-                        'minimum_free_delivery_order_amount' => 0.00,
-                        'delivery_charges' => 0.00,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
@@ -232,8 +235,6 @@ class AddressAutocompleteController extends Controller
                         // 'native_name' => $nativeName !== $cityEn['name'] ? $nativeName : null,
                         'country_id' => $countryId,
                         'region_id' => $regionId,
-                        'minimum_free_delivery_order_amount' => 0.00,
-                        'delivery_charges' => 0.00,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
@@ -262,6 +263,101 @@ class AddressAutocompleteController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
+    // public function getZipcodes(Request $request)
+    // {
+    //     $request->validate([
+    //         'city_id' => 'required|exists:cities,id',
+    //         'q' => 'required|string|min:1|max:255',
+    //     ]);
+
+    //     $cityId = $request->input('city_id');
+    //     $query = $request->input('q');
+    //     $city = City::findOrFail($cityId);
+    //     $countryId = $city->country_id;
+    //     $country = Country::findOrFail($countryId);
+    //     $iso2 = $country->iso2;
+
+    //     // Check local database
+    //     $zipcodes = Zipcode::where('city_id', $cityId)
+    //         ->where('zipcode', 'LIKE', $query . '%')
+    //         ->select('id', 'zipcode AS text')
+    //         ->limit(10)
+    //         ->get();
+
+    //     // If no zipcodes or data is stale (>30 days), fetch from GeoNames
+    //     if ($zipcodes->isEmpty() || $this->isDataStale($cityId, 'zipcodes')) {
+    //         try {
+    //             $zipPath = storage_path("app/geo/{$iso2}.zip");
+    //             $filePath = storage_path("app/geo/{$iso2}.txt");
+    //             $url = "https://download.geonames.org/export/zip/{$iso2}.zip";
+
+    //             // Download and extract GeoNames ZIP file if needed
+    //             if (!file_exists($filePath)) {
+    //                 Storage::makeDirectory('geo');
+    //                 $this->client->get($url, ['sink' => $zipPath]);
+    //                 $zip = new \ZipArchive;
+    //                 if ($zip->open($zipPath) !== true) {
+    //                     throw new \Exception("Failed to extract $zipPath");
+    //                 }
+    //                 $zip->extractTo(storage_path('app/geo'));
+    //                 $zip->close();
+    //             }
+
+    //             $file = @fopen($filePath, 'r');
+    //             if ($file === false) {
+    //                 throw new \Exception("Failed to open $filePath");
+    //             }
+
+    //             $zipcodesBatch = [];
+    //             while (($line = fgets($file)) !== false) {
+    //                 $data = explode("\t", trim($line));
+    //                 //["UA","79049","\u041b\u044c\u0432\u0456\u0432","Lvivska","15","Lvivska","","","","49.8383","24.0232","4"]
+    //                 // \Log::debug(json_encode($data));
+    //                 if (count($data) < 3 || $data[0] !== $iso2) {
+    //                     continue;
+    //                 }
+
+    //                 $zipcodesBatch[] = [
+    //                     'zipcode' => $data[1],
+    //                     'city_id' => $cityId,
+    //                     'created_at' => now(),
+    //                     'updated_at' => now(),
+    //                 ];
+    //             }
+
+    //             fclose($file);
+    //             Storage::delete(["geo/{$iso2}.zip", "geo/{$iso2}.txt"]);
+
+    //             // Process zipcodes in chunks of 500
+    //             if (!empty($zipcodesBatch)) {
+    //                 $chunks = array_chunk($zipcodesBatch, 1000);
+    //                 foreach ($chunks as $index => $chunk) {
+    //                     // \Log::info("Processing zipcodes chunk", ['chunk' => $index + 1, 'size' => count($chunk)]);
+    //                     $this->insertOrUpdateZipcodes($chunk);
+    //                 }
+    //             }
+
+    //             // Re-query after fetching
+    //             $zipcodes = Zipcode::where('city_id', $cityId)
+    //                 ->where('zipcode', 'LIKE', $query . '%')
+    //                 ->select('id', 'zipcode AS text')
+    //                 ->limit(10)
+    //                 ->get();
+    //         } catch (\Exception $e) {
+    //             \Log::error("Error fetching zipcodes for city {$cityId}: " . $e->getMessage());
+    //             return response()->json(['error' => 'Failed to fetch zipcodes'], 500);
+    //         }
+    //     }
+
+    //     return response()->json(['results' => $zipcodes]);
+    // }
+
+    /**
+     * Get zipcodes for autocomplete based on city ID and query using Geoapify API.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getZipcodes(Request $request)
     {
         $request->validate([
@@ -275,7 +371,7 @@ class AddressAutocompleteController extends Controller
         $countryId = $city->country_id;
         $country = Country::findOrFail($countryId);
         $iso2 = $country->iso2;
-        \Log::debug('ISO2 = ' . $iso2);
+
         // Check local database
         $zipcodes = Zipcode::where('city_id', $cityId)
             ->where('zipcode', 'LIKE', $query . '%')
@@ -283,58 +379,83 @@ class AddressAutocompleteController extends Controller
             ->limit(10)
             ->get();
 
-        // If no zipcodes or data is stale (>30 days), fetch from GeoNames
+        // If no zipcodes or data is stale (>30 days), fetch from Geoapify
         if ($zipcodes->isEmpty() || $this->isDataStale($cityId, 'zipcodes')) {
             try {
-                $zipPath = storage_path("app/geo/{$iso2}.zip");
-                $filePath = storage_path("app/geo/{$iso2}.txt");
-                $url = "https://download.geonames.org/export/zip/{$iso2}.zip";
-                \Log::debug('ZIP CODE URL = ' . $url);
-                // Download and extract GeoNames ZIP file if needed
-                if (!file_exists($filePath)) {
-                    Storage::makeDirectory('geo');
-                    $this->client->get($url, ['sink' => $zipPath]);
-                    $zip = new \ZipArchive;
-                    if ($zip->open($zipPath) !== true) {
-                        throw new \Exception("Failed to extract $zipPath");
-                    }
-                    $zip->extractTo(storage_path('app/geo'));
-                    $zip->close();
-                }
-
-                $file = @fopen($filePath, 'r');
-                if ($file === false) {
-                    throw new \Exception("Failed to open $filePath");
-                }
+                $response = $this->geoapifyClient->get('v1/postcode/list', [
+                    'query' => [
+                        'countrycode' => mb_strtolower($iso2),
+                        'text' => $query,
+                        'city' => $city->name,
+                        'limit' => 100,
+                        'apiKey' => env('GEOAPIFY_API_KEY'),
+                    ],
+                ]);
+                $data = json_decode($response->getBody(), true);
+                \Log::debug("Geoapify zipcodes response for {$iso2}:", $data);
 
                 $zipcodesBatch = [];
-                while (($line = fgets($file)) !== false) {
-                    $data = explode("\t", trim($line));
-                    //["UA","79049","\u041b\u044c\u0432\u0456\u0432","Lvivska","15","Lvivska","","","","49.8383","24.0232","4"]
-                    // \Log::debug(json_encode($data));
-                    if (count($data) < 3 || $data[0] !== $iso2) {
-                        continue;
-                    }
+                $zipcodesDataBatch = [];
+                foreach ($data['features'] ?? [] as $feature) {
+                    if (
+                        !empty($feature['properties']['postcode']) &&
+                        !empty($feature['properties']['city']) &&
+                        strcasecmp($feature['properties']['city'], $city->name) === 0
+                    ) {
+                        $zipcodeId = Zipcode::where('zipcode', $feature['properties']['postcode'])
+                            ->where('city_id', $cityId)
+                            ->value('id');
 
-                    $zipcodesBatch[] = [
-                        'zipcode' => $data[1],
-                        'city_id' => $cityId,
-                        'minimum_free_delivery_order_amount' => 0.00,
-                        'delivery_charges' => 0.00,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
+                        if (!$zipcodeId) {
+                            $zipcodesBatch[] = [
+                                'zipcode' => $feature['properties']['postcode'],
+                                'city_id' => $cityId,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ];
+                        }
+
+                        $zipcodesDataBatch[] = [
+                            'id' => $zipcodeId ?: null, // Will be updated after zipcode insertion
+                            'data' => json_encode($feature['properties']),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
                 }
 
-                fclose($file);
-                Storage::delete(["geo/{$iso2}.zip", "geo/{$iso2}.txt"]);
-
-                // Process zipcodes in chunks of 500
+                // Insert or update zipcodes and zipcodes_data in chunks
                 if (!empty($zipcodesBatch)) {
                     $chunks = array_chunk($zipcodesBatch, 1000);
                     foreach ($chunks as $index => $chunk) {
-                        // \Log::info("Processing zipcodes chunk", ['chunk' => $index + 1, 'size' => count($chunk)]);
+                        \Log::info("Processing zipcodes chunk", ['chunk' => $index + 1, 'size' => count($chunk)]);
                         $this->insertOrUpdateZipcodes($chunk);
+
+                        // Update zipcodes_data with new zipcode IDs
+                        foreach ($chunk as $zipcode) {
+                            $zipcodeId = Zipcode::where('zipcode', $zipcode['zipcode'])
+                                ->where('city_id', $zipcode['city_id'])
+                                ->value('id');
+
+                            foreach ($zipcodesDataBatch as &$dataEntry) {
+                                if ($dataEntry['id'] === null && $zipcode['zipcode'] === json_decode($dataEntry['data'])->postcode) {
+                                    $dataEntry['id'] = $zipcodeId;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Insert or update zipcodes_data
+                if (!empty($zipcodesDataBatch)) {
+                    $chunks = array_chunk($zipcodesDataBatch, 1000);
+                    foreach ($chunks as $index => $chunk) {
+                        \Log::info("Processing zipcodes_data chunk", ['chunk' => $index + 1, 'size' => count($chunk)]);
+                        DB::table('zipcodes_data')->upsert(
+                            $chunk,
+                            ['id'],
+                            ['data', 'updated_at']
+                        );
                     }
                 }
 
@@ -345,7 +466,7 @@ class AddressAutocompleteController extends Controller
                     ->limit(10)
                     ->get();
             } catch (\Exception $e) {
-                \Log::error("Error fetching zipcodes for city {$cityId}: " . $e->getMessage());
+                \Log::error("Error fetching zipcodes for city {$cityId} from Geoapify: " . $e->getMessage());
                 return response()->json(['error' => 'Failed to fetch zipcodes'], 500);
             }
         }

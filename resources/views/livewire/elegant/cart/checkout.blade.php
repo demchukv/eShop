@@ -34,7 +34,7 @@
                                                     <div class="address mb-2 text-muted">
                                                         <address class="m-0" id="address">
                                                             {{ $default_address[0]->address }},
-                                                            <br />{{ $default_address[0]->landmark . ' ' . $default_address[0]->area . ' ' . $default_address[0]->city }},
+                                                            <br />{{ $default_address[0]->landmark . ', ' . $default_address[0]->area . ' ' . $default_address[0]->city }},
                                                             <br />{{ $default_address[0]->state . ' ' . $default_address[0]->country . ' ' . $default_address[0]->pincode }}.
                                                         </address>
                                                     </div>

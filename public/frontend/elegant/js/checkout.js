@@ -247,6 +247,10 @@ document.addEventListener("livewire:navigated", () => {
             console.log(address_id);
             $(document).on("click", ".set-address", function () {
                 $("#address-modal").modal("hide");
+                setTimeout(() => {
+                    $(".modal-backdrop").remove();
+                    $("body").removeClass("modal-open");
+                }, 500);
                 Livewire.dispatch("get_selected_address", {
                     address_id: address_id,
                 });
@@ -513,7 +517,7 @@ document.addEventListener("livewire:navigated", () => {
                                                     if (result.error == false) {
                                                         Livewire.navigate(
                                                             appUrl +
-                                                                "payments?response=order_success"
+                                                            "payments?response=order_success"
                                                         );
                                                         return;
                                                     }
@@ -687,7 +691,7 @@ document.addEventListener("livewire:navigated", () => {
                                         function (response) {
                                             Livewire.navigate(
                                                 appUrl +
-                                                    "payments?response=wallet_failed"
+                                                "payments?response=wallet_failed"
                                             );
                                         }
                                     );
@@ -844,13 +848,13 @@ document.addEventListener("livewire:navigated", () => {
                                     if (result.error == false) {
                                         Livewire.navigate(
                                             appUrl +
-                                                "payments?response=wallet_success"
+                                            "payments?response=wallet_success"
                                         );
                                         return;
                                     } else {
                                         Livewire.navigate(
                                             appUrl +
-                                                "payments?response=wallet_failed"
+                                            "payments?response=wallet_failed"
                                         );
                                         iziToast.error({
                                             message: result.message,
