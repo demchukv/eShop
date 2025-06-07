@@ -7210,6 +7210,7 @@ function getOrderDetails($where = null, $status = false, $sellerId = null, $stor
             'oi.otp as item_otp',
             'a.name as user_name',
             'a.zipcode_id',
+            'a.address as street',
             'oi.id as order_item_id',
             'p.*',
             'v.product_id',

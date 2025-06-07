@@ -4,6 +4,7 @@ $(document).ready(function () {
     // Обробка кліку на посилання адреси
     $('.address-link').on('click', function () {
         const zipcodeId = $(this).data('zipcode-id');
+        const addressId = $(this).data('address-id');
 
         // Очищення попередніх даних
         $('#addressDetails').html('<p><strong>{{ labels('admin_labels.loading', 'Loading...') }}</strong></p>');
@@ -13,17 +14,24 @@ $(document).ready(function () {
         $.ajax({
             url: '{{ route("address.details") }}',
             method: 'GET',
-            data: { zipcode_id: zipcodeId },
+            data: { zipcode_id: zipcodeId, address_id: addressId },
             success: function (response) {
                 if (response.error) {
-                    $('#addressDetails').html('<p class="text-danger">{{ labels('admin_labels.error', 'Error') }}: ' + response.message + '</p>');
+                    $('#addressDetails').html(`<p class="text-danger">{{ labels('admin_labels.error', 'Error') }}: ` + response.message + '</p>');
                     return;
                 }
 
                 // Відображення текстової інформації
                 const data = response.data;
+                const addressData = response.addressData;
+                console.log(data);
+                console.log(addressData);
                 let addressHtml = `
-    < p > <strong>{{ labels('admin_labels.country', 'Country') }}:</strong> ${data.country || 'N/A'}</ >
+                    <h3>Cliemt entered address</h3>
+                    <p>${addressData.address}</p>
+                    <p>${data.formatted}</p>
+                    <h3>Address by zipcode</h3>
+                    <p><strong>{{ labels('admin_labels.country', 'Country') }}:</strong> ${data.country || 'N/A'}</p>
                     <p><strong>{{ labels('admin_labels.region', 'Region') }}:</strong> ${data.region || 'N/A'}</p>
                     <p><strong>{{ labels('admin_labels.city', 'City') }}:</strong> ${data.city || 'N/A'}</p>
                     <p><strong>{{ labels('admin_labels.zipcode', 'Zipcode') }}:</strong> ${data.zipcode || 'N/A'}</p>

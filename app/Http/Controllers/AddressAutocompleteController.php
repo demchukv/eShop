@@ -104,7 +104,7 @@ class AddressAutocompleteController extends Controller
                 ]);
                 $dataEn = json_decode($responseEn->getBody(), true);
                 $regionsEn = $dataEn['data'] ?? [];
-
+                \Log::debug($regionsEn);
                 // sleep(2);
 
                 // Fetch native names
@@ -194,35 +194,6 @@ class AddressAutocompleteController extends Controller
             ->limit(10)
             ->get();
 
-        // If no cities and region matches query, treat region as city
-        if ($cities->isEmpty() && $regionId && str_starts_with(strtolower($region->name), strtolower($query))) {
-            // Check if region is already in cities
-            $existingCity = City::where('country_id', $countryId)
-                ->where('region_id', $regionId)
-                ->where('name', $region->name)
-                ->first();
-
-            if (!$existingCity) {
-                // Add region as city
-                $citiesBatch = [
-                    [
-                        'name' => $region->name,
-                        'native_name' => $region->native_name,
-                        'country_id' => $countryId,
-                        'region_id' => $regionId,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]
-                ];
-                $this->insertOrUpdateCities($citiesBatch);
-            }
-
-            // Re-query to include newly added city
-            $cities = $citiesQuery->select('id', 'name AS text', 'native_name')
-                ->limit(10)
-                ->get();
-        }
-
         // If no cities or data is stale (>30 days), fetch from API
         if ($cities->isEmpty() || $this->isDataStale($countryId, 'cities', $regionId)) {
             try {
@@ -246,17 +217,20 @@ class AddressAutocompleteController extends Controller
                 ]);
                 $dataEn = json_decode($responseEn->getBody(), true);
                 $citiesEn = $dataEn['data'] ?? [];
+                \Log::debug($citiesEn);
 
                 $totalCount = $dataEn['metadata']['totalCount'] ?? 0;
 
                 foreach ($citiesEn as $index => $cityEn) {
-                    $citiesBatch[] = [
-                        'name' => $cityEn['name'],
-                        'country_id' => $countryId,
-                        'region_id' => $regionId,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
+                    if ($cityEn['type'] == 'CITY') {
+                        $citiesBatch[] = [
+                            'name' => $cityEn['name'],
+                            'country_id' => $countryId,
+                            'region_id' => $regionId,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
                 }
 
                 if (!empty($citiesBatch)) {
@@ -442,10 +416,11 @@ class AddressAutocompleteController extends Controller
                 $zipcodesBatch = [];
                 $zipcodesDataBatch = [];
                 foreach ($data['features'] ?? [] as $feature) {
+                    \Log::debug(($feature));
                     if (
                         !empty($feature['properties']['postcode']) &&
-                        !empty($feature['properties']['city']) &&
-                        strcasecmp($feature['properties']['city'], $city->name) === 0
+                        !empty($feature['properties']['city'])
+                        // && strcasecmp($feature['properties']['city'], $city->name) === 0
                     ) {
                         $zipcodeId = Zipcode::where('zipcode', $feature['properties']['postcode'])
                             ->where('city_id', $cityId)

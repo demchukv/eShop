@@ -71,6 +71,7 @@
 @section('scripts')
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
     <script>
         $(document).ready(function() {
             let map = null; // Змінна для зберігання об'єкта карти
@@ -78,6 +79,7 @@
             // Обробка кліку на посилання адреси
             $('.address-link').on('click', function() {
                 const zipcodeId = $(this).data('zipcode-id');
+                const addressId = $(this).data('address-id');
 
                 // Очищення попередніх даних
                 $('#addressDetails').html(
@@ -89,7 +91,8 @@
                     url: '{{ route('address.details') }}',
                     method: 'GET',
                     data: {
-                        zipcode_id: zipcodeId
+                        zipcode_id: zipcodeId,
+                        address_id: addressId
                     },
                     success: function(response) {
                         if (response.error) {
@@ -101,15 +104,20 @@
 
                         // Відображення текстової інформації
                         const data = response.data;
+                        const addressData = response.addressData;
+
                         let addressHtml = `
-    <p><strong>{{ labels('admin_labels.country', 'Country') }}:</strong> ${data.country || 'N/A'}</p>
-    <p><strong>{{ labels('admin_labels.region', 'Region') }}:</strong> ${data.region || 'N/A'}</p>
-    <p><strong>{{ labels('admin_labels.city', 'City') }}:</strong> ${data.city || 'N/A'}</p>
-    <p><strong>{{ labels('admin_labels.zipcode', 'Zipcode') }}:</strong> ${data.zipcode || 'N/A'}</p>
-    <p><strong>{{ labels('admin_labels.street', 'Street') }}:</strong> ${data.street || 'N/A'}</p>
-    <p><strong>{{ labels('admin_labels.latitude', 'Latitude') }}:</strong> ${data.latitude || 'N/A'}</p>
-    <p><strong>{{ labels('admin_labels.longitude', 'Longitude') }}:</strong> ${data.longitude || 'N/A'}</p>
-    `;
+                        <h5>Client entered address</h5>
+                        <p>${addressData.address}</p>
+                        <h5>Address by zipcode</h5>
+                        <p><strong>{{ labels('admin_labels.country', 'Country') }}:</strong> ${data.country || 'N/A'}<br>
+                        <strong>{{ labels('admin_labels.region', 'Region') }}:</strong> ${data.region || 'N/A'}<br>
+                        <strong>{{ labels('admin_labels.city', 'City') }}:</strong> ${data.city || 'N/A'}<br>
+                        <strong>{{ labels('admin_labels.zipcode', 'Zipcode') }}:</strong> ${data.zipcode || 'N/A'}</p>
+                        <p><strong>{{ labels('admin_labels.street', 'Formatted') }}:</strong> ${addressData.address || 'N/A'}, ${data.street || 'N/A'}</p>
+                        <p><strong>{{ labels('admin_labels.latitude', 'Latitude') }}:</strong> ${data.latitude || 'N/A'}<br>
+                        <strong>{{ labels('admin_labels.longitude', 'Longitude') }}:</strong> ${data.longitude || 'N/A'}</p>
+                        `;
                         $('#addressDetails').html(addressHtml);
 
                         // Ініціалізація карти OpenStreetMap

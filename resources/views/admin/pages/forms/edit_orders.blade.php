@@ -106,7 +106,8 @@
                                 <span class="body-default me-1">{{ labels('admin_labels.address', 'Address') }}:</span>
                                 <span class="caption text-muted"><a href="javascript:void(0)" class="address-link"
                                         data-bs-toggle="modal" data-bs-target="#addressModal"
-                                        data-zipcode-id="{{ $order_detls[0]->zipcode_id }}">
+                                        data-zipcode-id="{{ $order_detls[0]->zipcode_id }}"
+                                        data-address-id="{{ $order_detls[0]->address_id }}">
                                         {{ $order_detls[0]->address }}
                                     </a></span>
                             </div>

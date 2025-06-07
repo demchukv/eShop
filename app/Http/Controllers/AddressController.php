@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Address;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
@@ -55,6 +56,7 @@ class AddressController extends Controller
     {
         try {
             $zipcodeId = $request->query('zipcode_id');
+            $addressId = $request->query('address_id');
 
             if (!$zipcodeId) {
                 return response()->json([
@@ -62,6 +64,11 @@ class AddressController extends Controller
                     'message' => 'Zipcode ID is required.'
                 ], 400);
             }
+
+            if ($addressId) {
+                $addressRes = Address::where('id', $addressId)->first();
+            }
+            $addressData = $addressRes ?? [];
 
             // Кешування на 24 години
             $cacheKey = 'address_details_' . $zipcodeId;
@@ -77,7 +84,6 @@ class AddressController extends Controller
                     'message' => 'Zipcode data not found.'
                 ], 404);
             }
-
             // Витягування даних із поля data
             $data = $zipcodeData->data ?? [];
 
@@ -91,7 +97,9 @@ class AddressController extends Controller
                     'street' => $data['formatted'] ?? $data['address_line2'] ?? null,
                     'latitude' => $data['lat'] ?? null,
                     'longitude' => $data['lon'] ?? null,
-                ]
+                    'address' => $addressData['address'] ?? null,
+                ],
+                'addressData' => $addressData,
             ]);
         } catch (\Exception $e) {
             return response()->json([

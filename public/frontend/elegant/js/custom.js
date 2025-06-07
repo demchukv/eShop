@@ -2387,7 +2387,7 @@ document.addEventListener("livewire:navigated", () => {
             placeholder: placeholder,
             allowClear: true,
             dropdownParent: container,
-            minimumInputLength: 2,
+            minimumInputLength: 1,
             ajax: {
                 url: appUrl + url,
                 dataType: 'json',
